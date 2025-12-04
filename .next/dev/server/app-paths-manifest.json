@@ -1,8 +1,0 @@
-{
-  "/alarm/page": "app/alarm/page.js",
-  "/area/add/page": "app/area/add/page.js",
-  "/area/page": "app/area/page.js",
-  "/drones/page": "app/drones/page.js",
-  "/page": "app/page.js",
-  "/sensors/page": "app/sensors/page.js"
-}
