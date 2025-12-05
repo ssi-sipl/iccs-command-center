@@ -1,8 +1,7 @@
 {
-  "/alarm/page": "app/alarm/page.js",
+  "/area/[id]/edit/page": "app/area/[id]/edit/page.js",
+  "/area/[id]/page": "app/area/[id]/page.js",
   "/area/add/page": "app/area/add/page.js",
   "/area/page": "app/area/page.js",
-  "/drones/page": "app/drones/page.js",
-  "/page": "app/page.js",
-  "/sensors/page": "app/sensors/page.js"
+  "/page": "app/page.js"
 }
