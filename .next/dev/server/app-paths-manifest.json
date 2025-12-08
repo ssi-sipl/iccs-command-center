@@ -1,10 +1,7 @@
 {
-  "/alarm/[id]/edit/page": "app/alarm/[id]/edit/page.js",
-  "/alarm/[id]/page": "app/alarm/[id]/page.js",
-  "/alarm/add/page": "app/alarm/add/page.js",
   "/alarm/page": "app/alarm/page.js",
-  "/sensors/[id]/edit/page": "app/sensors/[id]/edit/page.js",
-  "/sensors/[id]/page": "app/sensors/[id]/page.js",
-  "/sensors/add/page": "app/sensors/add/page.js",
+  "/area/page": "app/area/page.js",
+  "/drones/page": "app/drones/page.js",
+  "/page": "app/page.js",
   "/sensors/page": "app/sensors/page.js"
 }

@@ -678,13 +678,17 @@ __turbopack_context__.s([
     "DashboardSidebar",
     ()=>DashboardSidebar
 ]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = /*#__PURE__*/ __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$wifi$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Wifi$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/wifi.js [app-client] (ecmascript) <export default as Wifi>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$left$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronLeft$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chevron-left.js [app-client] (ecmascript) <export default as ChevronLeft>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$right$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronRight$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chevron-right.js [app-client] (ecmascript) <export default as ChevronRight>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$triangle$2d$alert$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertTriangle$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/triangle-alert.js [app-client] (ecmascript) <export default as AlertTriangle>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/loader-circle.js [app-client] (ecmascript) <export default as Loader2>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/ui/button.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/ui/badge.tsx [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$socket$2e$io$2d$client$2f$build$2f$esm$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/socket.io-client/build/esm/index.js [app-client] (ecmascript) <locals>");
 ;
 var _s = __turbopack_context__.k.signature();
 "use client";
@@ -692,9 +696,118 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
+;
 function DashboardSidebar({ isOpen, onToggle }) {
     _s();
     const [droneStatus] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("connected");
+    const [alerts, setAlerts] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    const [alertsLoading, setAlertsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [alertsError, setAlertsError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [socketConnected, setSocketConnected] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const API_BASE_URL = ("TURBOPACK compile-time value", "http://localhost:5000") || "http://localhost:5000";
+    // 1) Initial fetch of active alerts
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "DashboardSidebar.useEffect": ()=>{
+            const fetchActiveAlerts = {
+                "DashboardSidebar.useEffect.fetchActiveAlerts": async ()=>{
+                    setAlertsLoading(true);
+                    setAlertsError(null);
+                    try {
+                        const res = await fetch(`${API_BASE_URL}/api/alerts/active`, {
+                            method: "GET",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            cache: "no-store"
+                        });
+                        if (!res.ok) {
+                            const errorData = await res.json().catch({
+                                "DashboardSidebar.useEffect.fetchActiveAlerts": ()=>({})
+                            }["DashboardSidebar.useEffect.fetchActiveAlerts"]);
+                            throw new Error(errorData.error || "Failed to fetch active alerts");
+                        }
+                        const json = await res.json();
+                        if (json.success && Array.isArray(json.data)) {
+                            setAlerts(json.data);
+                        } else {
+                            setAlerts([]);
+                            if (json.error) setAlertsError(json.error);
+                        }
+                    } catch (err) {
+                        console.error("Error fetching active alerts:", err);
+                        setAlertsError(err instanceof Error ? err.message : "Failed to fetch active alerts");
+                        setAlerts([]);
+                    } finally{
+                        setAlertsLoading(false);
+                    }
+                }
+            }["DashboardSidebar.useEffect.fetchActiveAlerts"];
+            fetchActiveAlerts();
+        }
+    }["DashboardSidebar.useEffect"], [
+        API_BASE_URL
+    ]);
+    // 2) Socket.IO realtime updates
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "DashboardSidebar.useEffect": ()=>{
+            // connect only in browser
+            const socket = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$socket$2e$io$2d$client$2f$build$2f$esm$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["io"])(API_BASE_URL, {
+                transports: [
+                    "websocket",
+                    "polling"
+                ]
+            });
+            socket.on("connect", {
+                "DashboardSidebar.useEffect": ()=>{
+                    console.log("✅ Connected to alerts socket:", socket.id);
+                    setSocketConnected(true);
+                }
+            }["DashboardSidebar.useEffect"]);
+            socket.on("disconnect", {
+                "DashboardSidebar.useEffect": ()=>{
+                    console.log("❌ Disconnected from alerts socket");
+                    setSocketConnected(false);
+                }
+            }["DashboardSidebar.useEffect"]);
+            // New ACTIVE alert
+            socket.on("alert_active", {
+                "DashboardSidebar.useEffect": (alert)=>{
+                    console.log("🔔 alert_active:", alert);
+                    setAlerts({
+                        "DashboardSidebar.useEffect": (prev)=>{
+                            // avoid duplicates by id
+                            const exists = prev.some({
+                                "DashboardSidebar.useEffect.exists": (a)=>a.id === alert.id
+                            }["DashboardSidebar.useEffect.exists"]);
+                            if (exists) return prev;
+                            return [
+                                ...prev,
+                                alert
+                            ];
+                        }
+                    }["DashboardSidebar.useEffect"]);
+                }
+            }["DashboardSidebar.useEffect"]);
+            // Alert resolved (SENT or NEUTRALISED)
+            socket.on("alert_resolved", {
+                "DashboardSidebar.useEffect": (payload)=>{
+                    console.log("✅ alert_resolved:", payload);
+                    setAlerts({
+                        "DashboardSidebar.useEffect": (prev)=>prev.filter({
+                                "DashboardSidebar.useEffect": (a)=>a.id !== payload.id
+                            }["DashboardSidebar.useEffect"])
+                    }["DashboardSidebar.useEffect"]);
+                }
+            }["DashboardSidebar.useEffect"]);
+            return ({
+                "DashboardSidebar.useEffect": ()=>{
+                    socket.disconnect();
+                }
+            })["DashboardSidebar.useEffect"];
+        }
+    }["DashboardSidebar.useEffect"], [
+        API_BASE_URL
+    ]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
             isOpen && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -702,8 +815,8 @@ function DashboardSidebar({ isOpen, onToggle }) {
                 onClick: onToggle
             }, void 0, false, {
                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                lineNumber: 18,
-                columnNumber: 18
+                lineNumber: 133,
+                columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("aside", {
                 className: `fixed left-0 top-14 z-30 flex h-[calc(100vh-3.5rem)] flex-col border-r border-[#333] bg-[#1a1a1a] p-4 transition-transform duration-300 lg:static lg:z-0 lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"} w-72 md:w-80`,
@@ -716,7 +829,7 @@ function DashboardSidebar({ isOpen, onToggle }) {
                                 children: "ALARM"
                             }, void 0, false, {
                                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                                lineNumber: 27,
+                                lineNumber: 146,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -724,20 +837,20 @@ function DashboardSidebar({ isOpen, onToggle }) {
                                 children: "Alarm-1"
                             }, void 0, false, {
                                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                                lineNumber: 28,
+                                lineNumber: 149,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "mt-4 border-b border-[#333]"
                             }, void 0, false, {
                                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                                lineNumber: 29,
+                                lineNumber: 152,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/dashboard-sidebar.tsx",
-                        lineNumber: 26,
+                        lineNumber: 145,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -748,7 +861,7 @@ function DashboardSidebar({ isOpen, onToggle }) {
                                 children: "DRONE"
                             }, void 0, false, {
                                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                                lineNumber: 34,
+                                lineNumber: 157,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -765,12 +878,12 @@ function DashboardSidebar({ isOpen, onToggle }) {
                                                         className: "h-5 w-5 text-gray-400"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/dashboard-sidebar.tsx",
-                                                        lineNumber: 39,
+                                                        lineNumber: 164,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/dashboard-sidebar.tsx",
-                                                    lineNumber: 38,
+                                                    lineNumber: 163,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -781,7 +894,7 @@ function DashboardSidebar({ isOpen, onToggle }) {
                                                             children: "Drone-1"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/dashboard-sidebar.tsx",
-                                                            lineNumber: 42,
+                                                            lineNumber: 167,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -789,19 +902,19 @@ function DashboardSidebar({ isOpen, onToggle }) {
                                                             children: "Tap for details"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/dashboard-sidebar.tsx",
-                                                            lineNumber: 43,
+                                                            lineNumber: 168,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/dashboard-sidebar.tsx",
-                                                    lineNumber: 41,
+                                                    lineNumber: 166,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/dashboard-sidebar.tsx",
-                                            lineNumber: 37,
+                                            lineNumber: 162,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -809,18 +922,18 @@ function DashboardSidebar({ isOpen, onToggle }) {
                                             children: "Connected"
                                         }, void 0, false, {
                                             fileName: "[project]/components/dashboard-sidebar.tsx",
-                                            lineNumber: 46,
+                                            lineNumber: 171,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/dashboard-sidebar.tsx",
-                                    lineNumber: 36,
+                                    lineNumber: 161,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                                lineNumber: 35,
+                                lineNumber: 160,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -829,50 +942,178 @@ function DashboardSidebar({ isOpen, onToggle }) {
                                 children: "PATROL"
                             }, void 0, false, {
                                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                                lineNumber: 56,
+                                lineNumber: 183,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "mt-4 border-b border-[#333]"
                             }, void 0, false, {
                                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                                lineNumber: 62,
+                                lineNumber: 189,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/dashboard-sidebar.tsx",
-                        lineNumber: 33,
+                        lineNumber: 156,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
+                        className: "flex-1 overflow-y-auto",
                         children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                                className: "mb-3 text-sm font-semibold tracking-wide text-white",
-                                children: "ALERT"
-                            }, void 0, false, {
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "mb-1 flex items-center justify-between",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                                        className: "text-sm font-semibold tracking-wide text-white",
+                                        children: "ALERT"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/dashboard-sidebar.tsx",
+                                        lineNumber: 195,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: `text-[10px] ${socketConnected ? "text-green-500" : "text-gray-500"}`,
+                                        children: socketConnected ? "live" : "offline"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/dashboard-sidebar.tsx",
+                                        lineNumber: 198,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
                                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                                lineNumber: 67,
+                                lineNumber: 194,
                                 columnNumber: 11
                             }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            alertsLoading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-2 text-sm text-gray-400",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__["Loader2"], {
+                                        className: "h-4 w-4 animate-spin text-[#4A9FD4]"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/dashboard-sidebar.tsx",
+                                        lineNumber: 210,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        children: "Loading active alerts..."
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/dashboard-sidebar.tsx",
+                                        lineNumber: 211,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/components/dashboard-sidebar.tsx",
+                                lineNumber: 209,
+                                columnNumber: 13
+                            }, this),
+                            !alertsLoading && alertsError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-sm text-red-500",
+                                children: [
+                                    "Failed to load alerts: ",
+                                    alertsError
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/components/dashboard-sidebar.tsx",
+                                lineNumber: 217,
+                                columnNumber: 13
+                            }, this),
+                            !alertsLoading && !alertsError && alerts.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 className: "text-sm text-gray-500",
                                 children: "No Active Alerts Found..."
                             }, void 0, false, {
                                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                                lineNumber: 68,
-                                columnNumber: 11
+                                lineNumber: 224,
+                                columnNumber: 13
+                            }, this),
+                            !alertsLoading && !alertsError && alerts.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "space-y-3",
+                                children: alerts.map((alert)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "rounded-lg border border-[#333] bg-[#222] p-3 text-sm",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "mb-2 flex items-start gap-2",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$triangle$2d$alert$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__AlertTriangle$3e$__["AlertTriangle"], {
+                                                        className: "mt-0.5 h-4 w-4 text-orange-500"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/components/dashboard-sidebar.tsx",
+                                                        lineNumber: 236,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        className: "flex-1",
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                                className: "font-medium text-white",
+                                                                children: alert.message || "Alert"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/components/dashboard-sidebar.tsx",
+                                                                lineNumber: 238,
+                                                                columnNumber: 23
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                                className: "text-xs text-gray-400",
+                                                                children: [
+                                                                    "Sensor:",
+                                                                    " ",
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                        className: "font-mono text-[#4A9FD4]",
+                                                                        children: alert.sensor?.name || alert.sensorId || "Unknown Sensor"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/components/dashboard-sidebar.tsx",
+                                                                        lineNumber: 243,
+                                                                        columnNumber: 25
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/components/dashboard-sidebar.tsx",
+                                                                lineNumber: 241,
+                                                                columnNumber: 23
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/components/dashboard-sidebar.tsx",
+                                                        lineNumber: 237,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/components/dashboard-sidebar.tsx",
+                                                lineNumber: 235,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                className: "text-[11px] text-gray-500",
+                                                children: new Date(alert.createdAt).toLocaleString()
+                                            }, void 0, false, {
+                                                fileName: "[project]/components/dashboard-sidebar.tsx",
+                                                lineNumber: 251,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, alert.id, true, {
+                                        fileName: "[project]/components/dashboard-sidebar.tsx",
+                                        lineNumber: 231,
+                                        columnNumber: 17
+                                    }, this))
+                            }, void 0, false, {
+                                fileName: "[project]/components/dashboard-sidebar.tsx",
+                                lineNumber: 229,
+                                columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/dashboard-sidebar.tsx",
-                        lineNumber: 66,
+                        lineNumber: 193,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                lineNumber: 20,
+                lineNumber: 139,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -884,24 +1125,24 @@ function DashboardSidebar({ isOpen, onToggle }) {
                     className: "h-5 w-5"
                 }, void 0, false, {
                     fileName: "[project]/components/dashboard-sidebar.tsx",
-                    lineNumber: 80,
-                    columnNumber: 19
+                    lineNumber: 270,
+                    columnNumber: 11
                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$right$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronRight$3e$__["ChevronRight"], {
                     className: "h-5 w-5"
                 }, void 0, false, {
                     fileName: "[project]/components/dashboard-sidebar.tsx",
-                    lineNumber: 80,
-                    columnNumber: 57
+                    lineNumber: 272,
+                    columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/dashboard-sidebar.tsx",
-                lineNumber: 72,
+                lineNumber: 261,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true);
 }
-_s(DashboardSidebar, "EqmI2Lq7WD25KS+uVgwBQOLS2fk=");
+_s(DashboardSidebar, "SWwGUwtcAa2mQqM/YcSlFaPoXE4=");
 _c = DashboardSidebar;
 var _c;
 __turbopack_context__.k.register(_c, "DashboardSidebar");
