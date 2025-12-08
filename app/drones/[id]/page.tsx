@@ -1,60 +1,167 @@
-"use client"
+// app/drones/[id]/page.tsx
+// Updated View Drone Page with Backend Integration
+"use client";
 
-import { useState } from "react"
-import { useParams } from "next/navigation"
-import Link from "next/link"
-import { DashboardHeader } from "@/components/dashboard-header"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Pencil, Plane, Battery, Gauge, Satellite, Wind, Navigation } from "lucide-react"
-import { dronesData } from "@/lib/data/drones"
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { DashboardHeader } from "@/components/dashboard-header";
+import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ArrowLeft,
+  Pencil,
+  Plane,
+  Battery,
+  Gauge,
+  Satellite,
+  Wind,
+  Navigation,
+  Loader2,
+  Calendar,
+} from "lucide-react";
+import { getDroneOSById, type DroneOS } from "@/lib/api/droneos";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ViewDronePage() {
-  const params = useParams()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const params = useParams();
+  const { toast } = useToast();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [drone, setDrone] = useState<DroneOS | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const drone = dronesData.find((d) => d.drone_id === params.id)
+  useEffect(() => {
+    if (params.id) {
+      fetchDroneDetails();
+    }
+  }, [params.id]);
 
-  if (!drone) {
+  const fetchDroneDetails = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getDroneOSById(params.id as string);
+      if (response.success && response.data) {
+        setDrone(response.data);
+      } else {
+        setError(response.error || "Failed to fetch drone details");
+        toast({
+          title: "Error",
+          description: response.error || "Failed to fetch drone details",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      setError("Failed to fetch drone details");
+      toast({
+        title: "Error",
+        description: "Failed to fetch drone details",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Get battery level badge color
+  const getBatteryBadge = (batteryLevel: number) => {
+    if (batteryLevel >= 50) {
+      return (
+        <Badge className="bg-green-600/20 text-green-400">
+          {batteryLevel}%
+        </Badge>
+      );
+    } else if (batteryLevel >= 20) {
+      return (
+        <Badge className="bg-yellow-600/20 text-yellow-400">
+          {batteryLevel}%
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge className="bg-red-600/20 text-red-400">{batteryLevel}%</Badge>
+      );
+    }
+  };
+
+  // Loading State
+  if (loading) {
+    return (
+      <div className="flex h-screen flex-col bg-[#1a1a1a]">
+        <DashboardHeader activeItem="DRONES" />
+        <div className="relative flex flex-1 overflow-hidden">
+          <DashboardSidebar
+            isOpen={sidebarOpen}
+            onToggle={() => setSidebarOpen(!sidebarOpen)}
+          />
+          <main className="flex flex-1 items-center justify-center p-4">
+            <div className="text-center">
+              <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-[#8B0000]" />
+              <p className="text-lg font-medium text-gray-400">
+                Loading drone details...
+              </p>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // Error State or Drone Not Found
+  if (error || !drone) {
     return (
       <div className="flex h-screen flex-col bg-[#1a1a1a]">
         <DashboardHeader activeItem="DRONES" />
         <div className="flex flex-1 items-center justify-center">
           <div className="text-center">
             <Plane className="mx-auto mb-4 h-16 w-16 text-gray-600" />
-            <h2 className="text-xl font-semibold text-white">Drone Not Found</h2>
-            <p className="mt-2 text-gray-400">The drone you're looking for doesn't exist.</p>
+            <h2 className="text-xl font-semibold text-white">
+              Drone Not Found
+            </h2>
+            <p className="mt-2 text-gray-400">
+              {error || "The drone you're looking for doesn't exist."}
+            </p>
             <Link href="/drones">
-              <Button className="mt-4 bg-[#8B0000] text-white hover:bg-[#6B0000]">Back to Drones</Button>
+              <Button className="mt-4 bg-[#8B0000] text-white hover:bg-[#6B0000]">
+                Back to Drones
+              </Button>
             </Link>
           </div>
         </div>
       </div>
-    )
-  }
-
-  const getStatusBadge = (status: typeof drone.status) => {
-    switch (status) {
-      case "connected":
-        return <Badge className="bg-green-600/20 text-green-400">Connected</Badge>
-      case "disconnected":
-        return <Badge className="bg-red-600/20 text-red-400">Disconnected</Badge>
-      case "maintenance":
-        return <Badge className="bg-yellow-600/20 text-yellow-400">Maintenance</Badge>
-    }
+    );
   }
 
   return (
     <div className="flex h-screen flex-col bg-[#1a1a1a]">
       <DashboardHeader activeItem="DRONES" />
       <div className="relative flex flex-1 overflow-hidden">
-        <DashboardSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+        <DashboardSidebar
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+        />
         <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
           <div className="mx-auto max-w-6xl">
             {/* Back Button */}
-            <Link href="/drones" className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white">
+            <Link
+              href="/drones"
+              className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white"
+            >
               <ArrowLeft className="h-4 w-4" />
               Back to Drones
             </Link>
@@ -67,15 +174,15 @@ export default function ViewDronePage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-3">
-                    <h1 className="text-2xl font-bold text-white">{drone.drone_os_name}</h1>
-                    {getStatusBadge(drone.status)}
+                    <h1 className="text-2xl font-bold text-white">
+                      {drone.droneOSName}
+                    </h1>
+                    {getBatteryBadge(drone.minBatteryLevel)}
                   </div>
-                  <p className="text-sm text-gray-400">
-                    {drone.drone_id} | {drone.drone_type}
-                  </p>
+                  <p className="text-sm text-gray-400">{drone.droneType}</p>
                 </div>
               </div>
-              <Link href={`/drones/${drone.drone_id}/edit`}>
+              <Link href={`/drones/${drone.id}/edit`}>
                 <Button className="gap-2 bg-[#8B0000] text-white hover:bg-[#6B0000]">
                   <Pencil className="h-4 w-4" />
                   Edit Drone
@@ -92,7 +199,9 @@ export default function ViewDronePage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Max Speed</p>
-                    <p className="text-2xl font-bold text-white">{drone.drone_speed} m/s</p>
+                    <p className="text-2xl font-bold text-white">
+                      {drone.droneSpeed} m/s
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -103,7 +212,9 @@ export default function ViewDronePage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Max Altitude</p>
-                    <p className="text-2xl font-bold text-white">{drone.max_altitude}m</p>
+                    <p className="text-2xl font-bold text-white">
+                      {drone.maxAltitude}m
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -114,7 +225,9 @@ export default function ViewDronePage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Min Battery</p>
-                    <p className="text-2xl font-bold text-white">{drone.min_battery_level}%</p>
+                    <p className="text-2xl font-bold text-white">
+                      {drone.minBatteryLevel}%
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -125,7 +238,9 @@ export default function ViewDronePage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Max Wind</p>
-                    <p className="text-2xl font-bold text-white">{drone.max_wind_speed} m/s</p>
+                    <p className="text-2xl font-bold text-white">
+                      {drone.maxWindSpeed} m/s
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -143,24 +258,30 @@ export default function ViewDronePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between border-b border-[#333] pb-3">
-                    <span className="text-gray-400">Drone ID</span>
-                    <span className="font-mono text-white">{drone.drone_id}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">OS Name</span>
-                    <span className="text-white">{drone.drone_os_name}</span>
+                    <span className="text-white">{drone.droneOSName}</span>
                   </div>
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Drone Type</span>
-                    <span className="text-white">{drone.drone_type}</span>
+                    <span className="text-white">{drone.droneType}</span>
                   </div>
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Target Altitude</span>
-                    <span className="font-mono text-white">{drone.target_altitude}m</span>
+                    <span className="font-mono text-white">
+                      {drone.targetAltitude}m
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-b border-[#333] pb-3">
+                    <span className="text-gray-400">Max Altitude</span>
+                    <span className="font-mono text-white">
+                      {drone.maxAltitude}m
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">USB Address</span>
-                    <span className="font-mono text-white">{drone.usb_address}</span>
+                    <span className="font-mono text-white">
+                      {drone.usbAddress}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -176,23 +297,27 @@ export default function ViewDronePage() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">GPS Name</span>
-                    <span className="text-white">{drone.gps_name}</span>
+                    <span className="text-white">{drone.gpsName}</span>
                   </div>
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">GPS Fix</span>
-                    <span className="text-white">{drone.gps_fix}</span>
+                    <span className="text-white">{drone.gpsFix}</span>
                   </div>
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Min HDOP</span>
-                    <span className="font-mono text-white">{drone.min_hdop}</span>
+                    <span className="font-mono text-white">
+                      {drone.minHDOP}
+                    </span>
                   </div>
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Min Sat Count</span>
-                    <span className="font-mono text-white">{drone.min_sat_count}</span>
+                    <span className="font-mono text-white">
+                      {drone.minSatCount}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">GPS Lost Action</span>
-                    <span className="text-white">{drone.gps_lost_action}</span>
+                    <span className="text-white">{drone.gpsLost}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -208,19 +333,23 @@ export default function ViewDronePage() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Min Battery Level</span>
-                    <span className="font-mono text-white">{drone.min_battery_level}%</span>
+                    <span className="font-mono text-white">
+                      {drone.minBatteryLevel}%
+                    </span>
                   </div>
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Battery Fail Safe</span>
-                    <span className="text-white">{drone.battery_fail_safe}</span>
+                    <span className="text-white">{drone.batteryFailSafe}</span>
                   </div>
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Telemetry Lost Action</span>
-                    <span className="text-white">{drone.telemetry_lost_action}</span>
+                    <span className="text-white">{drone.telemetryLost}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Max Wind Speed</span>
-                    <span className="font-mono text-white">{drone.max_wind_speed} m/s</span>
+                    <span className="font-mono text-white">
+                      {drone.maxWindSpeed} m/s
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -228,16 +357,27 @@ export default function ViewDronePage() {
               {/* Metadata */}
               <Card className="border-[#333] bg-[#222]">
                 <CardHeader>
-                  <CardTitle className="text-white">Metadata</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Calendar className="h-5 w-5" />
+                    Metadata
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Created At</span>
-                    <span className="text-white">{drone.created_at}</span>
+                    <span className="text-white">
+                      {formatDate(drone.createdAt)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-b border-[#333] pb-3">
+                    <span className="text-gray-400">Last Updated</span>
+                    <span className="text-white">
+                      {formatDate(drone.updatedAt)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Status</span>
-                    {getStatusBadge(drone.status)}
+                    <span className="text-gray-400">Battery Status</span>
+                    {getBatteryBadge(drone.minBatteryLevel)}
                   </div>
                 </CardContent>
               </Card>
@@ -246,5 +386,5 @@ export default function ViewDronePage() {
         </main>
       </div>
     </div>
-  )
+  );
 }

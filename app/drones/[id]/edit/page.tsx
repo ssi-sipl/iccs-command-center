@@ -1,95 +1,293 @@
-"use client"
+// app/drones/[id]/edit/page.tsx
+// Updated Edit Drone Page with Backend Integration
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { DashboardHeader } from "@/components/dashboard-header"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Save, Plane } from "lucide-react"
-import { dronesData, gpsLostActions, telemetryLostActions, batteryFailSafeActions } from "@/lib/data/drones"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { DashboardHeader } from "@/components/dashboard-header";
+import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArrowLeft, Save, Plane, Loader2 } from "lucide-react";
+import { getDroneOSById, updateDroneOS, type DroneOS } from "@/lib/api/droneos";
+import { useToast } from "@/hooks/use-toast";
+
+// Action options
+const gpsLostActions = ["RTL", "Land", "Hover", "Continue"];
+const telemetryLostActions = ["RTL", "Land", "Hover", "Continue"];
+const batteryFailSafeActions = ["RTL", "Land"];
 
 export default function EditDronePage() {
-  const params = useParams()
-  const router = useRouter()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  const drone = dronesData.find((d) => d.drone_id === params.id)
+  const params = useParams();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [drone, setDrone] = useState<DroneOS | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
-    drone_id: drone?.drone_id || "",
-    drone_os_name: drone?.drone_os_name || "",
-    drone_type: drone?.drone_type || "",
-    gps_fix: drone?.gps_fix || "",
-    min_hdop: drone?.min_hdop?.toString() || "",
-    min_sat_count: drone?.min_sat_count?.toString() || "",
-    max_wind_speed: drone?.max_wind_speed?.toString() || "",
-    drone_speed: drone?.drone_speed?.toString() || "",
-    target_altitude: drone?.target_altitude?.toString() || "",
-    gps_lost_action: drone?.gps_lost_action || "",
-    telemetry_lost_action: drone?.telemetry_lost_action || "",
-    min_battery_level: drone?.min_battery_level?.toString() || "",
-    usb_address: drone?.usb_address || "",
-    battery_fail_safe: drone?.battery_fail_safe || "",
-    gps_name: drone?.gps_name || "",
-    max_altitude: drone?.max_altitude?.toString() || "",
-    status: drone?.status || "connected",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+    droneOSName: "",
+    droneType: "",
+    gpsFix: "",
+    minHDOP: "",
+    minSatCount: "",
+    maxWindSpeed: "",
+    droneSpeed: "",
+    targetAltitude: "",
+    gpsLost: "",
+    telemetryLost: "",
+    minBatteryLevel: "",
+    usbAddress: "",
+    batteryFailSafe: "",
+    gpsName: "",
+    maxAltitude: "",
+  });
 
-  if (!drone) {
+  const [validationErrors, setValidationErrors] = useState({
+    droneOSName: "",
+    droneType: "",
+    minHDOP: "",
+    minSatCount: "",
+    minBatteryLevel: "",
+  });
+
+  useEffect(() => {
+    if (params.id) {
+      fetchDroneDetails();
+    }
+  }, [params.id]);
+
+  const fetchDroneDetails = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getDroneOSById(params.id as string);
+      if (response.success && response.data) {
+        const droneData = response.data;
+        setDrone(droneData);
+        setFormData({
+          droneOSName: droneData.droneOSName,
+          droneType: droneData.droneType,
+          gpsFix: droneData.gpsFix,
+          minHDOP: droneData.minHDOP.toString(),
+          minSatCount: droneData.minSatCount.toString(),
+          maxWindSpeed: droneData.maxWindSpeed.toString(),
+          droneSpeed: droneData.droneSpeed.toString(),
+          targetAltitude: droneData.targetAltitude.toString(),
+          gpsLost: droneData.gpsLost,
+          telemetryLost: droneData.telemetryLost,
+          minBatteryLevel: droneData.minBatteryLevel.toString(),
+          usbAddress: droneData.usbAddress,
+          batteryFailSafe: droneData.batteryFailSafe,
+          gpsName: droneData.gpsName,
+          maxAltitude: droneData.maxAltitude.toString(),
+        });
+      } else {
+        setError(response.error || "Failed to fetch drone details");
+        toast({
+          title: "Error",
+          description: response.error || "Failed to fetch drone details",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      setError("Failed to fetch drone details");
+      toast({
+        title: "Error",
+        description: "Failed to fetch drone details",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {
+      droneOSName: "",
+      droneType: "",
+      minHDOP: "",
+      minSatCount: "",
+      minBatteryLevel: "",
+    };
+
+    let isValid = true;
+
+    if (!formData.droneOSName.trim()) {
+      errors.droneOSName = "Drone OS Name is required";
+      isValid = false;
+    }
+
+    if (!formData.droneType.trim()) {
+      errors.droneType = "Drone Type is required";
+      isValid = false;
+    }
+
+    const hdop = parseFloat(formData.minHDOP);
+    if (isNaN(hdop) || hdop < 0 || hdop > 1) {
+      errors.minHDOP = "Min HDOP must be between 0 and 1";
+      isValid = false;
+    }
+
+    const satCount = parseInt(formData.minSatCount);
+    if (isNaN(satCount) || satCount < 0 || satCount > 8) {
+      errors.minSatCount = "Min Sat Count must be between 0 and 8";
+      isValid = false;
+    }
+
+    const battery = parseFloat(formData.minBatteryLevel);
+    if (isNaN(battery) || battery < 0 || battery > 100) {
+      errors.minBatteryLevel = "Battery level must be between 0 and 100";
+      isValid = false;
+    }
+
+    setValidationErrors(errors);
+    return isValid;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please check the form for errors",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await updateDroneOS(params.id as string, {
+        droneOSName: formData.droneOSName,
+        droneType: formData.droneType,
+        gpsFix: formData.gpsFix,
+        minHDOP: parseFloat(formData.minHDOP),
+        minSatCount: parseInt(formData.minSatCount),
+        maxWindSpeed: parseFloat(formData.maxWindSpeed),
+        droneSpeed: parseFloat(formData.droneSpeed),
+        targetAltitude: parseFloat(formData.targetAltitude),
+        gpsLost: formData.gpsLost,
+        telemetryLost: formData.telemetryLost,
+        minBatteryLevel: parseFloat(formData.minBatteryLevel),
+        usbAddress: formData.usbAddress,
+        batteryFailSafe: formData.batteryFailSafe,
+        gpsName: formData.gpsName,
+        maxAltitude: parseFloat(formData.maxAltitude),
+      });
+
+      if (response.success) {
+        toast({
+          title: "Success",
+          description: "Drone updated successfully",
+        });
+        router.push(`/drones/${params.id}`);
+      } else {
+        toast({
+          title: "Error",
+          description: response.error || "Failed to update drone",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to update drone",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear validation error
+    if (validationErrors[field as keyof typeof validationErrors]) {
+      setValidationErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  // Loading State
+  if (loading) {
+    return (
+      <div className="flex h-screen flex-col bg-[#1a1a1a]">
+        <DashboardHeader activeItem="DRONES" />
+        <div className="relative flex flex-1 overflow-hidden">
+          <DashboardSidebar
+            isOpen={sidebarOpen}
+            onToggle={() => setSidebarOpen(!sidebarOpen)}
+          />
+          <main className="flex flex-1 items-center justify-center p-4">
+            <div className="text-center">
+              <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-[#8B0000]" />
+              <p className="text-lg font-medium text-gray-400">
+                Loading drone details...
+              </p>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // Error State or Drone Not Found
+  if (error || !drone) {
     return (
       <div className="flex h-screen flex-col bg-[#1a1a1a]">
         <DashboardHeader activeItem="DRONES" />
         <div className="flex flex-1 items-center justify-center">
           <div className="text-center">
             <Plane className="mx-auto mb-4 h-16 w-16 text-gray-600" />
-            <h2 className="text-xl font-semibold text-white">Drone Not Found</h2>
-            <p className="mt-2 text-gray-400">The drone you're looking for doesn't exist.</p>
+            <h2 className="text-xl font-semibold text-white">
+              Drone Not Found
+            </h2>
+            <p className="mt-2 text-gray-400">
+              {error || "The drone you're looking for doesn't exist."}
+            </p>
             <Link href="/drones">
-              <Button className="mt-4 bg-[#8B0000] text-white hover:bg-[#6B0000]">Back to Drones</Button>
+              <Button className="mt-4 bg-[#8B0000] text-white hover:bg-[#6B0000]">
+                Back to Drones
+              </Button>
             </Link>
           </div>
         </div>
       </div>
-    )
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // TODO: Replace with actual API call
-    console.log("Updating drone:", formData)
-
-    setIsSubmitting(false)
-    router.push(`/drones/${drone.drone_id}`)
-  }
-
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    );
   }
 
   return (
     <div className="flex h-screen flex-col bg-[#1a1a1a]">
       <DashboardHeader activeItem="DRONES" />
       <div className="relative flex flex-1 overflow-hidden">
-        <DashboardSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+        <DashboardSidebar
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+        />
         <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
           <div className="mx-auto max-w-6xl">
             {/* Title */}
-            <h1 className="mb-4 text-2xl font-semibold text-[#4A9FD4]">Edit OS Settings</h1>
+            <h1 className="mb-4 text-2xl font-semibold text-[#4A9FD4]">
+              Edit OS Settings
+            </h1>
 
             {/* Back Button */}
             <Link
-              href={`/drones/${drone.drone_id}`}
+              href={`/drones/${params.id}`}
               className="mb-6 inline-flex items-center gap-2 text-gray-400 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -100,59 +298,60 @@ export default function EditDronePage() {
               <div className="rounded-lg border border-[#333] bg-[#222] p-4 md:p-6">
                 {/* Form Grid */}
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {/* Drone ID - Locked */}
-                  <div className="space-y-2">
-                    <Label htmlFor="drone_id" className="text-gray-300">
-                      Drone ID
-                    </Label>
-                    <Input
-                      id="drone_id"
-                      value={formData.drone_id}
-                      disabled
-                      className="border-[#444] bg-[#1a1a1a] text-gray-500"
-                    />
-                  </div>
-
                   {/* Drone OS Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="drone_os_name" className="text-gray-300">
+                    <Label htmlFor="droneOSName" className="text-gray-300">
                       Drone OS Name<span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="drone_os_name"
+                      id="droneOSName"
                       placeholder="Enter drone OS name"
-                      value={formData.drone_os_name}
-                      onChange={(e) => handleChange("drone_os_name", e.target.value)}
+                      value={formData.droneOSName}
+                      onChange={(e) =>
+                        handleChange("droneOSName", e.target.value)
+                      }
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
+                    {validationErrors.droneOSName && (
+                      <p className="text-xs text-red-500">
+                        {validationErrors.droneOSName}
+                      </p>
+                    )}
                   </div>
 
                   {/* Drone Type */}
                   <div className="space-y-2">
-                    <Label htmlFor="drone_type" className="text-gray-300">
+                    <Label htmlFor="droneType" className="text-gray-300">
                       Drone Type<span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="drone_type"
-                      placeholder="Enter drone type"
-                      value={formData.drone_type}
-                      onChange={(e) => handleChange("drone_type", e.target.value)}
+                      id="droneType"
+                      placeholder="e.g., quadcopter, hexacopter"
+                      value={formData.droneType}
+                      onChange={(e) =>
+                        handleChange("droneType", e.target.value)
+                      }
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
+                    {validationErrors.droneType && (
+                      <p className="text-xs text-red-500">
+                        {validationErrors.droneType}
+                      </p>
+                    )}
                   </div>
 
                   {/* GPS Fix */}
                   <div className="space-y-2">
-                    <Label htmlFor="gps_fix" className="text-gray-300">
+                    <Label htmlFor="gpsFix" className="text-gray-300">
                       GPS Fix<span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="gps_fix"
+                      id="gpsFix"
                       placeholder="Enter GPS fix value"
-                      value={formData.gps_fix}
-                      onChange={(e) => handleChange("gps_fix", e.target.value)}
+                      value={formData.gpsFix}
+                      onChange={(e) => handleChange("gpsFix", e.target.value)}
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
@@ -160,53 +359,68 @@ export default function EditDronePage() {
 
                   {/* Min HDOP */}
                   <div className="space-y-2">
-                    <Label htmlFor="min_hdop" className="text-gray-300">
-                      {"Min. HDOP(1<0)"}
-                      <span className="text-red-500">*</span>
+                    <Label htmlFor="minHDOP" className="text-gray-300">
+                      Min. HDOP (0-1)<span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="min_hdop"
+                      id="minHDOP"
                       type="number"
-                      step="0.1"
+                      step="0.01"
                       min="0"
                       max="1"
-                      placeholder="Enter a value between 0 and 1"
-                      value={formData.min_hdop}
-                      onChange={(e) => handleChange("min_hdop", e.target.value)}
+                      placeholder="0.0 to 1.0"
+                      value={formData.minHDOP}
+                      onChange={(e) => handleChange("minHDOP", e.target.value)}
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
+                    {validationErrors.minHDOP && (
+                      <p className="text-xs text-red-500">
+                        {validationErrors.minHDOP}
+                      </p>
+                    )}
                   </div>
 
                   {/* Min Sat Count */}
                   <div className="space-y-2">
-                    <Label htmlFor="min_sat_count" className="text-gray-300">
-                      Min Sat Count (1-8)<span className="text-red-500">*</span>
+                    <Label htmlFor="minSatCount" className="text-gray-300">
+                      Min Sat Count (0-8)<span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="min_sat_count"
+                      id="minSatCount"
                       type="number"
-                      min="1"
+                      min="0"
                       max="8"
-                      placeholder="Enter a number between 0 and 8"
-                      value={formData.min_sat_count}
-                      onChange={(e) => handleChange("min_sat_count", e.target.value)}
+                      placeholder="0 to 8"
+                      value={formData.minSatCount}
+                      onChange={(e) =>
+                        handleChange("minSatCount", e.target.value)
+                      }
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
+                    {validationErrors.minSatCount && (
+                      <p className="text-xs text-red-500">
+                        {validationErrors.minSatCount}
+                      </p>
+                    )}
                   </div>
 
                   {/* Max Wind Speed */}
                   <div className="space-y-2">
-                    <Label htmlFor="max_wind_speed" className="text-gray-300">
-                      Max Wind Speed(m/s)<span className="text-red-500">*</span>
+                    <Label htmlFor="maxWindSpeed" className="text-gray-300">
+                      Max Wind Speed (m/s)
+                      <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="max_wind_speed"
+                      id="maxWindSpeed"
                       type="number"
-                      placeholder="Enter maximum wind speed in m/s"
-                      value={formData.max_wind_speed}
-                      onChange={(e) => handleChange("max_wind_speed", e.target.value)}
+                      step="0.1"
+                      placeholder="Enter max wind speed"
+                      value={formData.maxWindSpeed}
+                      onChange={(e) =>
+                        handleChange("maxWindSpeed", e.target.value)
+                      }
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
@@ -214,15 +428,18 @@ export default function EditDronePage() {
 
                   {/* Drone Speed */}
                   <div className="space-y-2">
-                    <Label htmlFor="drone_speed" className="text-gray-300">
-                      Drone Speed(m/s)<span className="text-red-500">*</span>
+                    <Label htmlFor="droneSpeed" className="text-gray-300">
+                      Drone Speed (m/s)<span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="drone_speed"
+                      id="droneSpeed"
                       type="number"
-                      placeholder="Enter maximum drone speed in m/s"
-                      value={formData.drone_speed}
-                      onChange={(e) => handleChange("drone_speed", e.target.value)}
+                      step="0.1"
+                      placeholder="Enter drone speed"
+                      value={formData.droneSpeed}
+                      onChange={(e) =>
+                        handleChange("droneSpeed", e.target.value)
+                      }
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
@@ -230,15 +447,18 @@ export default function EditDronePage() {
 
                   {/* Target Altitude */}
                   <div className="space-y-2">
-                    <Label htmlFor="target_altitude" className="text-gray-300">
-                      Target Altitude(m)<span className="text-red-500">*</span>
+                    <Label htmlFor="targetAltitude" className="text-gray-300">
+                      Target Altitude (m)<span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="target_altitude"
+                      id="targetAltitude"
                       type="number"
-                      placeholder="Enter target altitude in meters"
-                      value={formData.target_altitude}
-                      onChange={(e) => handleChange("target_altitude", e.target.value)}
+                      step="0.1"
+                      placeholder="Enter target altitude"
+                      value={formData.targetAltitude}
+                      onChange={(e) =>
+                        handleChange("targetAltitude", e.target.value)
+                      }
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
@@ -246,22 +466,22 @@ export default function EditDronePage() {
 
                   {/* GPS Lost */}
                   <div className="space-y-2">
-                    <Label htmlFor="gps_lost_action" className="text-gray-300">
+                    <Label htmlFor="gpsLost" className="text-gray-300">
                       GPS Lost<span className="text-red-500">*</span>
                     </Label>
                     <Select
-                      value={formData.gps_lost_action}
-                      onValueChange={(value) => handleChange("gps_lost_action", value)}
+                      value={formData.gpsLost}
+                      onValueChange={(value) => handleChange("gpsLost", value)}
                     >
                       <SelectTrigger className="border-[#444] bg-[#2a2a2a] text-white focus:ring-[#8B0000]">
-                        <SelectValue placeholder="Select action on GPS lost" />
+                        <SelectValue placeholder="Select action" />
                       </SelectTrigger>
                       <SelectContent className="border-[#333] bg-[#222]">
                         {gpsLostActions.map((action) => (
                           <SelectItem
                             key={action}
                             value={action}
-                            className="text-white focus:bg-[#333] focus:text-white"
+                            className="text-white focus:bg-[#333]"
                           >
                             {action}
                           </SelectItem>
@@ -272,22 +492,24 @@ export default function EditDronePage() {
 
                   {/* Telemetry Lost */}
                   <div className="space-y-2">
-                    <Label htmlFor="telemetry_lost_action" className="text-gray-300">
+                    <Label htmlFor="telemetryLost" className="text-gray-300">
                       Telemetry Lost<span className="text-red-500">*</span>
                     </Label>
                     <Select
-                      value={formData.telemetry_lost_action}
-                      onValueChange={(value) => handleChange("telemetry_lost_action", value)}
+                      value={formData.telemetryLost}
+                      onValueChange={(value) =>
+                        handleChange("telemetryLost", value)
+                      }
                     >
                       <SelectTrigger className="border-[#444] bg-[#2a2a2a] text-white focus:ring-[#8B0000]">
-                        <SelectValue placeholder="Select action on telemetry lost" />
+                        <SelectValue placeholder="Select action" />
                       </SelectTrigger>
                       <SelectContent className="border-[#333] bg-[#222]">
                         {telemetryLostActions.map((action) => (
                           <SelectItem
                             key={action}
                             value={action}
-                            className="text-white focus:bg-[#333] focus:text-white"
+                            className="text-white focus:bg-[#333]"
                           >
                             {action}
                           </SelectItem>
@@ -298,32 +520,42 @@ export default function EditDronePage() {
 
                   {/* Min Battery Level */}
                   <div className="space-y-2">
-                    <Label htmlFor="min_battery_level" className="text-gray-300">
-                      Min Battery Level(%)<span className="text-red-500">*</span>
+                    <Label htmlFor="minBatteryLevel" className="text-gray-300">
+                      Min Battery Level (%)
+                      <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="min_battery_level"
+                      id="minBatteryLevel"
                       type="number"
                       min="0"
                       max="100"
-                      placeholder="Enter minimum battery level in percentage"
-                      value={formData.min_battery_level}
-                      onChange={(e) => handleChange("min_battery_level", e.target.value)}
+                      placeholder="0 to 100"
+                      value={formData.minBatteryLevel}
+                      onChange={(e) =>
+                        handleChange("minBatteryLevel", e.target.value)
+                      }
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
+                    {validationErrors.minBatteryLevel && (
+                      <p className="text-xs text-red-500">
+                        {validationErrors.minBatteryLevel}
+                      </p>
+                    )}
                   </div>
 
                   {/* USB Address */}
                   <div className="space-y-2">
-                    <Label htmlFor="usb_address" className="text-gray-300">
+                    <Label htmlFor="usbAddress" className="text-gray-300">
                       USB Address<span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="usb_address"
-                      placeholder="Enter USB address"
-                      value={formData.usb_address}
-                      onChange={(e) => handleChange("usb_address", e.target.value)}
+                      id="usbAddress"
+                      placeholder="e.g., /dev/ttyUSB0"
+                      value={formData.usbAddress}
+                      onChange={(e) =>
+                        handleChange("usbAddress", e.target.value)
+                      }
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
@@ -331,22 +563,24 @@ export default function EditDronePage() {
 
                   {/* Battery Fail Safe */}
                   <div className="space-y-2">
-                    <Label htmlFor="battery_fail_safe" className="text-gray-300">
-                      Battery Fail Safe(RTL, Land)<span className="text-red-500">*</span>
+                    <Label htmlFor="batteryFailSafe" className="text-gray-300">
+                      Battery Fail Safe<span className="text-red-500">*</span>
                     </Label>
                     <Select
-                      value={formData.battery_fail_safe}
-                      onValueChange={(value) => handleChange("battery_fail_safe", value)}
+                      value={formData.batteryFailSafe}
+                      onValueChange={(value) =>
+                        handleChange("batteryFailSafe", value)
+                      }
                     >
                       <SelectTrigger className="border-[#444] bg-[#2a2a2a] text-white focus:ring-[#8B0000]">
-                        <SelectValue placeholder="Select action on battery fail safe" />
+                        <SelectValue placeholder="Select action" />
                       </SelectTrigger>
                       <SelectContent className="border-[#333] bg-[#222]">
                         {batteryFailSafeActions.map((action) => (
                           <SelectItem
                             key={action}
                             value={action}
-                            className="text-white focus:bg-[#333] focus:text-white"
+                            className="text-white focus:bg-[#333]"
                           >
                             {action}
                           </SelectItem>
@@ -357,14 +591,14 @@ export default function EditDronePage() {
 
                   {/* GPS Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="gps_name" className="text-gray-300">
+                    <Label htmlFor="gpsName" className="text-gray-300">
                       GPS Name<span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="gps_name"
+                      id="gpsName"
                       placeholder="Enter GPS name"
-                      value={formData.gps_name}
-                      onChange={(e) => handleChange("gps_name", e.target.value)}
+                      value={formData.gpsName}
+                      onChange={(e) => handleChange("gpsName", e.target.value)}
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
@@ -372,50 +606,31 @@ export default function EditDronePage() {
 
                   {/* Max Altitude */}
                   <div className="space-y-2">
-                    <Label htmlFor="max_altitude" className="text-gray-300">
-                      Max Altitude(m)<span className="text-red-500">*</span>
+                    <Label htmlFor="maxAltitude" className="text-gray-300">
+                      Max Altitude (m)<span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="max_altitude"
+                      id="maxAltitude"
                       type="number"
-                      placeholder="Enter maximum altitude in meters"
-                      value={formData.max_altitude}
-                      onChange={(e) => handleChange("max_altitude", e.target.value)}
+                      step="0.1"
+                      placeholder="Enter max altitude"
+                      value={formData.maxAltitude}
+                      onChange={(e) =>
+                        handleChange("maxAltitude", e.target.value)
+                      }
                       required
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                     />
-                  </div>
-
-                  {/* Status */}
-                  <div className="space-y-2">
-                    <Label htmlFor="status" className="text-gray-300">
-                      Status
-                    </Label>
-                    <Select value={formData.status} onValueChange={(value) => handleChange("status", value)}>
-                      <SelectTrigger className="border-[#444] bg-[#2a2a2a] text-white focus:ring-[#8B0000]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="border-[#333] bg-[#222]">
-                        <SelectItem value="connected" className="text-white focus:bg-[#333] focus:text-white">
-                          Connected
-                        </SelectItem>
-                        <SelectItem value="disconnected" className="text-white focus:bg-[#333] focus:text-white">
-                          Disconnected
-                        </SelectItem>
-                        <SelectItem value="maintenance" className="text-white focus:bg-[#333] focus:text-white">
-                          Maintenance
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
 
                 {/* Submit Button */}
                 <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                  <Link href={`/drones/${drone.drone_id}`}>
+                  <Link href={`/drones/${params.id}`}>
                     <Button
                       type="button"
                       variant="outline"
+                      disabled={isSubmitting}
                       className="w-full border-[#333] bg-transparent text-white hover:bg-[#333] sm:w-auto"
                     >
                       Cancel
@@ -424,10 +639,19 @@ export default function EditDronePage() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full gap-2 bg-[#2563EB] px-6 text-white hover:bg-[#1D4ED8] sm:w-auto"
+                    className="w-full gap-2 bg-[#2563EB] px-6 text-white hover:bg-[#1D4ED8] disabled:opacity-50 sm:w-auto"
                   >
-                    <Save className="h-4 w-4" />
-                    {isSubmitting ? "Saving..." : "SAVE & NEXT"}
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4" />
+                        SAVE & NEXT
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -436,5 +660,5 @@ export default function EditDronePage() {
         </main>
       </div>
     </div>
-  )
+  );
 }

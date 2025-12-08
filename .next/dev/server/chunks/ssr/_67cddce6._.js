@@ -1345,8 +1345,8 @@ function DronesListPage() {
                     children: "Connected"
                 }, void 0, false, {
                     fileName: "[project]/app/drones/page.tsx",
-                    lineNumber: 44,
-                    columnNumber: 16
+                    lineNumber: 61,
+                    columnNumber: 11
                 }, this);
             case "disconnected":
                 return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1354,8 +1354,8 @@ function DronesListPage() {
                     children: "Disconnected"
                 }, void 0, false, {
                     fileName: "[project]/app/drones/page.tsx",
-                    lineNumber: 46,
-                    columnNumber: 16
+                    lineNumber: 67,
+                    columnNumber: 11
                 }, this);
             case "maintenance":
                 return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1363,8 +1363,8 @@ function DronesListPage() {
                     children: "Maintenance"
                 }, void 0, false, {
                     fileName: "[project]/app/drones/page.tsx",
-                    lineNumber: 48,
-                    columnNumber: 16
+                    lineNumber: 73,
+                    columnNumber: 11
                 }, this);
         }
     };
@@ -1375,7 +1375,7 @@ function DronesListPage() {
                 activeItem: "DRONES"
             }, void 0, false, {
                 fileName: "[project]/app/drones/page.tsx",
-                lineNumber: 54,
+                lineNumber: 82,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1386,7 +1386,7 @@ function DronesListPage() {
                         onToggle: ()=>setSidebarOpen(!sidebarOpen)
                     }, void 0, false, {
                         fileName: "[project]/app/drones/page.tsx",
-                        lineNumber: 56,
+                        lineNumber: 84,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -1404,7 +1404,7 @@ function DronesListPage() {
                                                     children: "Drone Management"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/drones/page.tsx",
-                                                    lineNumber: 62,
+                                                    lineNumber: 93,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1412,13 +1412,13 @@ function DronesListPage() {
                                                     children: "Manage and configure all surveillance drones"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/drones/page.tsx",
-                                                    lineNumber: 63,
+                                                    lineNumber: 96,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/drones/page.tsx",
-                                            lineNumber: 61,
+                                            lineNumber: 92,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -1430,25 +1430,25 @@ function DronesListPage() {
                                                         className: "h-4 w-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/drones/page.tsx",
-                                                        lineNumber: 67,
+                                                        lineNumber: 102,
                                                         columnNumber: 19
                                                     }, this),
                                                     "Add New Drone"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/drones/page.tsx",
-                                                lineNumber: 66,
+                                                lineNumber: 101,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/drones/page.tsx",
-                                            lineNumber: 65,
+                                            lineNumber: 100,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/drones/page.tsx",
-                                    lineNumber: 60,
+                                    lineNumber: 91,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1461,7 +1461,7 @@ function DronesListPage() {
                                                     className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/drones/page.tsx",
-                                                    lineNumber: 76,
+                                                    lineNumber: 111,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -1471,13 +1471,13 @@ function DronesListPage() {
                                                     className: "border-[#333] bg-[#222] pl-10 text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/drones/page.tsx",
-                                                    lineNumber: 77,
+                                                    lineNumber: 112,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/drones/page.tsx",
-                                            lineNumber: 75,
+                                            lineNumber: 110,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1491,13 +1491,13 @@ function DronesListPage() {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/drones/page.tsx",
-                                            lineNumber: 84,
+                                            lineNumber: 119,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/drones/page.tsx",
-                                    lineNumber: 74,
+                                    lineNumber: 109,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1513,7 +1513,7 @@ function DronesListPage() {
                                                             children: "Drone ID"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 94,
+                                                            lineNumber: 129,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1521,7 +1521,7 @@ function DronesListPage() {
                                                             children: "OS Name"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 95,
+                                                            lineNumber: 130,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1529,7 +1529,7 @@ function DronesListPage() {
                                                             children: "Type"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 96,
+                                                            lineNumber: 131,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1537,7 +1537,7 @@ function DronesListPage() {
                                                             children: "Speed (m/s)"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 97,
+                                                            lineNumber: 132,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1545,7 +1545,7 @@ function DronesListPage() {
                                                             children: "Max Alt (m)"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 98,
+                                                            lineNumber: 133,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1553,7 +1553,7 @@ function DronesListPage() {
                                                             children: "Battery Min"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 99,
+                                                            lineNumber: 134,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1561,7 +1561,7 @@ function DronesListPage() {
                                                             children: "Status"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 100,
+                                                            lineNumber: 135,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1569,18 +1569,18 @@ function DronesListPage() {
                                                             children: "Actions"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 101,
+                                                            lineNumber: 136,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/drones/page.tsx",
-                                                    lineNumber: 93,
+                                                    lineNumber: 128,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/drones/page.tsx",
-                                                lineNumber: 92,
+                                                lineNumber: 127,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableBody"], {
@@ -1592,7 +1592,7 @@ function DronesListPage() {
                                                                 children: drone.drone_id
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                lineNumber: 107,
+                                                                lineNumber: 147,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1600,7 +1600,7 @@ function DronesListPage() {
                                                                 children: drone.drone_os_name
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                lineNumber: 108,
+                                                                lineNumber: 150,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1608,7 +1608,7 @@ function DronesListPage() {
                                                                 children: drone.drone_type
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                lineNumber: 109,
+                                                                lineNumber: 153,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1616,7 +1616,7 @@ function DronesListPage() {
                                                                 children: drone.drone_speed
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                lineNumber: 110,
+                                                                lineNumber: 156,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1624,7 +1624,7 @@ function DronesListPage() {
                                                                 children: drone.max_altitude
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                lineNumber: 111,
+                                                                lineNumber: 159,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1635,14 +1635,14 @@ function DronesListPage() {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                lineNumber: 112,
+                                                                lineNumber: 162,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
                                                                 children: getStatusBadge(drone.status)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                lineNumber: 113,
+                                                                lineNumber: 165,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1660,17 +1660,17 @@ function DronesListPage() {
                                                                                     className: "h-4 w-4"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                    lineNumber: 122,
+                                                                                    lineNumber: 174,
                                                                                     columnNumber: 31
                                                                                 }, this)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                                lineNumber: 117,
+                                                                                lineNumber: 169,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/drones/page.tsx",
-                                                                            lineNumber: 116,
+                                                                            lineNumber: 168,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -1683,17 +1683,17 @@ function DronesListPage() {
                                                                                     className: "h-4 w-4"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                    lineNumber: 131,
+                                                                                    lineNumber: 183,
                                                                                     columnNumber: 31
                                                                                 }, this)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                                lineNumber: 126,
+                                                                                lineNumber: 178,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/drones/page.tsx",
-                                                                            lineNumber: 125,
+                                                                            lineNumber: 177,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialog"], {
@@ -1708,17 +1708,17 @@ function DronesListPage() {
                                                                                             className: "h-4 w-4"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/app/drones/page.tsx",
-                                                                                            lineNumber: 141,
+                                                                                            lineNumber: 193,
                                                                                             columnNumber: 33
                                                                                         }, this)
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/app/drones/page.tsx",
-                                                                                        lineNumber: 136,
+                                                                                        lineNumber: 188,
                                                                                         columnNumber: 31
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                    lineNumber: 135,
+                                                                                    lineNumber: 187,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogContent"], {
@@ -1731,7 +1731,7 @@ function DronesListPage() {
                                                                                                     children: "Delete Drone"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                                    lineNumber: 146,
+                                                                                                    lineNumber: 198,
                                                                                                     columnNumber: 33
                                                                                                 }, this),
                                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogDescription"], {
@@ -1743,13 +1743,13 @@ function DronesListPage() {
                                                                                                     ]
                                                                                                 }, void 0, true, {
                                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                                    lineNumber: 147,
+                                                                                                    lineNumber: 201,
                                                                                                     columnNumber: 33
                                                                                                 }, this)
                                                                                             ]
                                                                                         }, void 0, true, {
                                                                                             fileName: "[project]/app/drones/page.tsx",
-                                                                                            lineNumber: 145,
+                                                                                            lineNumber: 197,
                                                                                             columnNumber: 31
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogFooter"], {
@@ -1759,7 +1759,7 @@ function DronesListPage() {
                                                                                                     children: "Cancel"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                                    lineNumber: 152,
+                                                                                                    lineNumber: 208,
                                                                                                     columnNumber: 33
                                                                                                 }, this),
                                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogAction"], {
@@ -1768,58 +1768,58 @@ function DronesListPage() {
                                                                                                     children: "Delete"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                                    lineNumber: 155,
+                                                                                                    lineNumber: 211,
                                                                                                     columnNumber: 33
                                                                                                 }, this)
                                                                                             ]
                                                                                         }, void 0, true, {
                                                                                             fileName: "[project]/app/drones/page.tsx",
-                                                                                            lineNumber: 151,
+                                                                                            lineNumber: 207,
                                                                                             columnNumber: 31
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                    lineNumber: 144,
+                                                                                    lineNumber: 196,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/app/drones/page.tsx",
-                                                                            lineNumber: 134,
+                                                                            lineNumber: 186,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 115,
+                                                                    lineNumber: 167,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                lineNumber: 114,
+                                                                lineNumber: 166,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, drone.drone_id, true, {
                                                         fileName: "[project]/app/drones/page.tsx",
-                                                        lineNumber: 106,
+                                                        lineNumber: 143,
                                                         columnNumber: 21
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/app/drones/page.tsx",
-                                                lineNumber: 104,
+                                                lineNumber: 141,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/drones/page.tsx",
-                                        lineNumber: 91,
+                                        lineNumber: 126,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/drones/page.tsx",
-                                    lineNumber: 90,
+                                    lineNumber: 125,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1837,7 +1837,7 @@ function DronesListPage() {
                                                                     children: drone.drone_id
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 178,
+                                                                    lineNumber: 237,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1845,7 +1845,7 @@ function DronesListPage() {
                                                                     children: drone.drone_os_name
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 179,
+                                                                    lineNumber: 238,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1853,20 +1853,20 @@ function DronesListPage() {
                                                                     children: drone.drone_type
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 180,
+                                                                    lineNumber: 241,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 177,
+                                                            lineNumber: 236,
                                                             columnNumber: 21
                                                         }, this),
                                                         getStatusBadge(drone.status)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/drones/page.tsx",
-                                                    lineNumber: 176,
+                                                    lineNumber: 235,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1879,7 +1879,7 @@ function DronesListPage() {
                                                                     className: "h-4 w-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 186,
+                                                                    lineNumber: 249,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1889,13 +1889,13 @@ function DronesListPage() {
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 187,
+                                                                    lineNumber: 250,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 185,
+                                                            lineNumber: 248,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1905,7 +1905,7 @@ function DronesListPage() {
                                                                     className: "h-4 w-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 190,
+                                                                    lineNumber: 253,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1915,13 +1915,13 @@ function DronesListPage() {
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 191,
+                                                                    lineNumber: 254,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 189,
+                                                            lineNumber: 252,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1931,7 +1931,7 @@ function DronesListPage() {
                                                                     className: "h-4 w-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 194,
+                                                                    lineNumber: 257,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1941,19 +1941,19 @@ function DronesListPage() {
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 195,
+                                                                    lineNumber: 258,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 193,
+                                                            lineNumber: 256,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/drones/page.tsx",
-                                                    lineNumber: 184,
+                                                    lineNumber: 247,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1971,19 +1971,19 @@ function DronesListPage() {
                                                                         className: "h-4 w-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/drones/page.tsx",
-                                                                        lineNumber: 205,
+                                                                        lineNumber: 268,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     "View"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                lineNumber: 200,
+                                                                lineNumber: 263,
                                                                 columnNumber: 23
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 199,
+                                                            lineNumber: 262,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -1998,19 +1998,19 @@ function DronesListPage() {
                                                                         className: "h-4 w-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/drones/page.tsx",
-                                                                        lineNumber: 215,
+                                                                        lineNumber: 281,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     "Edit"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/drones/page.tsx",
-                                                                lineNumber: 210,
+                                                                lineNumber: 276,
                                                                 columnNumber: 23
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 209,
+                                                            lineNumber: 272,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialog"], {
@@ -2025,17 +2025,17 @@ function DronesListPage() {
                                                                             className: "h-4 w-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/drones/page.tsx",
-                                                                            lineNumber: 226,
+                                                                            lineNumber: 292,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/drones/page.tsx",
-                                                                        lineNumber: 221,
+                                                                        lineNumber: 287,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 220,
+                                                                    lineNumber: 286,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogContent"], {
@@ -2048,7 +2048,7 @@ function DronesListPage() {
                                                                                     children: "Delete Drone"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                    lineNumber: 231,
+                                                                                    lineNumber: 297,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogDescription"], {
@@ -2060,13 +2060,13 @@ function DronesListPage() {
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                    lineNumber: 232,
+                                                                                    lineNumber: 300,
                                                                                     columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/app/drones/page.tsx",
-                                                                            lineNumber: 230,
+                                                                            lineNumber: 296,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogFooter"], {
@@ -2076,7 +2076,7 @@ function DronesListPage() {
                                                                                     children: "Cancel"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                    lineNumber: 237,
+                                                                                    lineNumber: 306,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogAction"], {
@@ -2085,42 +2085,42 @@ function DronesListPage() {
                                                                                     children: "Delete"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                                    lineNumber: 240,
+                                                                                    lineNumber: 309,
                                                                                     columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/app/drones/page.tsx",
-                                                                            lineNumber: 236,
+                                                                            lineNumber: 305,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/drones/page.tsx",
-                                                                    lineNumber: 229,
+                                                                    lineNumber: 295,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/drones/page.tsx",
-                                                            lineNumber: 219,
+                                                            lineNumber: 285,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/drones/page.tsx",
-                                                    lineNumber: 198,
+                                                    lineNumber: 261,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, drone.drone_id, true, {
                                             fileName: "[project]/app/drones/page.tsx",
-                                            lineNumber: 175,
+                                            lineNumber: 231,
                                             columnNumber: 17
                                         }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/app/drones/page.tsx",
-                                    lineNumber: 173,
+                                    lineNumber: 229,
                                     columnNumber: 13
                                 }, this),
                                 filteredDrones.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2130,7 +2130,7 @@ function DronesListPage() {
                                             className: "mb-4 h-12 w-12 text-gray-600"
                                         }, void 0, false, {
                                             fileName: "[project]/app/drones/page.tsx",
-                                            lineNumber: 256,
+                                            lineNumber: 325,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2138,7 +2138,7 @@ function DronesListPage() {
                                             children: "No drones found"
                                         }, void 0, false, {
                                             fileName: "[project]/app/drones/page.tsx",
-                                            lineNumber: 257,
+                                            lineNumber: 326,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2146,36 +2146,36 @@ function DronesListPage() {
                                             children: "Try adjusting your search or add a new drone"
                                         }, void 0, false, {
                                             fileName: "[project]/app/drones/page.tsx",
-                                            lineNumber: 258,
+                                            lineNumber: 329,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/drones/page.tsx",
-                                    lineNumber: 255,
+                                    lineNumber: 324,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/drones/page.tsx",
-                            lineNumber: 58,
+                            lineNumber: 89,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/drones/page.tsx",
-                        lineNumber: 57,
+                        lineNumber: 88,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/drones/page.tsx",
-                lineNumber: 55,
+                lineNumber: 83,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/drones/page.tsx",
-        lineNumber: 53,
+        lineNumber: 81,
         columnNumber: 5
     }, this);
 }
