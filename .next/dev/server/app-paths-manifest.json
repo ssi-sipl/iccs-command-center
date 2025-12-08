@@ -1,4 +1,6 @@
 {
+  "/sensors/[id]/edit/page": "app/sensors/[id]/edit/page.js",
+  "/sensors/[id]/page": "app/sensors/[id]/page.js",
   "/sensors/add/page": "app/sensors/add/page.js",
   "/sensors/page": "app/sensors/page.js"
 }

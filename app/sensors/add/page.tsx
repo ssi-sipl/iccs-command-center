@@ -286,18 +286,21 @@ export default function AddSensorPage() {
               {/* Form Grid */}
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {/* Choose Area */}
+                {/* Choose Area */}
                 <div className="space-y-2">
                   <Label className="text-gray-300">Choose Area:</Label>
                   <Select
-                    value={formData.areaId || undefined}
-                    onValueChange={(value) => handleChange("areaId", value)}
+                    value={formData.areaId || "none"}
+                    onValueChange={(value) =>
+                      handleChange("areaId", value === "none" ? "" : value)
+                    }
                   >
                     <SelectTrigger className="border-[#444] bg-[#2a2a2a] text-white focus:ring-[#4A9FD4]">
                       <SelectValue placeholder="Select Area (Optional)" />
                     </SelectTrigger>
                     <SelectContent className="border-[#333] bg-[#222]">
                       <SelectItem
-                        value=""
+                        value="none"
                         className="text-white focus:bg-[#333] focus:text-white"
                       >
                         None
@@ -321,7 +324,7 @@ export default function AddSensorPage() {
                     Choose Sensor Type:<span className="text-red-500">*</span>
                   </Label>
                   <Select
-                    value={formData.areaId || undefined}
+                    value={formData.sensorType || undefined}
                     onValueChange={(value) => handleChange("sensorType", value)}
                   >
                     <SelectTrigger className="border-[#444] bg-[#2a2a2a] text-white focus:ring-[#4A9FD4]">
@@ -350,15 +353,17 @@ export default function AddSensorPage() {
                 <div className="space-y-2">
                   <Label className="text-gray-300">Choose Alarm:</Label>
                   <Select
-                    value={formData.alarmId || ""}
-                    onValueChange={(value) => handleChange("alarmId", value)}
+                    value={formData.alarmId || "none"}
+                    onValueChange={(value) =>
+                      handleChange("alarmId", value === "none" ? "" : value)
+                    }
                   >
                     <SelectTrigger className="border-[#444] bg-[#2a2a2a] text-white focus:ring-[#4A9FD4]">
                       <SelectValue placeholder="None (Optional)" />
                     </SelectTrigger>
                     <SelectContent className="border-[#333] bg-[#222]">
                       <SelectItem
-                        value=""
+                        value="none"
                         className="text-white focus:bg-[#333] focus:text-white"
                       >
                         None
@@ -375,7 +380,6 @@ export default function AddSensorPage() {
                     </SelectContent>
                   </Select>
                 </div>
-
                 {/* Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-gray-300">
