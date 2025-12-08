@@ -1337,8 +1337,8 @@ function SensorsPage() {
                     children: "Online"
                 }, void 0, false, {
                     fileName: "[project]/app/sensors/page.tsx",
-                    lineNumber: 29,
-                    columnNumber: 16
+                    lineNumber: 47,
+                    columnNumber: 11
                 }, this);
             case "offline":
                 return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1346,7 +1346,7 @@ function SensorsPage() {
                     children: "Offline"
                 }, void 0, false, {
                     fileName: "[project]/app/sensors/page.tsx",
-                    lineNumber: 31,
+                    lineNumber: 50,
                     columnNumber: 16
                 }, this);
             case "warning":
@@ -1355,8 +1355,8 @@ function SensorsPage() {
                     children: "Warning"
                 }, void 0, false, {
                     fileName: "[project]/app/sensors/page.tsx",
-                    lineNumber: 33,
-                    columnNumber: 16
+                    lineNumber: 53,
+                    columnNumber: 11
                 }, this);
             default:
                 return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1364,7 +1364,7 @@ function SensorsPage() {
                     children: status
                 }, void 0, false, {
                     fileName: "[project]/app/sensors/page.tsx",
-                    lineNumber: 35,
+                    lineNumber: 56,
                     columnNumber: 16
                 }, this);
         }
@@ -1380,7 +1380,7 @@ function SensorsPage() {
                 activeItem: "SENSORS"
             }, void 0, false, {
                 fileName: "[project]/app/sensors/page.tsx",
-                lineNumber: 46,
+                lineNumber: 67,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1391,7 +1391,7 @@ function SensorsPage() {
                         onToggle: ()=>setSidebarOpen(!sidebarOpen)
                     }, void 0, false, {
                         fileName: "[project]/app/sensors/page.tsx",
-                        lineNumber: 48,
+                        lineNumber: 69,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -1409,7 +1409,7 @@ function SensorsPage() {
                                                     children: "Sensors"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/sensors/page.tsx",
-                                                    lineNumber: 54,
+                                                    lineNumber: 78,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1417,13 +1417,13 @@ function SensorsPage() {
                                                     children: "Manage and monitor all sensors"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/sensors/page.tsx",
-                                                    lineNumber: 55,
+                                                    lineNumber: 81,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 53,
+                                            lineNumber: 77,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -1435,25 +1435,25 @@ function SensorsPage() {
                                                         className: "h-4 w-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 59,
+                                                        lineNumber: 87,
                                                         columnNumber: 19
                                                     }, this),
                                                     "Add Sensor"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                lineNumber: 58,
+                                                lineNumber: 86,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 57,
+                                            lineNumber: 85,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/sensors/page.tsx",
-                                    lineNumber: 52,
+                                    lineNumber: 76,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1463,7 +1463,7 @@ function SensorsPage() {
                                             className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
                                         }, void 0, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 67,
+                                            lineNumber: 95,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -1473,13 +1473,13 @@ function SensorsPage() {
                                             className: "border-[#333] bg-[#222] pl-10 text-white placeholder:text-gray-500"
                                         }, void 0, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 68,
+                                            lineNumber: 96,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/sensors/page.tsx",
-                                    lineNumber: 66,
+                                    lineNumber: 94,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1496,12 +1496,12 @@ function SensorsPage() {
                                                             className: "h-6 w-6 text-blue-500"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 81,
+                                                            lineNumber: 109,
                                                             columnNumber: 21
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 80,
+                                                        lineNumber: 108,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1511,7 +1511,7 @@ function SensorsPage() {
                                                                 children: "Total Sensors"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 84,
+                                                                lineNumber: 112,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1519,24 +1519,24 @@ function SensorsPage() {
                                                                 children: __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$data$2f$sensors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["sensorsData"].length
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 85,
+                                                                lineNumber: 113,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 83,
+                                                        lineNumber: 111,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                lineNumber: 79,
+                                                lineNumber: 107,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 78,
+                                            lineNumber: 106,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -1550,12 +1550,12 @@ function SensorsPage() {
                                                             className: "h-6 w-6 text-green-500"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 92,
+                                                            lineNumber: 122,
                                                             columnNumber: 21
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 91,
+                                                        lineNumber: 121,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1565,7 +1565,7 @@ function SensorsPage() {
                                                                 children: "Online"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 95,
+                                                                lineNumber: 125,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1573,24 +1573,24 @@ function SensorsPage() {
                                                                 children: __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$data$2f$sensors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["sensorsData"].filter((s)=>s.status === "online").length
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 96,
+                                                                lineNumber: 126,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 94,
+                                                        lineNumber: 124,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                lineNumber: 90,
+                                                lineNumber: 120,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 89,
+                                            lineNumber: 119,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -1604,12 +1604,12 @@ function SensorsPage() {
                                                             className: "h-6 w-6 text-yellow-500"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 105,
+                                                            lineNumber: 135,
                                                             columnNumber: 21
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 104,
+                                                        lineNumber: 134,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1619,7 +1619,7 @@ function SensorsPage() {
                                                                 children: "Warning"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 108,
+                                                                lineNumber: 138,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1627,24 +1627,24 @@ function SensorsPage() {
                                                                 children: __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$data$2f$sensors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["sensorsData"].filter((s)=>s.status === "warning").length
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 109,
+                                                                lineNumber: 139,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 107,
+                                                        lineNumber: 137,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                lineNumber: 103,
+                                                lineNumber: 133,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 102,
+                                            lineNumber: 132,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -1658,12 +1658,12 @@ function SensorsPage() {
                                                             className: "h-6 w-6 text-red-500"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 118,
+                                                            lineNumber: 148,
                                                             columnNumber: 21
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 117,
+                                                        lineNumber: 147,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1673,7 +1673,7 @@ function SensorsPage() {
                                                                 children: "Offline"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 121,
+                                                                lineNumber: 151,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1681,30 +1681,30 @@ function SensorsPage() {
                                                                 children: __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$data$2f$sensors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["sensorsData"].filter((s)=>s.status === "offline").length
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 122,
+                                                                lineNumber: 152,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 120,
+                                                        lineNumber: 150,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                lineNumber: 116,
+                                                lineNumber: 146,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 115,
+                                            lineNumber: 145,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/sensors/page.tsx",
-                                    lineNumber: 77,
+                                    lineNumber: 105,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1720,7 +1720,7 @@ function SensorsPage() {
                                                             children: "Sensor ID"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 135,
+                                                            lineNumber: 165,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1728,7 +1728,7 @@ function SensorsPage() {
                                                             children: "Name"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 136,
+                                                            lineNumber: 166,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1736,7 +1736,7 @@ function SensorsPage() {
                                                             children: "Area"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 137,
+                                                            lineNumber: 167,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1744,7 +1744,7 @@ function SensorsPage() {
                                                             children: "Type"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 138,
+                                                            lineNumber: 168,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1752,7 +1752,7 @@ function SensorsPage() {
                                                             children: "Battery"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 139,
+                                                            lineNumber: 169,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1760,7 +1760,7 @@ function SensorsPage() {
                                                             children: "Status"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 140,
+                                                            lineNumber: 170,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1768,18 +1768,18 @@ function SensorsPage() {
                                                             children: "Actions"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                            lineNumber: 141,
+                                                            lineNumber: 171,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/sensors/page.tsx",
-                                                    lineNumber: 134,
+                                                    lineNumber: 164,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                lineNumber: 133,
+                                                lineNumber: 163,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableBody"], {
@@ -1791,7 +1791,7 @@ function SensorsPage() {
                                                                 children: sensor.sensor_id
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 147,
+                                                                lineNumber: 182,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1799,7 +1799,7 @@ function SensorsPage() {
                                                                 children: sensor.name
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 148,
+                                                                lineNumber: 185,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1807,7 +1807,7 @@ function SensorsPage() {
                                                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$data$2f$sensors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getAreaNameById"])(sensor.area_id)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 149,
+                                                                lineNumber: 188,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1815,7 +1815,7 @@ function SensorsPage() {
                                                                 children: sensor.sensor_type
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 150,
+                                                                lineNumber: 191,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1823,14 +1823,14 @@ function SensorsPage() {
                                                                 children: sensor.battery
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 151,
+                                                                lineNumber: 194,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
                                                                 children: getStatusBadge(sensor.status)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 152,
+                                                                lineNumber: 197,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1848,17 +1848,17 @@ function SensorsPage() {
                                                                                     className: "h-4 w-4"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/sensors/page.tsx",
-                                                                                    lineNumber: 157,
+                                                                                    lineNumber: 206,
                                                                                     columnNumber: 31
                                                                                 }, this)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                                lineNumber: 156,
+                                                                                lineNumber: 201,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                                            lineNumber: 155,
+                                                                            lineNumber: 200,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -1871,17 +1871,17 @@ function SensorsPage() {
                                                                                     className: "h-4 w-4"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/sensors/page.tsx",
-                                                                                    lineNumber: 162,
+                                                                                    lineNumber: 215,
                                                                                     columnNumber: 31
                                                                                 }, this)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                                lineNumber: 161,
+                                                                                lineNumber: 210,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                                            lineNumber: 160,
+                                                                            lineNumber: 209,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -1893,45 +1893,45 @@ function SensorsPage() {
                                                                                 className: "h-4 w-4"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                                lineNumber: 171,
+                                                                                lineNumber: 224,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                                            lineNumber: 165,
+                                                                            lineNumber: 218,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/sensors/page.tsx",
-                                                                    lineNumber: 154,
+                                                                    lineNumber: 199,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 153,
+                                                                lineNumber: 198,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, sensor.sensor_id, true, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 146,
+                                                        lineNumber: 178,
                                                         columnNumber: 21
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                lineNumber: 144,
+                                                lineNumber: 176,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/sensors/page.tsx",
-                                        lineNumber: 132,
+                                        lineNumber: 162,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/sensors/page.tsx",
-                                    lineNumber: 131,
+                                    lineNumber: 161,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1951,7 +1951,7 @@ function SensorsPage() {
                                                                         children: sensor.sensor_id
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                                        lineNumber: 188,
+                                                                        lineNumber: 244,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1959,20 +1959,20 @@ function SensorsPage() {
                                                                         children: sensor.name
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                                        lineNumber: 189,
+                                                                        lineNumber: 247,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 187,
+                                                                lineNumber: 243,
                                                                 columnNumber: 23
                                                             }, this),
                                                             getStatusBadge(sensor.status)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 186,
+                                                        lineNumber: 242,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1985,7 +1985,7 @@ function SensorsPage() {
                                                                         children: "Area: "
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                                        lineNumber: 195,
+                                                                        lineNumber: 255,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1993,13 +1993,13 @@ function SensorsPage() {
                                                                         children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$data$2f$sensors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getAreaNameById"])(sensor.area_id)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                                        lineNumber: 196,
+                                                                        lineNumber: 256,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 194,
+                                                                lineNumber: 254,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2009,7 +2009,7 @@ function SensorsPage() {
                                                                         children: "Type: "
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                                        lineNumber: 199,
+                                                                        lineNumber: 261,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2017,13 +2017,13 @@ function SensorsPage() {
                                                                         children: sensor.sensor_type
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                                        lineNumber: 200,
+                                                                        lineNumber: 262,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 198,
+                                                                lineNumber: 260,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2033,7 +2033,7 @@ function SensorsPage() {
                                                                         children: "Battery: "
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                                        lineNumber: 203,
+                                                                        lineNumber: 267,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2041,13 +2041,13 @@ function SensorsPage() {
                                                                         children: sensor.battery
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                                        lineNumber: 204,
+                                                                        lineNumber: 268,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 202,
+                                                                lineNumber: 266,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2057,7 +2057,7 @@ function SensorsPage() {
                                                                         children: "IP: "
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                                        lineNumber: 207,
+                                                                        lineNumber: 271,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2065,19 +2065,19 @@ function SensorsPage() {
                                                                         children: sensor.ip_address
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                                        lineNumber: 208,
+                                                                        lineNumber: 272,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 206,
+                                                                lineNumber: 270,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 193,
+                                                        lineNumber: 253,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2094,19 +2094,19 @@ function SensorsPage() {
                                                                             className: "mr-2 h-4 w-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                                            lineNumber: 217,
+                                                                            lineNumber: 286,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         "View"
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/sensors/page.tsx",
-                                                                    lineNumber: 213,
+                                                                    lineNumber: 282,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 212,
+                                                                lineNumber: 278,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -2120,19 +2120,19 @@ function SensorsPage() {
                                                                             className: "mr-2 h-4 w-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/sensors/page.tsx",
-                                                                            lineNumber: 226,
+                                                                            lineNumber: 298,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         "Edit"
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/sensors/page.tsx",
-                                                                    lineNumber: 222,
+                                                                    lineNumber: 294,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 221,
+                                                                lineNumber: 290,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2144,34 +2144,34 @@ function SensorsPage() {
                                                                     className: "h-4 w-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/sensors/page.tsx",
-                                                                    lineNumber: 236,
+                                                                    lineNumber: 308,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                                lineNumber: 230,
+                                                                lineNumber: 302,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 211,
+                                                        lineNumber: 277,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                lineNumber: 185,
+                                                lineNumber: 241,
                                                 columnNumber: 19
                                             }, this)
                                         }, sensor.sensor_id, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 184,
+                                            lineNumber: 237,
                                             columnNumber: 17
                                         }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/app/sensors/page.tsx",
-                                    lineNumber: 182,
+                                    lineNumber: 235,
                                     columnNumber: 13
                                 }, this),
                                 filteredSensors.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2181,7 +2181,7 @@ function SensorsPage() {
                                             className: "mx-auto h-12 w-12 text-gray-500"
                                         }, void 0, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 246,
+                                            lineNumber: 318,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2189,7 +2189,7 @@ function SensorsPage() {
                                             children: "No sensors found"
                                         }, void 0, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 247,
+                                            lineNumber: 319,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -2201,48 +2201,48 @@ function SensorsPage() {
                                                         className: "mr-2 h-4 w-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/sensors/page.tsx",
-                                                        lineNumber: 250,
+                                                        lineNumber: 322,
                                                         columnNumber: 21
                                                     }, this),
                                                     "Add First Sensor"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/sensors/page.tsx",
-                                                lineNumber: 249,
+                                                lineNumber: 321,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/sensors/page.tsx",
-                                            lineNumber: 248,
+                                            lineNumber: 320,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/sensors/page.tsx",
-                                    lineNumber: 245,
+                                    lineNumber: 317,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/sensors/page.tsx",
-                            lineNumber: 50,
+                            lineNumber: 74,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/sensors/page.tsx",
-                        lineNumber: 49,
+                        lineNumber: 73,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/sensors/page.tsx",
-                lineNumber: 47,
+                lineNumber: 68,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/sensors/page.tsx",
-        lineNumber: 45,
+        lineNumber: 66,
         columnNumber: 5
     }, this);
 }

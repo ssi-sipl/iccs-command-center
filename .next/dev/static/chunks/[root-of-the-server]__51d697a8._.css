@@ -2212,10 +2212,6 @@
     fill: var(--primary);
   }
 
-  .object-cover {
-    object-fit: cover;
-  }
-
   .p-0 {
     padding: calc(var(--spacing) * 0);
   }
@@ -2522,6 +2518,10 @@
     color: #8b0000;
   }
 
+  .text-\[\#2563EB\] {
+    color: #2563eb;
+  }
+
   .text-\[\#FFD700\] {
     color: gold;
   }
@@ -2664,10 +2664,6 @@
 
   .text-yellow-500 {
     color: var(--color-yellow-500);
-  }
-
-  .capitalize {
-    text-transform: capitalize;
   }
 
   .tabular-nums {
