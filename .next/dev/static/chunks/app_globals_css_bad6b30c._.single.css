@@ -2418,6 +2418,10 @@
     text-wrap: balance;
   }
 
+  .text-wrap {
+    text-wrap: wrap;
+  }
+
   .break-words {
     overflow-wrap: break-word;
   }
