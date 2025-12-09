@@ -1,12 +1,12 @@
 // lib/api/maps.ts
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export interface OfflineMap {
   id: string;
   name: string;
   description?: string | null;
-  tileRoot: string; // e.g. "/maps/manekshaw"
+  imagePath?: string; // for simple image overlay
+  tileRoot?: string; // e.g. "/maps/manekshaw" for tiled maps
   minZoom: number;
   maxZoom: number;
   north: number;
@@ -75,9 +75,18 @@ export async function getActiveMap(): Promise<ApiResponse<OfflineMap | null>> {
 }
 
 // Create map
-export async function createMap(
-  payload: Omit<OfflineMap, "id" | "isActive" | "createdAt" | "updatedAt">
-): Promise<ApiResponse<OfflineMap>> {
+export async function createMap(payload: {
+  name: string;
+  description?: string;
+  imagePath?: string;
+  tileRoot?: string;
+  minZoom?: number;
+  maxZoom?: number;
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}): Promise<ApiResponse<OfflineMap>> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/maps`, {
       method: "POST",
@@ -100,8 +109,8 @@ export async function createMap(
   }
 }
 
-// Set active map
-export async function setMapActive(
+// Set active map (alias for consistency)
+export async function setActiveMap(
   id: string
 ): Promise<ApiResponse<OfflineMap>> {
   try {
@@ -124,6 +133,9 @@ export async function setMapActive(
     };
   }
 }
+
+// Alternative name for the same function
+export const setMapActive = setActiveMap;
 
 // Delete map
 export async function deleteMap(id: string): Promise<ApiResponse<null>> {

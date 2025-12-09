@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { DashboardHeader } from "@/components/dashboard-header";
@@ -12,6 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   getAllMaps,
@@ -29,6 +35,7 @@ import {
   Trash2,
   CheckCircle2,
   ArrowLeft,
+  Layers,
 } from "lucide-react";
 
 export default function ManageMapsPage() {
@@ -42,7 +49,11 @@ export default function ManageMapsPage() {
   // form state for new map
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [mapType, setMapType] = useState<"image" | "tiles">("image");
   const [imagePath, setImagePath] = useState("/maps/base-map.jpg");
+  const [tileRoot, setTileRoot] = useState("/maps/tiles");
+  const [minZoom, setMinZoom] = useState("13");
+  const [maxZoom, setMaxZoom] = useState("18");
   const [north, setNorth] = useState<string>("");
   const [south, setSouth] = useState<string>("");
   const [east, setEast] = useState<string>("");
@@ -99,7 +110,7 @@ export default function ManageMapsPage() {
       return;
     }
 
-    if (!imagePath.trim()) {
+    if (mapType === "image" && !imagePath.trim()) {
       toast({
         title: "Image path required",
         description:
@@ -109,10 +120,22 @@ export default function ManageMapsPage() {
       return;
     }
 
+    if (mapType === "tiles" && !tileRoot.trim()) {
+      toast({
+        title: "Tile root required",
+        description:
+          "Provide the tile root path (e.g. /maps/tiles or http://localhost:8080/tiles).",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const northNum = Number(north);
     const southNum = Number(south);
     const eastNum = Number(east);
     const westNum = Number(west);
+    const minZoomNum = Number(minZoom);
+    const maxZoomNum = Number(maxZoom);
 
     if ([northNum, southNum, eastNum, westNum].some((v) => Number.isNaN(v))) {
       toast({
@@ -141,17 +164,44 @@ export default function ManageMapsPage() {
       return;
     }
 
+    if (Number.isNaN(minZoomNum) || Number.isNaN(maxZoomNum)) {
+      toast({
+        title: "Invalid zoom levels",
+        description: "Min and max zoom must be valid numbers.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (minZoomNum > maxZoomNum) {
+      toast({
+        title: "Invalid zoom levels",
+        description: "Min zoom must be less than or equal to max zoom.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const res = await createMap({
+      const payload: any = {
         name: name.trim(),
         description: description.trim() || undefined,
-        imagePath: imagePath.trim(),
         north: northNum,
         south: southNum,
         east: eastNum,
         west: westNum,
-      });
+        minZoom: minZoomNum,
+        maxZoom: maxZoomNum,
+      };
+
+      if (mapType === "image") {
+        payload.imagePath = imagePath.trim();
+      } else {
+        payload.tileRoot = tileRoot.trim();
+      }
+
+      const res = await createMap(payload);
 
       if (!res.success || !res.data) {
         throw new Error(res.error || "Failed to create map");
@@ -165,11 +215,12 @@ export default function ManageMapsPage() {
       // reset form
       setName("");
       setDescription("");
-      // keep imagePath as-is for convenience
       setNorth("");
       setSouth("");
       setEast("");
       setWest("");
+      setMinZoom("13");
+      setMaxZoom("18");
 
       // reload list
       await loadMaps();
@@ -331,6 +382,7 @@ export default function ManageMapsPage() {
                       maps.map((map) => {
                         const isActive = map.isActive;
                         const loadingThis = actionLoadingId === map.id;
+                        const isTiled = !!map.tileRoot;
 
                         return (
                           <div
@@ -348,6 +400,22 @@ export default function ManageMapsPage() {
                                     Active
                                   </Badge>
                                 )}
+                                <Badge
+                                  variant="outline"
+                                  className="flex items-center gap-1 border-[#444] text-[10px] text-gray-400"
+                                >
+                                  {isTiled ? (
+                                    <>
+                                      <Layers className="h-3 w-3" />
+                                      Tiled
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ImageIcon className="h-3 w-3" />
+                                      Image
+                                    </>
+                                  )}
+                                </Badge>
                               </div>
                               {map.description && (
                                 <p className="text-xs text-gray-400">
@@ -356,9 +424,13 @@ export default function ManageMapsPage() {
                               )}
                               <div className="mt-1 grid gap-1 text-[11px] text-gray-400 sm:grid-cols-2">
                                 <div className="flex items-center gap-1">
-                                  <ImageIcon className="h-3 w-3 text-gray-500" />
+                                  {isTiled ? (
+                                    <Layers className="h-3 w-3 text-gray-500" />
+                                  ) : (
+                                    <ImageIcon className="h-3 w-3 text-gray-500" />
+                                  )}
                                   <span className="truncate">
-                                    {map.imagePath}
+                                    {isTiled ? map.tileRoot : map.imagePath}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -371,6 +443,9 @@ export default function ManageMapsPage() {
                                   </span>
                                 </div>
                               </div>
+                              <div className="text-[10px] text-gray-500">
+                                Zoom: {map.minZoom} - {map.maxZoom}
+                              </div>
                               <p className="text-[10px] text-gray-500">
                                 Created:{" "}
                                 {new Date(map.createdAt).toLocaleString()}
@@ -380,7 +455,7 @@ export default function ManageMapsPage() {
                             <div className="flex flex-col gap-2">
                               {!isActive && (
                                 <Button
-                                  size="xs"
+                                  size="sm"
                                   className="bg-[#2563EB] text-[11px] text-white hover:bg-[#1D4ED8]"
                                   disabled={loadingThis}
                                   onClick={() => handleSetActive(map.id)}
@@ -461,23 +536,120 @@ export default function ManageMapsPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <Label
-                          htmlFor="imagePath"
-                          className="text-xs text-gray-300"
-                        >
-                          Image Path<span className="text-red-500">*</span>
+                        <Label className="text-xs text-gray-300">
+                          Map Type<span className="text-red-500">*</span>
                         </Label>
-                        <Input
-                          id="imagePath"
-                          value={imagePath}
-                          onChange={(e) => setImagePath(e.target.value)}
-                          placeholder="/maps/base-map.jpg"
-                          className="h-9 border-[#444] bg-[#1a1a1a] text-xs text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
-                        />
-                        <p className="text-[10px] text-gray-500">
-                          Put the image file in <code>/public/maps</code> and
-                          reference it as <code>/maps/filename.jpg</code>.
-                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={
+                              mapType === "image" ? "default" : "outline"
+                            }
+                            className={`flex-1 text-xs ${
+                              mapType === "image"
+                                ? "bg-[#2563EB] text-white"
+                                : "border-[#444] text-gray-300"
+                            }`}
+                            onClick={() => setMapType("image")}
+                          >
+                            <ImageIcon className="mr-1 h-3 w-3" />
+                            Image Overlay
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={
+                              mapType === "tiles" ? "default" : "outline"
+                            }
+                            className={`flex-1 text-xs ${
+                              mapType === "tiles"
+                                ? "bg-[#2563EB] text-white"
+                                : "border-[#444] text-gray-300"
+                            }`}
+                            onClick={() => setMapType("tiles")}
+                          >
+                            <Layers className="mr-1 h-3 w-3" />
+                            Tiled Map
+                          </Button>
+                        </div>
+                      </div>
+
+                      {mapType === "image" ? (
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="imagePath"
+                            className="text-xs text-gray-300"
+                          >
+                            Image Path<span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="imagePath"
+                            value={imagePath}
+                            onChange={(e) => setImagePath(e.target.value)}
+                            placeholder="/maps/base-map.jpg"
+                            className="h-9 border-[#444] bg-[#1a1a1a] text-xs text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
+                          />
+                          <p className="text-[10px] text-gray-500">
+                            Put the image file in <code>/public/maps</code> and
+                            reference it as <code>/maps/filename.jpg</code>.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="tileRoot"
+                            className="text-xs text-gray-300"
+                          >
+                            Tile Root URL<span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="tileRoot"
+                            value={tileRoot}
+                            onChange={(e) => setTileRoot(e.target.value)}
+                            placeholder="/maps/tiles or http://localhost:8080/tiles"
+                            className="h-9 border-[#444] bg-[#1a1a1a] text-xs text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
+                          />
+                          <p className="text-[10px] text-gray-500">
+                            Base URL for tiles. Will use {"{z}/{x}/{y}.jpg"}{" "}
+                            pattern.
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="minZoom"
+                            className="text-xs text-gray-300"
+                          >
+                            Min Zoom
+                          </Label>
+                          <Input
+                            id="minZoom"
+                            type="number"
+                            value={minZoom}
+                            onChange={(e) => setMinZoom(e.target.value)}
+                            placeholder="13"
+                            className="h-9 border-[#444] bg-[#1a1a1a] text-xs text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="maxZoom"
+                            className="text-xs text-gray-300"
+                          >
+                            Max Zoom
+                          </Label>
+                          <Input
+                            id="maxZoom"
+                            type="number"
+                            value={maxZoom}
+                            onChange={(e) => setMaxZoom(e.target.value)}
+                            placeholder="18"
+                            className="h-9 border-[#444] bg-[#1a1a1a] text-xs text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
+                          />
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
@@ -487,6 +659,7 @@ export default function ManageMapsPage() {
                             className="text-xs text-gray-300"
                           >
                             North (max lat)
+                            <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             id="north"
@@ -504,6 +677,7 @@ export default function ManageMapsPage() {
                             className="text-xs text-gray-300"
                           >
                             South (min lat)
+                            <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             id="south"
@@ -521,6 +695,7 @@ export default function ManageMapsPage() {
                             className="text-xs text-gray-300"
                           >
                             East (max lng)
+                            <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             id="east"
@@ -538,6 +713,7 @@ export default function ManageMapsPage() {
                             className="text-xs text-gray-300"
                           >
                             West (min lng)
+                            <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             id="west"
