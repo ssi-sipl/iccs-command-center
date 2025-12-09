@@ -33,6 +33,7 @@ const sensorTypes = [
   "PIR Sensor",
   "Other",
 ];
+
 const statusOptions = ["Active", "Inactive"];
 const sendDroneOptions = ["Yes", "No"];
 const activeOptions = ["Active", "Inactive"];
