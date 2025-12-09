@@ -1,5 +1,9 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/alarm/page": "app/alarm/page.js",
+  "/area/page": "app/area/page.js",
+  "/drones/page": "app/drones/page.js",
   "/maps/manage/page": "app/maps/manage/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/sensors/page": "app/sensors/page.js"
 }

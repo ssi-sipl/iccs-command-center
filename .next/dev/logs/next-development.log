@@ -767,3 +767,161 @@ Import traces:
 [00:27:30.381] Browser LOG     [MapView] Loaded drones: [{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}]
 [00:27:30.381] Browser LOG     [MapView] Drones response: {"count":2,"data":[{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}],"success":true}
 [00:27:30.381] Browser LOG     [MapView] Loaded drones: [{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}]
+[00:36:43.299] Browser LOG     [MapView] Socket disconnected
+[00:36:43.299] Browser LOG     ❌ Disconnected from alerts socket
+[00:36:44.316] Browser LOG     ✅ Connected to alerts socket: PtYpSZ6knVuJKXLvAAAB
+[00:36:46.790] Browser LOG     [MapView] Socket connected DC4WizRLpmOtMnF9AAAD
+[00:37:14.594] Browser LOG     ❌ Disconnected from alerts socket
+[00:37:14.594] Browser LOG     [MapView] Socket disconnected
+[00:37:15.660] Browser LOG     ✅ Connected to alerts socket: i8C3yijM5yCFCWwSAAAB
+[00:37:15.764] Browser LOG     [MapView] Socket connected i0zOTiDWFGFapLvkAAAD
+[00:37:18.246] Browser LOG     ❌ Disconnected from alerts socket
+[00:37:18.246] Browser LOG     [MapView] Socket disconnected
+[00:37:19.529] Browser LOG     ✅ Connected to alerts socket: MIiAn8EFUUst8yNpAAAB
+[00:37:19.529] Browser LOG     [MapView] Socket connected Ofsg3oKKE2-kBToFAAAD
+[00:37:21.781] Browser LOG     [MapView] Socket disconnected
+[00:37:21.781] Browser LOG     ❌ Disconnected from alerts socket
+[00:37:22.783] Browser LOG     [MapView] Socket connected ApLZyLJB_MoBG39CAAAB
+[00:37:23.249] Browser LOG     ✅ Connected to alerts socket: 2zBHVi0MOCGCAo1bAAAD
+[00:37:39.174] Browser LOG     [MapView] Socket disconnected
+[00:37:39.174] Browser LOG     ❌ Disconnected from alerts socket
+[00:37:39.857] Browser LOG     ✅ Connected to alerts socket: 3sZPZCn3vyYGz2HtAAAB
+[00:37:40.119] Browser LOG     ❌ Disconnected from alerts socket
+[00:37:40.887] Browser LOG     ✅ Connected to alerts socket: ED9a37TXsWrfizPOAAAB
+[00:37:41.986] Browser LOG     [MapView] Socket connected 3tzsHRTUJeoIB-E3AAAD
+[00:43:29.361] Browser LOG     [MapView] Socket disconnected
+[00:43:29.364] Browser LOG     ❌ Disconnected from alerts socket
+[00:43:30.390] Browser LOG     ✅ Connected to alerts socket: j-rl_0KNHnDYGmzhAAAB
+[00:43:31.395] Browser LOG     [MapView] Socket connected pgWTpwNSkl0oD8fyAAAD
+[00:44:48.491] Browser LOG     [MapView] Socket disconnected
+[00:44:48.491] Browser LOG     ❌ Disconnected from alerts socket
+[00:44:50.520] Browser LOG     [MapView] Socket connected a5Zb1KVYlgiMhj1_AAAC
+[00:44:50.520] Browser LOG     ✅ Connected to alerts socket: bP2aV0PDW1ceY0d8AAAD
+[00:46:32.907] Browser LOG     ❌ Disconnected from alerts socket
+[00:46:32.907] Browser LOG     [MapView] Socket disconnected
+[00:46:33.921] Browser LOG     [MapView] Socket connected 6Yk9CjagTyfVDy5wAAAB
+[00:46:34.929] Browser LOG     ✅ Connected to alerts socket: c84cbWzqrvZifSJ9AAAD
+[00:46:56.068] Browser LOG     ❌ Disconnected from alerts socket
+[00:46:56.068] Browser LOG     [MapView] Socket disconnected
+[00:46:57.085] Browser LOG     ✅ Connected to alerts socket: AF0t8eB3f1Uwi7aQAAAB
+[00:46:58.090] Browser LOG     [MapView] Socket connected L0P9qDBCeB1Hyyr7AAAD
+[00:47:10.293] Browser LOG     [MapView] Socket disconnected
+[00:47:10.293] Browser LOG     ❌ Disconnected from alerts socket
+[00:47:11.296] Browser LOG     ✅ Connected to alerts socket: X8JKSCz-gZkIcg49AAAB
+[00:47:14.345] Browser LOG     [MapView] Socket connected FJMs_EbYdldIrvo-AAAD
+[00:47:14.346] Browser LOG     [MapView] Socket disconnected
+[00:47:14.346] Browser LOG     ❌ Disconnected from alerts socket
+[00:47:15.357] Browser LOG     ✅ Connected to alerts socket: BDEyuBueCew6uw4VAAAB
+[00:47:16.375] Browser LOG     [MapView] Socket connected fJTtRDxiJQ3cehs8AAAD
+[00:47:18.655] Browser LOG     ❌ Disconnected from alerts socket
+[00:47:18.655] Browser LOG     [MapView] Socket disconnected
+[00:47:19.668] Browser LOG     [MapView] Socket connected xP8PnYICH7MHOoLEAAAB
+[00:47:20.685] Browser LOG     ✅ Connected to alerts socket: HYhhRSk5gxFcEG74AAAD
+[00:47:46.944] Browser LOG     ❌ Disconnected from alerts socket
+[00:47:46.944] Browser LOG     [MapView] Socket disconnected
+[00:47:47.979] Browser LOG     ✅ Connected to alerts socket: Q5S0tSFh_9iSanEkAAAB
+[00:47:48.992] Browser LOG     [MapView] Socket connected Xmg_luwbE1fxp0u3AAAD
+[00:48:11.726] Browser LOG     [MapView] Socket disconnected
+[00:48:11.726] Browser LOG     ❌ Disconnected from alerts socket
+[00:53:42.797] Browser LOG     ✅ Connected to alerts socket: 147ixpFx1uZVfQJ0AAAB
+[00:53:42.797] Browser LOG     [MapView] Socket connected AHiArEUl5xFgGY5vAAAD
+[00:56:50.997] Browser LOG     [MapView] Socket disconnected
+[00:56:50.997] Browser LOG     ❌ Disconnected from alerts socket
+[00:56:53.020] Browser LOG     ✅ Connected to alerts socket: e6Zj3KrJZnI3of9BAAAB
+[00:56:53.020] Browser LOG     [MapView] Socket connected YQG3ngwVolgDUkizAAAD
+[00:57:02.881] Browser LOG     ❌ Disconnected from alerts socket
+[00:57:02.881] Browser LOG     [MapView] Socket disconnected
+[00:57:03.915] Browser LOG     [MapView] Socket connected Y-QezOIwxOveNgLEAAAB
+[00:57:04.931] Browser LOG     ✅ Connected to alerts socket: PaVHerwdGa9w_8tkAAAD
+[00:57:07.512] Browser LOG     ❌ Disconnected from alerts socket
+[00:57:07.512] Browser LOG     [MapView] Socket disconnected
+[00:57:08.525] Browser LOG     ✅ Connected to alerts socket: -wnvhTWZ4aVaSJdvAAAB
+[00:57:08.525] Browser LOG     [MapView] Socket connected 8XGtSaDFRdUEM6LPAAAD
+[00:58:49.455] Browser LOG     [MapView] Socket disconnected
+[00:58:49.455] Browser LOG     ❌ Disconnected from alerts socket
+[00:58:50.483] Browser LOG     [MapView] Socket connected ySy4iAuCvsOt9Lv5AAAB
+[00:58:51.488] Browser LOG     ✅ Connected to alerts socket: la7P77wUclE7DfrpAAAD
+[00:59:03.301] Browser LOG     ❌ Disconnected from alerts socket
+[00:59:03.301] Browser LOG     [MapView] Socket disconnected
+[00:59:04.302] Browser LOG     [MapView] Socket connected RROK8Yu2eX56Yc6UAAAB
+[00:59:04.302] Browser LOG     [MapView] Socket disconnected
+[00:59:05.474] Browser LOG     ✅ Connected to alerts socket: l8qI52199_VMhfLPAAAB
+[00:59:06.830] Browser LOG     [MapView] Socket connected Hi2iTVQ76JI45wCCAAAD
+[00:59:06.830] Browser LOG     [MapView] Socket disconnected
+[00:59:06.830] Browser LOG     ❌ Disconnected from alerts socket
+[00:59:07.850] Browser LOG     [MapView] Socket connected BXA259Mz40T5HGwEAAAB
+[00:59:07.850] Browser LOG     ✅ Connected to alerts socket: u3xL4Vo2583eu6n8AAAD
+[00:59:09.163] Browser LOG     ❌ Disconnected from alerts socket
+[00:59:09.163] Browser LOG     [MapView] Socket disconnected
+[00:59:11.202] Browser LOG     ✅ Connected to alerts socket: Zqv0rYEf9WeuXGJrAAAB
+[00:59:11.202] Browser LOG     [MapView] Socket connected fZT2GmD4dPoRd6bqAAAD
+[00:59:14.063] Browser LOG     [MapView] Socket disconnected
+[00:59:14.063] Browser LOG     ❌ Disconnected from alerts socket
+[00:59:15.081] Browser LOG     [MapView] Socket connected STypoKQkhKKr0V-UAAAB
+[00:59:16.086] Browser LOG     ✅ Connected to alerts socket: 4pqHVw8sQfrzxnfKAAAD
+[00:59:29.774] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T10:34:58.814Z","decidedAt":null,"decision":null,"id":"6937fb524aa281b094753127","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:59:29.774] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T10:34:58.814Z","decidedAt":null,"decision":null,"id":"6937fb524aa281b094753127","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:59:36.373] Browser ERROR   Error sending drone: {}
+[00:59:36.374] Browser ERROR   Error sending drone: {}
+[01:00:06.437] Browser LOG     ❌ Disconnected from alerts socket
+[01:00:06.438] Browser LOG     [MapView] Socket disconnected
+[01:00:07.281] Browser LOG     ✅ Connected to alerts socket: fQNzy-DXMmzGt2-dAAAB
+[01:00:07.429] Browser LOG     ❌ Disconnected from alerts socket
+[01:00:08.265] Browser LOG     ✅ Connected to alerts socket: nxXjPCB3jxkaWXPoAAAB
+[01:00:10.694] Browser LOG     [MapView] Socket connected xurTOXuwFkaqj2bGAAAD
+[01:00:12.501] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:00:12.738] Browser LOG     ✅ Connected to alerts socket: vFBTnGvoGcaPFJl4AAAF
+[01:00:12.738] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[01:00:12.738] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[01:00:12.738] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765276542693}
+[01:00:12.738] Browser LOG     [MapView] Socket connected sXFKPerEryQ8P15eAAAH
+[01:00:13.207] Browser LOG     [MapView] Drones response: {"count":2,"data":[{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}],"success":true}
+[01:00:13.207] Browser LOG     [MapView] Loaded drones: [{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}]
+[01:00:16.663] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T10:35:46.542Z","decidedAt":null,"decision":null,"id":"6937fb82a739bfd8b3e47165","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[01:00:16.663] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T10:35:46.542Z","decidedAt":null,"decision":null,"id":"6937fb82a739bfd8b3e47165","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[01:00:21.497] Browser ERROR   Error sending drone: {}
+[01:00:21.497] Browser ERROR   Error sending drone: {}
+[01:00:37.124] Browser LOG     [MapView] Socket disconnected
+[01:00:37.124] Browser LOG     ❌ Disconnected from alerts socket
+[01:00:38.216] Browser LOG     [MapView] Socket connected CSaopsheC9Tr6-f6AAAB
+[01:00:38.611] Browser LOG     ✅ Connected to alerts socket: tD92zGJfEDXfc7PxAAAD
+[01:00:40.640] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:00:40.830] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[01:00:40.830] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[01:00:40.830] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765276570779}
+[01:00:40.830] Browser LOG     ✅ Connected to alerts socket: -_fPmHWm6yooLXQ3AAAF
+[01:00:40.830] Browser LOG     [MapView] Socket connected EOPCsL0noIUQeQUAAAAH
+[01:00:41.501] Browser LOG     [MapView] Drones response: {"count":2,"data":[{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}],"success":true}
+[01:00:41.501] Browser LOG     [MapView] Loaded drones: [{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}]
+[01:00:44.976] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T10:36:14.824Z","decidedAt":null,"decision":null,"id":"6937fb9e0bafcd4bcf5129fc","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[01:00:44.976] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T10:36:14.824Z","decidedAt":null,"decision":null,"id":"6937fb9e0bafcd4bcf5129fc","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[01:00:50.203] Browser LOG     ✅ alert_resolved: {"id":"6937fb9e0bafcd4bcf5129fc","status":"SENT"}
+[01:00:50.203] Browser LOG     [MapView] ✅ alert_resolved: {"id":"6937fb9e0bafcd4bcf5129fc","status":"SENT"}
+[01:01:04.257] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T10:36:34.101Z","decidedAt":null,"decision":null,"id":"6937fbb20bafcd4bcf5129fd","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[01:01:04.257] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T10:36:34.101Z","decidedAt":null,"decision":null,"id":"6937fbb20bafcd4bcf5129fd","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[01:01:14.963] Browser LOG     ✅ alert_resolved: {"id":"6937fbb20bafcd4bcf5129fd","status":"SENT"}
+[01:01:14.963] Browser LOG     [MapView] ✅ alert_resolved: {"id":"6937fbb20bafcd4bcf5129fd","status":"SENT"}
+[01:02:21.930] Browser LOG     ❌ Disconnected from alerts socket
+[01:02:21.930] Browser LOG     [MapView] Socket disconnected
+[01:02:21.930] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/maps/manage color: rgb(120, 120, 120) color: inherit {"dp":"/maps/manage","o":"http://localhost:3000/maps/manage","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765276671847}
+[01:02:22.115] Browser LOG     ✅ Connected to alerts socket: YruNFS-9Z307Jn7AAAAK
+[01:02:25.564] Browser LOG     ❌ Disconnected from alerts socket
+[01:02:25.564] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/alarm color: rgb(120, 120, 120) color: inherit {"dp":"/alarm","o":"http://localhost:3000/alarm","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765276675515}
+[01:02:26.187] Browser LOG     ✅ Connected to alerts socket: Y0HY1msWY5d3B1OKAAAN
+[01:02:28.796] Browser LOG     ❌ Disconnected from alerts socket
+[01:02:28.796] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/drones color: rgb(120, 120, 120) color: inherit {"dp":"/drones","o":"http://localhost:3000/drones","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765276678749}
+[01:02:29.157] Browser LOG     ✅ Connected to alerts socket: qIwPtiWLf9xfcKx7AAAP
+[01:02:30.337] Browser LOG     ❌ Disconnected from alerts socket
+[01:02:30.337] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/sensors color: rgb(120, 120, 120) color: inherit {"dp":"/sensors","o":"http://localhost:3000/sensors","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765276680280}
+[01:02:30.866] Browser LOG     ✅ Connected to alerts socket: x2Ipap86zP1QjbwDAAAS
+[01:02:31.654] Browser LOG     ❌ Disconnected from alerts socket
+[01:02:31.654] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/area color: rgb(120, 120, 120) color: inherit {"dp":"/area","o":"http://localhost:3000/area","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765276681606}
+[01:02:32.162] Browser LOG     ✅ Connected to alerts socket: PAc9lnfK-06hJ0l4AAAV
+[01:02:33.041] Browser LOG     ❌ Disconnected from alerts socket
+[01:02:33.041] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765276682681}
+[01:02:33.041] Browser LOG     [MapView] Drones response: {"count":2,"data":[{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}],"success":true}
+[01:02:33.041] Browser LOG     [MapView] Loaded drones: [{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}]
+[01:02:33.041] Browser LOG     [MapView] Drones response: {"count":2,"data":[{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}],"success":true}
+[01:02:33.041] Browser LOG     [MapView] Loaded drones: [{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}]
+[01:02:33.041] Browser LOG     ✅ Connected to alerts socket: v9oLCoTGFvV7LbBQAAAY
+[01:02:33.041] Browser LOG     [MapView] Socket connected tmEbA7YLm4ecvUCmAAAa
