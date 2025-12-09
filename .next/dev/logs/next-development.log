@@ -1,26 +1,173 @@
-[00:00:01.188] Server  LOG      ✓ Ready in 845ms
-[00:00:14.552] Server  LOG      ○ Compiling / ...
-[00:00:16.801] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:17.061] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
-[00:00:17.061] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
-[00:00:17.061] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765258405145}
-[00:00:17.061] Browser LOG     ✅ Connected to alerts socket: Xhk8VQn_wcecR5wwAAAB
-[00:29:59.815] Server  LOG      ✓ Compiled in 751ms
-[00:30:01.314] Browser LOG     ✅ MapView socket connected: COAzu8mpIgVwsIdnAAAD
-[00:32:25.057] Browser LOG     ✅ alert_resolved: {"id":"6936c72f645304a49d8d0f9f","status":"SENT"}
-[00:32:25.057] Browser LOG     📡 MapView alert_resolved: {"id":"6936c72f645304a49d8d0f9f","status":"SENT"}
-[00:32:48.357] Server  LOG      ✓ Compiled in 214ms
-[00:32:49.105] Browser ERROR   ./components/map-view.tsx:312:49
-Parsing ecmascript source code failed
-  310 |         toast({
-  311 |           title: "Drone dispatched",
-> 312 |           description: `Drone "${res.data.drone.}" sent for alert.`,
-      |                                                 ^
-  313 |         });
-  314 |
-  315 |         // Remove alert from local list
+[00:00:01.376] Server  LOG      ✓ Ready in 1019ms
+[00:00:04.433] Server  LOG      ○ Compiling / ...
+[00:00:07.836] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:08.154] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:00:08.154] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:00:08.154] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765272938043}
+[00:00:08.154] Browser LOG     ✅ Connected to alerts socket: R8ZMKT7g1P8yP2l-AAB6
+[00:00:08.154] Browser ERROR   React has detected a change in the order of Hooks called by %s. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks
 
-Expected ident
+   Previous render            Next render
+   ------------------------------------------------------
+%s   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ MapView 1. useState                   useState
+2. useState                   useState
+3. useState                   useState
+4. useState                   useState
+5. useState                   useState
+6. useEffect                  useEffect
+7. useState                   useState
+8. useState                   useState
+9. useState                   useState
+10. useState                  useState
+11. useState                  useState
+12. useState                  useState
+13. useRef                    useRef
+14. useState                  useState
+15. useState                  useState
+16. useState                  useState
+17. useState                  useState
+18. useState                  useState
+19. useState                  useState
+20. useEffect                 useEffect
+21. useEffect                 useEffect
+22. useMemo                   useMemo
+23. undefined                 useMemo
+
+[00:00:08.154] Browser ERROR   uncaughtError: Error: Rendered more hooks than during the previous render.
+[00:00:08.154] Browser LOG     ❌ Disconnected from alerts socket
+[00:00:24.764] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:25.048] Browser ERROR   uncaughtError: Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <LoadingBoundary name="/" loading={null}>
+      <HTTPAccessFallbackBoundary notFound={<SegmentViewNode>} forbidden={undefined} unauthorized={undefined}>
+        <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<SegmentViewNode>} forbidden={undefined} ...>
+          <RedirectBoundary>
+            <RedirectErrorBoundary router={{...}}>
+              <InnerLayoutRouter url="/" tree={[...]} params={{}} cacheNode={{lazyData:null, ...}} segmentPath={[...]} ...>
+                <SegmentViewNode type="page" pagePath="page.tsx">
+                  <SegmentTrieNode>
+                  <ClientPageRoot Component={function DashboardPage} serverProvidedParams={{...}}>
+                    <DashboardPage params={Promise} searchParams={Promise}>
+                      <div className="flex h-scr...">
+                        <DashboardHeader>
+                        <div className="relative f...">
+                          <DashboardSidebar>
+                          <main className="relative f...">
+                            <MapView>
+                              <div
++                               className="relative h-full w-full"
+-                               className="flex h-full w-full items-center justify-center bg-black"
+                              >
+                                <MapContainerComponent center={[...]} zoom={17} ...>
++                                 <div
++                                   className="h-full w-full"
++                                   id={undefined}
++                                   style={undefined}
++                                   ref={function MapContainerComponent.useCallback[mapRef]}
++                                 >
+-                                 <svg
+-                                   xmlns="http://www.w3.org/2000/svg"
+-                                   width="24"
+-                                   height="24"
+-                                   viewBox="0 0 24 24"
+-                                   fill="none"
+-                                   stroke="currentColor"
+-                                   stroke-width="2"
+-                                   stroke-linecap="round"
+-                                   stroke-linejoin="round"
+-                                   className="lucide lucide-loader-circle mr-2 h-4 w-4 animate-spin text-gray-400"
+-                                 >
+                                ...
+                ...
+              ...
+
+[00:00:25.048] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:00:25.048] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:00:25.048] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:00:25.048] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765272955013}
+[00:00:25.048] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765272955013}
+[00:00:25.408] Browser LOG     ✅ Connected to alerts socket: g_1rIn9bpiTk6YYvAAB-
+[00:00:25.408] Browser LOG     MapView socket connected 6LzcCPX3kEv5_YjkAAB_
+[00:00:29.813] Server  LOG      ✓ Compiled in 605ms
+[00:00:29.973] Browser LOG     MapView socket disconnected
+[00:00:29.973] Browser LOG     [MapView] Socket connected kue_ER2GUwMN7WIvAACB
+[00:00:30.647] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:30.871] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:00:30.871] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:00:30.871] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765272960794}
+[00:00:30.871] Browser LOG     ✅ Connected to alerts socket: kAxz0Esf1t9v5j4UAACD
+[00:00:30.871] Browser LOG     [MapView] Socket connected 85u1Piqq4XM_8xKxAACF
+[00:04:27.237] Server  LOG      ✓ Compiled in 402ms
+[00:04:28.383] Browser LOG     [MapView] Socket disconnected
+[00:04:28.383] Browser LOG     [MapView] Socket connected gSsAZzMxYwu-kzP2AACH
+[00:04:30.472] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:04:30.669] Browser LOG     ✅ Connected to alerts socket: Fq9y9zdjZaKJF1M9AACK
+[00:04:30.669] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:04:30.669] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:04:30.669] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765273200608}
+[00:04:30.669] Browser LOG     [MapView] Socket connected T7DziA2nCujKNCQMAACL
+[00:04:52.512] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T09:40:21.624Z","decidedAt":null,"decision":null,"id":"6937ee85a16edce15d6c838e","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:04:52.512] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T09:40:21.624Z","decidedAt":null,"decision":null,"id":"6937ee85a16edce15d6c838e","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:05:23.118] Browser LOG     ✅ alert_resolved: {"id":"6937ee85a16edce15d6c838e","status":"NEUTRALISED"}
+[00:05:23.118] Browser LOG     [MapView] ✅ alert_resolved: {"id":"6937ee85a16edce15d6c838e","status":"NEUTRALISED"}
+[00:05:26.101] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:26.328] Browser LOG     ✅ Connected to alerts socket: 08ngfbkdtQtIS3I6AACO
+[00:05:26.328] Browser LOG     [MapView] Socket connected 4JE2qun8ckbKWn7rAACP
+[00:05:26.328] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:05:26.328] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:05:26.328] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765273256271}
+[00:07:35.665] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:35.887] Browser LOG     ✅ Connected to alerts socket: 6TkJPm50SyQMaXYdAACS
+[00:07:35.887] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:07:35.887] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:07:35.887] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765273385827}
+[00:07:35.887] Browser LOG     [MapView] Socket connected wRGITVnwg2oi8roFAACT
+[00:07:47.571] Server  LOG      ✓ Compiled in 627ms
+[00:07:49.593] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:49.827] Browser LOG     ✅ Connected to alerts socket: GZTHqx7EF14kcjKBAACW
+[00:07:49.827] Browser LOG     [MapView] Socket connected JyrR6VXhVMO1SbXpAACX
+[00:07:49.827] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:07:49.827] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:07:49.827] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765273399756}
+[00:07:49.827] Browser LOG     [MapView] Drones response: {"count":2,"data":[{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}],"success":true}
+[00:07:49.827] Browser LOG     [MapView] Loaded drones: [{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}]
+[00:08:38.294] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T09:44:07.199Z","decidedAt":null,"decision":null,"id":"6937ef67a16edce15d6c838f","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:08:38.294] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T09:44:07.199Z","decidedAt":null,"decision":null,"id":"6937ef67a16edce15d6c838f","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:08:52.291] Browser LOG     ✅ alert_resolved: {"id":"6937ef67a16edce15d6c838f","status":"NEUTRALISED"}
+[00:08:52.291] Browser LOG     [MapView] ✅ alert_resolved: {"id":"6937ef67a16edce15d6c838f","status":"NEUTRALISED"}
+[00:09:17.348] Server  LOG      ✓ Compiled in 110ms
+[00:09:21.027] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:09:21.528] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:09:21.528] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:09:21.528] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765273491342}
+[00:09:21.528] Browser LOG     ✅ Connected to alerts socket: PHQ6hEhmINytkHChAACa
+[00:09:21.528] Browser LOG     [MapView] Drones response: {"count":2,"data":[{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}],"success":true}
+[00:09:21.528] Browser LOG     [MapView] Loaded drones: [{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}]
+[00:09:21.528] Browser LOG     [MapView] Socket connected rSC0V2zAkKhSuGJyAACb
+[00:11:03.555] Server  LOG      ✓ Compiled in 203ms
+[00:11:04.322] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
 
 Import traces:
   Client Component Browser:
@@ -32,73 +179,521 @@ Import traces:
     ./components/map-view.tsx [Client Component SSR]
     ./app/page.tsx [Client Component SSR]
     ./app/page.tsx [Server Component]
-[00:32:53.178] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:32:53.360] Browser LOG     ✅ Connected to alerts socket: A6NiwAfaZiODk_NoAAAG
-[00:32:53.360] Browser LOG     ✅ MapView socket connected: lA_uyG0OqBk27jV8AAAH
-[00:32:53.360] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
-[00:32:53.360] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
-[00:32:53.360] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260361456}
-[00:33:16.497] Browser LOG     ❌ Disconnected from alerts socket
-[00:33:16.497] Browser LOG     ❌ MapView socket disconnected
-[00:33:16.497] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/sensors color: rgb(120, 120, 120) color: inherit {"dp":"/sensors","o":"http://localhost:3000/sensors","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260384581}
-[00:33:17.033] Browser LOG     ✅ Connected to alerts socket: GwV01nw1VtWfKJtxAAAK
-[00:33:24.847] Browser LOG     ❌ Disconnected from alerts socket
-[00:33:24.847] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260392930}
-[00:33:25.190] Browser LOG     ✅ Connected to alerts socket: JtLWeO_3424rEpMXAAAN
-[00:33:25.190] Browser LOG     ✅ MapView socket connected: coVLPiK7dpnJhFj4AAAP
-[00:33:32.031] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T06:06:39.560Z","decidedAt":null,"decision":null,"id":"6937bc6fd8cb38bb760725d4","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6936c477645304a49d8d0f98","latitude":12.122,"longitude":12.1122,"name":"Sensor 1","sensorId":"sensor1"},"sensorDbId":"6936c477645304a49d8d0f98","sensorId":"sensor1","status":"ACTIVE","type":"Person"}
-[00:33:32.031] Browser LOG     📡 MapView alert_active: {"createdAt":"2025-12-09T06:06:39.560Z","decidedAt":null,"decision":null,"id":"6937bc6fd8cb38bb760725d4","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6936c477645304a49d8d0f98","latitude":12.122,"longitude":12.1122,"name":"Sensor 1","sensorId":"sensor1"},"sensorDbId":"6936c477645304a49d8d0f98","sensorId":"sensor1","status":"ACTIVE","type":"Person"}
-[00:36:02.965] Server  LOG      ✓ Compiled in 158ms
-[00:36:13.971] Server  LOG      ✓ Compiled in 229ms
-[00:36:23.029] Server  LOG      ✓ Compiled in 89ms
-[00:36:35.998] Server  LOG      ✓ Compiled in 203ms
-[00:36:37.794] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:36:38.000] Browser LOG     ✅ Connected to alerts socket: OZfaEghn8S2wOQarAAAS
-[00:36:38.000] Browser LOG     ✅ MapView socket connected: Tb4JUs1ez8s9I4pDAAAT
-[00:36:38.000] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
-[00:36:38.000] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
-[00:36:38.000] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260586095}
-[00:36:43.888] Browser LOG     ❌ Disconnected from alerts socket
-[00:36:43.888] Browser LOG     ❌ MapView socket disconnected
-[00:36:43.888] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/sensors color: rgb(120, 120, 120) color: inherit {"dp":"/sensors","o":"http://localhost:3000/sensors","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260591982}
-[00:36:44.470] Browser LOG     ✅ Connected to alerts socket: FvuXugIXHsJRggITAAAW
-[00:36:46.946] Browser LOG     ❌ Disconnected from alerts socket
-[00:36:46.946] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/sensors/add color: rgb(120, 120, 120) color: inherit {"dp":"/sensors/add","o":"http://localhost:3000/sensors/add","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260595035}
-[00:36:47.419] Browser LOG     Fetched areas: [{"areaId":"area2","createdAt":"2025-12-08T08:18:34.292Z","id":"693689da77b188801bfc5b6e","latitude":11.11,"longitude":22.22,"name":"Area 2","status":"Active","updatedAt":"2025-12-08T08:18:34.292Z"},{"areaId":"area1","createdAt":"2025-12-04T08:15:21.483Z","id":"6931431999f4abd621d89a53","latitude":11.11,"longitude":22.22,"name":"Area 1","status":"Active","updatedAt":"2025-12-05T11:22:22.844Z"}]
-[00:36:47.419] Browser LOG     Fetched alarms: [{"alarmId":"alarm1","areaId":"6931431999f4abd621d89a53","createdAt":"2025-12-04T12:02:59.125Z","id":"69317873431216f098d42295","name":"Person Detected","status":"Active","updatedAt":"2025-12-04T12:02:59.125Z"}]
-[00:36:47.615] Browser LOG     Fetched areas: [{"areaId":"area2","createdAt":"2025-12-08T08:18:34.292Z","id":"693689da77b188801bfc5b6e","latitude":11.11,"longitude":22.22,"name":"Area 2","status":"Active","updatedAt":"2025-12-08T08:18:34.292Z"},{"areaId":"area1","createdAt":"2025-12-04T08:15:21.483Z","id":"6931431999f4abd621d89a53","latitude":11.11,"longitude":22.22,"name":"Area 1","status":"Active","updatedAt":"2025-12-05T11:22:22.844Z"}]
-[00:36:47.615] Browser LOG     Fetched alarms: [{"alarmId":"alarm1","areaId":"6931431999f4abd621d89a53","createdAt":"2025-12-04T12:02:59.125Z","id":"69317873431216f098d42295","name":"Person Detected","status":"Active","updatedAt":"2025-12-04T12:02:59.125Z"}]
-[00:36:47.615] Browser LOG     ✅ Connected to alerts socket: dgiyqgDLzVXEkxVMAAAZ
-[00:36:51.889] Browser LOG     ❌ Disconnected from alerts socket
-[00:36:51.889] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/area color: rgb(120, 120, 120) color: inherit {"dp":"/area","o":"http://localhost:3000/area","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260599975}
-[00:36:52.516] Browser LOG     ✅ Connected to alerts socket: qZDxzZjVrqAS4rHNAAAc
-[00:36:55.735] Browser LOG     ❌ Disconnected from alerts socket
-[00:36:55.735] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/area/6931431999f4abd621d89a53/edit color: rgb(120, 120, 120) color: inherit {"dp":"/area/[id]/edit","o":"http://localhost:3000/area/6931431999f4abd621d89a53/edit","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260603811}
-[00:36:56.268] Browser LOG     ✅ Connected to alerts socket: MTaVsHwDOCo63yptAAAf
-[00:37:13.696] Browser LOG     ❌ Disconnected from alerts socket
-[00:37:13.696] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/area/6931431999f4abd621d89a53 color: rgb(120, 120, 120) color: inherit {"dp":"/area/[id]","o":"http://localhost:3000/area/6931431999f4abd621d89a53","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260621737}
-[00:37:13.696] Browser LOG     ✅ Connected to alerts socket: X-o_CXd-5zJZjVV_AAAh
-[00:37:20.674] Browser LOG     ❌ Disconnected from alerts socket
-[00:37:20.674] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/sensors color: rgb(120, 120, 120) color: inherit {"dp":"/sensors","o":"http://localhost:3000/sensors","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260628759}
-[00:37:20.978] Browser LOG     ✅ Connected to alerts socket: pN646NA5xGEkZHp_AAAk
-[00:37:22.556] Browser LOG     ❌ Disconnected from alerts socket
-[00:37:22.556] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/sensors/add color: rgb(120, 120, 120) color: inherit {"dp":"/sensors/add","o":"http://localhost:3000/sensors/add","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260630564}
-[00:37:22.556] Browser LOG     Fetched areas: [{"areaId":"area2","createdAt":"2025-12-08T08:18:34.292Z","id":"693689da77b188801bfc5b6e","latitude":11.11,"longitude":22.22,"name":"Area 2","status":"Active","updatedAt":"2025-12-08T08:18:34.292Z"},{"areaId":"area1","createdAt":"2025-12-04T08:15:21.483Z","id":"6931431999f4abd621d89a53","latitude":28.44796,"longitude":77.040915,"name":"Area 1","status":"Active","updatedAt":"2025-12-09T06:10:20.542Z"}]
-[00:37:22.556] Browser LOG     Fetched alarms: [{"alarmId":"alarm1","areaId":"6931431999f4abd621d89a53","createdAt":"2025-12-04T12:02:59.125Z","id":"69317873431216f098d42295","name":"Person Detected","status":"Active","updatedAt":"2025-12-04T12:02:59.125Z"}]
-[00:37:22.658] Browser LOG     Fetched areas: [{"areaId":"area2","createdAt":"2025-12-08T08:18:34.292Z","id":"693689da77b188801bfc5b6e","latitude":11.11,"longitude":22.22,"name":"Area 2","status":"Active","updatedAt":"2025-12-08T08:18:34.292Z"},{"areaId":"area1","createdAt":"2025-12-04T08:15:21.483Z","id":"6931431999f4abd621d89a53","latitude":28.44796,"longitude":77.040915,"name":"Area 1","status":"Active","updatedAt":"2025-12-09T06:10:20.542Z"}]
-[00:37:22.658] Browser LOG     Fetched alarms: [{"alarmId":"alarm1","areaId":"6931431999f4abd621d89a53","createdAt":"2025-12-04T12:02:59.125Z","id":"69317873431216f098d42295","name":"Person Detected","status":"Active","updatedAt":"2025-12-04T12:02:59.125Z"}]
-[00:37:22.868] Browser LOG     ✅ Connected to alerts socket: kCSCgbVlNtRgYwmUAAAn
-[00:38:02.680] Browser LOG     ❌ Disconnected from alerts socket
-[00:38:02.680] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/sensors color: rgb(120, 120, 120) color: inherit {"dp":"/sensors","o":"http://localhost:3000/sensors","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260670746}
-[00:38:02.891] Browser LOG     ✅ Connected to alerts socket: CdLUUMQEXqu6hRhSAAAq
-[00:38:05.382] Browser LOG     ❌ Disconnected from alerts socket
-[00:38:05.382] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765260673461}
-[00:38:05.677] Browser LOG     ✅ Connected to alerts socket: YCz-pf-hWXaaks9lAAAt
-[00:38:05.677] Browser LOG     ✅ MapView socket connected: x6nxKaYsVwD6v9-dAAAv
-[00:38:14.001] Browser LOG     Manual drone dispatch (TODO backend): 6937bd7ed8cb38bb760725d5 693175406e660d8f3ed2e18f
-[00:38:42.968] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T06:11:50.924Z","decidedAt":null,"decision":null,"id":"6937bda6d8cb38bb760725d6","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
-[00:38:42.968] Browser LOG     📡 MapView alert_active: {"createdAt":"2025-12-09T06:11:50.924Z","decidedAt":null,"decision":null,"id":"6937bda6d8cb38bb760725d6","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
-[00:38:52.505] Browser LOG     ✅ alert_resolved: {"id":"6937bda6d8cb38bb760725d6","status":"SENT"}
-[00:38:52.505] Browser LOG     📡 MapView alert_resolved: {"id":"6937bda6d8cb38bb760725d6","status":"SENT"}
-[00:39:01.468] Browser LOG     ✅ alert_resolved: {"id":"6937bc6fd8cb38bb760725d4","status":"SENT"}
-[00:39:01.468] Browser LOG     📡 MapView alert_resolved: {"id":"6937bc6fd8cb38bb760725d4","status":"SENT"}
+[00:11:06.937] Server  ERROR    ⨯ ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+
+[00:11:08.019] Browser LOG     [MapView] Socket disconnected
+[00:11:08.019] Browser LOG     ❌ Disconnected from alerts socket
+[00:11:08.019] Browser LOG     ✅ Connected to alerts socket: 5Y0_v56ZbpiGZzIeAACd
+[00:11:08.019] Browser LOG     [MapView] Socket connected YvB7Hi0ovfVJA4JXAACf
+[00:11:08.124] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:11:08.390] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:11:08.650] Browser ERROR   uncaughtError: Error: ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+
+[00:11:08.847] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:11:08.847] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:11:17.206] Server  LOG      ✓ Compiled in 210ms
+[00:11:18.035] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:11:18.290] Browser LOG     ✅ Connected to alerts socket: n1yd1Zdn1htt_8DZAACh
+[00:11:18.290] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:11:18.290] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:11:18.290] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765273608195}
+[00:11:18.290] Browser LOG     [MapView] Socket connected -6PciEMFJLyrdXfeAACj
+[00:11:18.290] Browser LOG     [MapView] Drones response: {"count":2,"data":[{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}],"success":true}
+[00:11:18.290] Browser LOG     [MapView] Loaded drones: [{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}]
+[00:11:25.349] Server  LOG      ✓ Compiled in 175ms
+[00:11:26.154] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:11:52.268] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:11:53.905] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:11:57.346] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:11:57.346] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:11:58.515] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:11:59.892] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:12:01.870] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:12:01.870] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:12:01.870] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:12:01.870] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:12:19.571] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:12:20.574] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:12:22.135] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:12:22.135] Browser ERROR   ./components/map-view.tsx:718:19
+Parsing ecmascript source code failed
+  716 |                     </div>
+  717 |                   </>
+> 718 |                 ) : (
+      |                   ^
+  719 |                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+  720 |                     No drones configured yet. Please add drones in the Drone OS management section.
+  721 |                   </div>
+
+Expected '</', got ':'
+
+Import traces:
+  Client Component Browser:
+    ./components/map-view.tsx [Client Component Browser]
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/map-view.tsx [Client Component SSR]
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[00:12:59.978] Server  LOG      ✓ Compiled in 91ms
+[00:13:02.678] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:13:02.949] Browser LOG     ✅ Connected to alerts socket: NEqzXyZ5zLddwVTxAACm
+[00:13:02.949] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:13:02.949] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:13:02.949] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765273712824}
+[00:13:02.949] Browser LOG     [MapView] Socket connected uYpxjd2HhTa5MnnNAACn
+[00:13:02.949] Browser LOG     [MapView] Drones response: {"count":2,"data":[{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}],"success":true}
+[00:13:02.949] Browser LOG     [MapView] Loaded drones: [{"batteryFailSafe":"RTL","createdAt":"2025-12-08T04:56:52.812Z","droneOSName":"pihawk11","droneSpeed":12,"droneType":"quadcopter","gpsFix":"11.11","gpsLost":"RTL","gpsName":"GPS-M8M","id":"69365a9477b188801bfc5b6b","maxAltitude":100,"maxWindSpeed":12,"minBatteryLevel":40,"minHDOP":1,"minSatCount":8,"targetAltitude":100,"telemetryLost":"RTL","updatedAt":"2025-12-08T04:57:10.549Z","usbAddress":"/dev/ttyUSB0"},{"batteryFailSafe":"RTL","createdAt":"2025-12-04T11:49:20.094Z","droneOSName":"pihawk","droneSpeed":10,"droneType":"hexacopter","gpsFix":"gpsfixvalue","gpsLost":"RTL","gpsName":"GPS","id":"693175406e660d8f3ed2e18f","maxAltitude":100,"maxWindSpeed":20,"minBatteryLevel":40,"minHDOP":0.5,"minSatCount":8,"targetAltitude":10,"telemetryLost":"RTL","updatedAt":"2025-12-05T11:21:36.732Z","usbAddress":"user-filled"}]
+[00:13:09.444] Browser LOG     [MapView] Selected drone: 69365a9477b188801bfc5b6b
+[00:13:10.697] Browser LOG     [MapView] Selected drone: 693175406e660d8f3ed2e18f
+[00:13:12.748] Browser LOG     [MapView] Selected drone: 
+[00:13:14.116] Browser LOG     [MapView] Selected drone: 69365a9477b188801bfc5b6b
+[00:13:23.058] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T09:48:52.884Z","decidedAt":null,"decision":null,"id":"6937f084a16edce15d6c8390","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:13:23.058] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T09:48:52.884Z","decidedAt":null,"decision":null,"id":"6937f084a16edce15d6c8390","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:13:51.849] Server  LOG      ✓ Compiled in 74ms
+[00:14:17.462] Server  LOG      ✓ Compiled in 308ms
+[00:14:25.042] Server  LOG      ✓ Compiled in 82ms
+[00:14:40.429] Browser LOG     [MapView] ✅ alert_resolved: {"id":"6937f084a16edce15d6c8390","status":"NEUTRALISED"}
+[00:14:40.429] Browser LOG     ✅ alert_resolved: {"id":"6937f084a16edce15d6c8390","status":"NEUTRALISED"}
+[00:14:44.593] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T09:50:14.463Z","decidedAt":null,"decision":null,"id":"6937f0d6a16edce15d6c8391","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:14:44.593] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T09:50:14.463Z","decidedAt":null,"decision":null,"id":"6937f0d6a16edce15d6c8391","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:14:51.075] Browser LOG     ✅ alert_resolved: {"id":"6937f0d6a16edce15d6c8391","status":"NEUTRALISED"}
+[00:14:51.075] Browser LOG     [MapView] ✅ alert_resolved: {"id":"6937f0d6a16edce15d6c8391","status":"NEUTRALISED"}
+[00:14:54.332] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T09:50:24.203Z","decidedAt":null,"decision":null,"id":"6937f0e0a16edce15d6c8392","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:14:54.332] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T09:50:24.203Z","decidedAt":null,"decision":null,"id":"6937f0e0a16edce15d6c8392","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:15:00.117] Browser LOG     [MapView] Selected drone: 69365a9477b188801bfc5b6b
+[00:15:00.855] Browser LOG     ✅ alert_resolved: {"id":"6937f0e0a16edce15d6c8392","status":"SENT"}
+[00:15:00.855] Browser LOG     [MapView] ✅ alert_resolved: {"id":"6937f0e0a16edce15d6c8392","status":"SENT"}
+[00:15:04.168] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T09:50:34.041Z","decidedAt":null,"decision":null,"id":"6937f0eaa16edce15d6c8393","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:15:04.168] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T09:50:34.041Z","decidedAt":null,"decision":null,"id":"6937f0eaa16edce15d6c8393","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:15:07.116] Browser LOG     ✅ alert_resolved: {"id":"6937f0eaa16edce15d6c8393","status":"NEUTRALISED"}
+[00:15:07.116] Browser LOG     [MapView] ✅ alert_resolved: {"id":"6937f0eaa16edce15d6c8393","status":"NEUTRALISED"}
+[00:15:09.472] Browser LOG     🔔 alert_active: {"createdAt":"2025-12-09T09:50:39.346Z","decidedAt":null,"decision":null,"id":"6937f0efa16edce15d6c8394","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:15:09.472] Browser LOG     [MapView] 🔔 alert_active: {"createdAt":"2025-12-09T09:50:39.346Z","decidedAt":null,"decision":null,"id":"6937f0efa16edce15d6c8394","message":"Person Detected","metadata":{},"sensor":{"area":{"areaId":"area1","name":"Area 1"},"id":"6937bd7ed8cb38bb760725d5","latitude":28.44796,"longitude":77.040915,"name":"Sensor Center","sensorId":"center"},"sensorDbId":"6937bd7ed8cb38bb760725d5","sensorId":"center","status":"ACTIVE","type":"Person"}
+[00:15:14.368] Browser LOG     ✅ alert_resolved: {"id":"6937f0efa16edce15d6c8394","status":"SENT"}
+[00:15:14.368] Browser LOG     [MapView] ✅ alert_resolved: {"id":"6937f0efa16edce15d6c8394","status":"SENT"}
+[00:15:42.890] Browser LOG     [MapView] Selected drone: 693175406e660d8f3ed2e18f

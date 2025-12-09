@@ -1,28 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { Map as LeafletMap, DivIcon } from "leaflet";
+import "leaflet/dist/leaflet.css";
+import io, { type Socket } from "socket.io-client";
+import { Loader2 } from "lucide-react";
 import {
-  Plus,
-  Minus,
-  Camera,
-  AlertTriangle,
-  MapPin,
-  Crosshair,
-  Loader2,
-} from "lucide-react";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { io, Socket } from "socket.io-client";
-
-import { getAllSensors, type Sensor } from "@/lib/api/sensors";
-import {
-  getActiveAlerts,
-  sendDroneForAlert,
-  neutraliseAlert,
-  type Alert as ApiAlert,
-} from "@/lib/api/alerts";
-import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos";
 import {
   Select,
   SelectContent,
@@ -30,264 +22,406 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  getActiveAlerts,
+  neutraliseAlert,
+  sendDroneForAlert,
+  type Alert,
+} from "@/lib/api/alerts";
+import { getAllSensors, type Sensor } from "@/lib/api/sensors";
+import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos";
+import { useToast } from "@/hooks/use-toast";
+import { getActiveMap, OfflineMap } from "@/lib/api/maps";
 
-// reuse Alert type from API
-type Alert = ApiAlert;
+const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-// === CONFIG: adjust these bounds to match your offline map image ===
-const MAP_BOUNDS = {
-  north: 28.456969, // max latitude (top of image)
-  south: 28.438951, // min latitude (bottom of image)
-  west: 77.033995, // min longitude (left of image)
-  east: 77.048835, // max longitude (right of image)
-};
+let reactLeaflet: typeof import("react-leaflet") | null = null;
+let LeafletLib: typeof import("leaflet") | null = null;
 
-// Map sensorType → short label
-const typeLabel: Record<string, string> = {
-  "Motion Detector": "MOT",
-  Camera: "CAM",
-  "Thermal Sensor": "TH",
-  "Infrared Sensor": "IR",
-  "PIR Sensor": "PIR",
-  Other: "OTH",
-};
+// Only run in the browser
+if (typeof window !== "undefined") {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  reactLeaflet = require("react-leaflet");
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  LeafletLib = require("leaflet");
+}
+
+type ReactLeafletModule = typeof import("react-leaflet");
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export function MapView() {
-  const [zoom, setZoom] = useState(15);
-  const [sensors, setSensors] = useState<Sensor[]>([]);
-  const [sensorsLoading, setSensorsLoading] = useState(true);
-  const [sensorsError, setSensorsError] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [alertsLoading, setAlertsLoading] = useState(true);
-  const [alertsError, setAlertsError] = useState<string | null>(null);
+  const [reactLeaflet, setReactLeaflet] = useState<ReactLeafletModule | null>(
+    null
+  );
+  const [mapConfig, setMapConfig] = useState<OfflineMap | null>(null);
+  const [leafletMap, setLeafletMap] = useState<LeafletMap | null>(null);
+
+  const [loadingLib, setLoadingLib] = useState(true);
+  const [loadingMapConfig, setLoadingMapConfig] = useState(true);
+  const [loadingSensors, setLoadingSensors] = useState(true);
+  const [loadingAlerts, setLoadingAlerts] = useState(true);
+  const [loadingDrones, setLoadingDrones] = useState(true);
+
+  const [error, setError] = useState<string | null>(null);
+
+  const [sensors, setSensors] = useState<Sensor[]>([]);
+  const [activeAlerts, setActiveAlerts] = useState<Alert[]>([]);
+  const [drones, setDrones] = useState<DroneOS[]>([]);
+
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
 
   // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
   const [selectedSensor, setSelectedSensor] = useState<Sensor | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Drones
-  const [drones, setDrones] = useState<DroneOS[]>([]);
-  const [dronesLoading, setDronesLoading] = useState(false);
-  const [dronesError, setDronesError] = useState<string | null>(null);
-  const [selectedDroneId, setSelectedDroneId] = useState("");
+  const [selectedDroneId, setSelectedDroneId] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
 
-  const { toast } = useToast();
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  // Force re-render counter to update marker icons
+  const [markerUpdateKey, setMarkerUpdateKey] = useState(0);
 
-  // =============================
-  // Zoom handlers (still simple)
-  // =============================
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 1, 20));
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 1, 1));
-
-  // =============================
-  // Fetch sensors
-  // =============================
+  // ============================================
+  // Dynamic import react-leaflet (client only)
+  // ============================================
   useEffect(() => {
-    const fetchSensors = async () => {
-      setSensorsLoading(true);
-      setSensorsError(null);
+    let cancelled = false;
+
+    async function loadReactLeaflet() {
+      try {
+        const mod = await import("react-leaflet");
+        if (!cancelled) setReactLeaflet(mod);
+      } catch (err) {
+        console.error("Failed to load react-leaflet:", err);
+        if (!cancelled) setError("Failed to load map library");
+      } finally {
+        if (!cancelled) setLoadingLib(false);
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      loadReactLeaflet();
+    } else {
+      setLoadingLib(false);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // ============================================
+  // Fetch active map config
+  // ============================================
+  useEffect(() => {
+    const fetchActiveMap = async () => {
+      setLoadingMapConfig(true);
+      try {
+        const res = await getActiveMap();
+        if (res.success && res.data) {
+          setMapConfig(res.data);
+        } else {
+          setError(res.error || "No active offline map configured");
+        }
+      } catch (err) {
+        console.error("Error loading active map:", err);
+        setError("Failed to load active map");
+      } finally {
+        setLoadingMapConfig(false);
+      }
+    };
+
+    fetchActiveMap();
+  }, []);
+
+  // ============================================
+  // Fetch sensors
+  // ============================================
+  useEffect(() => {
+    const loadSensors = async () => {
+      setLoadingSensors(true);
       try {
         const res = await getAllSensors({ include: true });
         if (res.success && res.data) {
           setSensors(res.data);
         } else {
-          setSensors([]);
-          setSensorsError(res.error || "Failed to fetch sensors");
+          toast({
+            title: "Error",
+            description: res.error || "Failed to load sensors",
+            variant: "destructive",
+          });
         }
-      } catch (err: any) {
-        console.error("Error fetching sensors:", err);
-        setSensors([]);
-        setSensorsError(
-          err instanceof Error ? err.message : "Failed to fetch sensors"
-        );
+      } catch (err) {
+        console.error("Error loading sensors:", err);
+        toast({
+          title: "Error",
+          description: "Failed to load sensors",
+          variant: "destructive",
+        });
       } finally {
-        setSensorsLoading(false);
+        setLoadingSensors(false);
       }
     };
 
-    fetchSensors();
-  }, []);
+    loadSensors();
+  }, [toast]);
 
-  // =============================
-  // Fetch initial active alerts
-  // =============================
+  // ============================================
+  // Fetch drones
+  // ============================================
   useEffect(() => {
-    const fetchAlerts = async () => {
-      setAlertsLoading(true);
-      setAlertsError(null);
+    const loadDrones = async () => {
+      setLoadingDrones(true);
+      try {
+        const res = await getAllDroneOS();
+        console.log("[MapView] Drones response:", res);
+
+        if (res.success && res.data) {
+          console.log("[MapView] Loaded drones:", res.data);
+          setDrones(res.data);
+        } else {
+          console.error("[MapView] Failed to load drones:", res.error);
+          // Don't show toast on initial load if no drones exist
+          if (res.error && !res.error.includes("No drone")) {
+            toast({
+              title: "Error",
+              description: res.error || "Failed to load drones",
+              variant: "destructive",
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error loading drones:", err);
+        toast({
+          title: "Error",
+          description: "Failed to load drones",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingDrones(false);
+      }
+    };
+
+    loadDrones();
+  }, [toast]);
+
+  // ============================================
+  // Fetch active alerts + WebSocket subscription
+  // ============================================
+  useEffect(() => {
+    const loadAlerts = async () => {
+      setLoadingAlerts(true);
       try {
         const res = await getActiveAlerts();
         if (res.success && res.data) {
-          setAlerts(res.data);
+          setActiveAlerts(res.data);
         } else {
-          setAlerts([]);
-          setAlertsError(res.error || "Failed to fetch active alerts");
+          toast({
+            title: "Error",
+            description: res.error || "Failed to load active alerts",
+            variant: "destructive",
+          });
         }
-      } catch (err: any) {
-        console.error("Error fetching alerts:", err);
-        setAlerts([]);
-        setAlertsError(
-          err instanceof Error ? err.message : "Failed to fetch active alerts"
-        );
+      } catch (err) {
+        console.error("Error loading active alerts:", err);
+        toast({
+          title: "Error",
+          description: "Failed to load active alerts",
+          variant: "destructive",
+        });
       } finally {
-        setAlertsLoading(false);
+        setLoadingAlerts(false);
       }
     };
 
-    fetchAlerts();
-  }, []);
+    loadAlerts();
 
-  // =============================
-  // Socket.IO for realtime alerts
-  // =============================
-  useEffect(() => {
-    const socket: Socket = io(API_BASE_URL, {
+    // Setup socket
+    const s = io(API_BASE_URL, {
       transports: ["websocket", "polling"],
     });
 
-    socket.on("connect", () => {
-      console.log("✅ MapView socket connected:", socket.id);
+    s.on("connect", () => {
+      console.log("[MapView] Socket connected", s.id);
       setSocketConnected(true);
     });
 
-    socket.on("disconnect", () => {
-      console.log("❌ MapView socket disconnected");
+    s.on("disconnect", () => {
+      console.log("[MapView] Socket disconnected");
       setSocketConnected(false);
     });
 
-    socket.on("alert_active", (alert: Alert) => {
-      console.log("📡 MapView alert_active:", alert);
-      setAlerts((prev) => {
-        const exists = prev.some((a) => a.id === alert.id);
-        return exists ? prev : [...prev, alert];
+    // Listen for new alerts (alert_active is what sidebar uses)
+    s.on("alert_active", (alert: Alert) => {
+      console.log("[MapView] 🔔 alert_active:", alert);
+      setActiveAlerts((prev) => {
+        // if we already have it, ignore
+        if (prev.some((a) => a.id === alert.id)) return prev;
+        return [alert, ...prev];
       });
+      // Force marker re-render
+      setMarkerUpdateKey((k) => k + 1);
     });
 
-    socket.on("alert_resolved", (payload: { id: string; status: string }) => {
-      console.log("📡 MapView alert_resolved:", payload);
-      setAlerts((prev) => prev.filter((a) => a.id !== payload.id));
+    // Also listen for alert_created (your original event)
+    s.on("alert_created", (alert: Alert) => {
+      console.log("[MapView] 🔔 alert_created:", alert);
+      setActiveAlerts((prev) => {
+        if (prev.some((a) => a.id === alert.id)) return prev;
+        return [alert, ...prev];
+      });
+      setMarkerUpdateKey((k) => k + 1);
+    });
 
-      // If modal is open on that alert, close it
+    // Listen for resolved alerts
+    s.on("alert_resolved", (payload: { id: string; status: string }) => {
+      console.log("[MapView] ✅ alert_resolved:", payload);
+      setActiveAlerts((prev) => prev.filter((a) => a.id !== payload.id));
+
+      // Update selected alert if it was resolved
       setSelectedAlert((current) =>
         current && current.id === payload.id ? null : current
       );
-      setIsModalOpen((open) =>
+
+      // Close modal if the resolved alert was open
+      setModalOpen((open) =>
         selectedAlert && selectedAlert.id === payload.id ? false : open
       );
+
+      // Force marker re-render
+      setMarkerUpdateKey((k) => k + 1);
     });
 
-    return () => {
-      socket.disconnect();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [API_BASE_URL]);
-
-  // =============================
-  // When modal opens, fetch drones
-  // (for now: ALL drones; later we can filter by area)
-  // =============================
-  useEffect(() => {
-    const fetchDrones = async () => {
-      if (!isModalOpen || !selectedSensor) {
-        setDrones([]);
-        setSelectedDroneId("");
-        setDronesError(null);
-        return;
-      }
-
-      setDronesLoading(true);
-      setDronesError(null);
-      setSelectedDroneId("");
-
-      try {
-        const res = await getAllDroneOS();
-        if (res.success && res.data) {
-          // TODO: once DroneOS has areaId, filter by selectedSensor.areaId
-          setDrones(res.data);
-        } else {
-          setDrones([]);
-          setDronesError(res.error || "Failed to fetch drones");
+    // Listen for alert updates
+    s.on("alert_updated", (alert: Alert) => {
+      console.log("[MapView] 🔄 alert_updated:", alert);
+      setActiveAlerts((prev) => {
+        const filtered = prev.filter((a) => a.id !== alert.id);
+        // keep it in list only if still ACTIVE
+        if (alert.status === "ACTIVE") {
+          return [alert, ...filtered];
         }
-      } catch (err: any) {
-        console.error("Error fetching drones:", err);
-        setDrones([]);
-        setDronesError(
-          err instanceof Error ? err.message : "Failed to fetch drones"
-        );
-      } finally {
-        setDronesLoading(false);
+        return filtered;
+      });
+
+      // If the modal is open on this alert and it is no longer ACTIVE, update modal state
+      setSelectedAlert((prev) => {
+        if (!prev) return prev;
+        if (prev.id !== alert.id) return prev;
+        return alert.status === "ACTIVE" ? alert : null;
+      });
+
+      // Force marker re-render
+      setMarkerUpdateKey((k) => k + 1);
+    });
+
+    setSocket(s);
+
+    return () => {
+      s.disconnect();
+    };
+  }, [toast]);
+
+  // ============================================
+  // Derived: map alert by sensorDbId
+  // ============================================
+  const alertBySensorDbId = useMemo(() => {
+    const map: Record<string, Alert> = {};
+    for (const alert of activeAlerts) {
+      if (alert.status === "ACTIVE") {
+        map[alert.sensorDbId] = alert;
       }
-    };
-
-    fetchDrones();
-  }, [isModalOpen, selectedSensor]);
-
-  // =============================
-  // Derived: active alerts per sensor
-  // =============================
-  const activeAlertBySensorDbId = new Map<string, Alert>();
-  for (const alert of alerts) {
-    if (alert.sensorDbId) {
-      activeAlertBySensorDbId.set(alert.sensorDbId, alert);
     }
+    return map;
+  }, [activeAlerts]);
+
+  // ============================================
+  // Sensor marker styling
+  // ============================================
+  function getSensorBaseColor(sensorType: string): string {
+    const t = sensorType.toLowerCase();
+    if (t.includes("camera")) return "#3b82f6"; // blue
+    if (t.includes("thermal")) return "#f97316"; // orange
+    if (t.includes("infrared") || t.includes("pir")) return "#a855f7"; // purple
+    if (t.includes("motion")) return "#22c55e"; // green
+    return "#9ca3af"; // gray
   }
 
-  // =============================
-  // Helpers: project lat/lng to %
-  // =============================
-  function projectSensor(sensor: Sensor) {
-    if (
-      !MAP_BOUNDS ||
-      MAP_BOUNDS.east === MAP_BOUNDS.west ||
-      MAP_BOUNDS.north === MAP_BOUNDS.south
-    ) {
-      return { left: "50%", top: "50%" };
+  function getSensorIcon(sensor: Sensor, hasActiveAlert: boolean): DivIcon {
+    if (!LeafletLib) {
+      // @ts-ignore
+      return {} as DivIcon;
     }
 
-    const lat = sensor.latitude;
-    const lng = sensor.longitude;
+    const L = LeafletLib;
 
-    const x =
-      ((lng - MAP_BOUNDS.west) / (MAP_BOUNDS.east - MAP_BOUNDS.west)) * 100;
-    const y =
-      (1 - (lat - MAP_BOUNDS.south) / (MAP_BOUNDS.north - MAP_BOUNDS.south)) *
-      100;
+    const baseColor = getSensorBaseColor(sensor.sensorType);
+    const bg = hasActiveAlert ? "#b91c1c" : baseColor; // 🔴 red if alert
+    const border = hasActiveAlert ? "#fecaca" : "#0f172a";
 
-    return {
-      left: `${Math.min(100, Math.max(0, x))}%`,
-      top: `${Math.min(100, Math.max(0, y))}%`,
-    };
+    const t = sensor.sensorType.toLowerCase();
+    let label = "S";
+    if (t.includes("camera")) label = "C";
+    else if (t.includes("thermal")) label = "T";
+    else if (t.includes("infrared") || t.includes("pir")) label = "P";
+    else if (t.includes("motion")) label = "M";
+
+    const html = `
+    <div
+      style="
+        width: 22px;
+        height: 22px;
+        border-radius: 9999px;
+        background: ${bg};
+        border: 2px solid ${border};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 11px;
+        font-weight: 600;
+        box-shadow: 0 0 6px rgba(0,0,0,0.6);
+      "
+    >
+      ${label}
+    </div>
+  `;
+
+    return L.divIcon({
+      html,
+      className: "",
+      iconSize: [22, 22],
+      iconAnchor: [11, 11],
+    });
   }
 
-  // =============================
-  // Click handlers
-  // =============================
-  const handleSensorClick = (sensor: Sensor) => {
-    const activeAlert = activeAlertBySensorDbId.get(sensor.id) || null;
+  // ============================================
+  // Modal open/close from marker click
+  // ============================================
+  function openSensorModal(sensor: Sensor) {
+    const alert = alertBySensorDbId[sensor.id];
     setSelectedSensor(sensor);
-    setSelectedAlert(activeAlert);
-    setIsModalOpen(true);
-  };
+    setSelectedAlert(alert ?? null);
+    setSelectedDroneId("");
+    setModalOpen(true);
+  }
 
-  const closeModal = () => {
-    if (actionLoading) return;
-    setIsModalOpen(false);
+  function closeModal() {
+    setModalOpen(false);
     setSelectedSensor(null);
     setSelectedAlert(null);
-    setDrones([]);
-    setDronesError(null);
     setSelectedDroneId("");
-  };
+    setActionLoading(false);
+  }
 
+  // ============================================
+  // Modal actions: send drone / neutralise
+  // ============================================
   const handleSendDrone = async () => {
     if (!selectedSensor) return;
-
     if (!selectedDroneId) {
       toast({
         title: "Select a drone",
@@ -297,91 +431,76 @@ export function MapView() {
       return;
     }
 
-    // CASE 1: There is an ACTIVE alert for this sensor → use sendDroneForAlert
-    if (selectedAlert) {
-      setActionLoading(true);
+    // If we have an ACTIVE alert -> use alert API
+    if (selectedAlert && selectedAlert.status === "ACTIVE") {
       try {
+        setActionLoading(true);
         const res = await sendDroneForAlert(selectedAlert.id, selectedDroneId);
-
-        if (!res.success || !res.data) {
-          throw new Error(res.error || "Failed to send drone");
+        if (res.success) {
+          toast({
+            title: "Drone dispatched",
+            description: `Drone mission started for ${selectedSensor.name}`,
+          });
+          closeModal();
+        } else {
+          toast({
+            title: "Error",
+            description: res.error || "Failed to send drone",
+            variant: "destructive",
+          });
         }
-
-        toast({
-          title: "Drone dispatched",
-          description: `Drone "${res.data.drone.name}" sent for alert.`,
-        });
-
-        // Remove alert from local list
-        setAlerts((prev) => prev.filter((a) => a.id !== selectedAlert.id));
-        closeModal();
-      } catch (err: any) {
-        console.error("Error sending drone:", err);
+      } catch (err) {
+        console.error("Error sending drone for alert:", err);
         toast({
           title: "Error",
-          description:
-            err instanceof Error ? err.message : "Failed to send drone",
+          description: "Failed to send drone",
           variant: "destructive",
         });
       } finally {
         setActionLoading(false);
       }
-      return;
-    }
-
-    // CASE 2: No active alert → manual drone dispatch (UI only, TODO backend)
-    setActionLoading(true);
-    try {
-      console.log(
-        "Manual drone dispatch (TODO backend):",
-        selectedSensor.id,
-        selectedDroneId
-      );
+    } else {
+      // No active alert: (manual dispatch placeholder)
+      console.warn("[MapView] Manual drone dispatch not yet wired to backend", {
+        sensorId: selectedSensor.id,
+        droneId: selectedDroneId,
+      });
       toast({
-        title: "Manual drone dispatch",
+        title: "Manual dispatch (stub)",
         description:
-          "This is a UI-only action for now. Wire it to your mission planner backend when ready.",
+          "UI action is working, wire this to a manual mission endpoint on the backend.",
       });
       closeModal();
-    } catch (err: any) {
-      console.error("Error in manual send drone:", err);
-      toast({
-        title: "Error",
-        description: "Failed to send drone",
-        variant: "destructive",
-      });
-    } finally {
-      setActionLoading(false);
     }
   };
 
   const handleNeutralise = async () => {
     if (!selectedAlert) return;
 
-    setActionLoading(true);
     try {
+      setActionLoading(true);
       const res = await neutraliseAlert(
         selectedAlert.id,
-        "Manual neutralisation from map"
+        "Neutralised from map"
       );
-
-      if (!res.success) {
-        throw new Error(res.error || "Failed to neutralise alert");
+      if (res.success) {
+        toast({
+          title: "Alert neutralised",
+          description: "Alert has been marked as neutralised.",
+        });
+        closeModal();
+      } else {
+        toast({
+          title: "Error",
+          description: res.error || "Failed to neutralise alert",
+          variant: "destructive",
+        });
       }
-
-      toast({
-        title: "Alert neutralised",
-        description: "Alert has been marked as neutralised.",
-      });
-
-      setAlerts((prev) => prev.filter((a) => a.id !== selectedAlert.id));
-      closeModal();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error neutralising alert:", err);
       toast({
         title: "Error",
-        description:
-          err instanceof Error ? err.message : "Failed to neutralise alert",
+        description: "Failed to neutralise alert",
         variant: "destructive",
       });
     } finally {
@@ -389,287 +508,256 @@ export function MapView() {
     }
   };
 
-  // =============================
-  // Render
-  // =============================
+  // ============================================
+  // Center calculation from map bounds
+  // ============================================
+  const center: [number, number] | null =
+    mapConfig != null
+      ? [
+          (mapConfig.north + mapConfig.south) / 2,
+          (mapConfig.east + mapConfig.west) / 2,
+        ]
+      : null;
+
+  const isLoading =
+    loadingLib || loadingMapConfig || loadingSensors || loadingAlerts;
+
+  // ============================================
+  // Early states
+  // ============================================
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#111]">
+        <p className="text-sm text-gray-400">Loading map...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#111] px-4 text-center">
+        <p className="text-sm text-red-400">{error}</p>
+      </div>
+    );
+  }
+
+  if (!reactLeaflet || !mapConfig || !center) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#111] px-4 text-center">
+        <p className="text-sm text-gray-400">
+          No active offline map configured. Go to{" "}
+          <span className="font-mono">/maps/manage</span> and create / activate
+          one.
+        </p>
+      </div>
+    );
+  }
+
+  const { MapContainer, TileLayer, Marker, Tooltip } = reactLeaflet;
+  const L = LeafletLib;
+
   return (
-    <div className="relative h-full w-full">
-      {/* Satellite Map Background (offline image) */}
-      <div
-        className="h-full w-full bg-cover bg-center"
-        style={{
-          backgroundImage: `url('/satellite-aerial-view-of-city-urban-area-from-abov.jpg')`,
-          // You can add scale/transform based on zoom if you want
-        }}
-      />
-
-      {/* Zoom Controls */}
-      <div className="absolute left-2 top-2 flex flex-col gap-1 md:left-4 md:top-4">
-        <Button
-          variant="secondary"
-          size="icon"
-          className="h-8 w-8 bg-white text-black hover:bg-gray-200"
-          onClick={handleZoomIn}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="secondary"
-          size="icon"
-          className="h-8 w-8 bg-white text-black hover:bg-gray-200"
-          onClick={handleZoomOut}
-        >
-          <Minus className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Optional center "camera" marker (e.g. base station) */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-teal-500 shadow-lg md:h-10 md:w-10">
-          <Camera className="h-4 w-4 text-white md:h-5 md:w-5" />
+    <>
+      <div className="relative h-full w-full">
+        {/* Socket status indicator */}
+        <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2 rounded-md bg-black/70 px-3 py-1.5 text-xs backdrop-blur-sm">
+          <div
+            className={`h-2 w-2 rounded-full ${
+              socketConnected ? "bg-green-500" : "bg-gray-500"
+            }`}
+          />
+          <span className="text-white">
+            {socketConnected ? "Live" : "Offline"}
+          </span>
         </div>
-      </div>
 
-      {/* Sensor markers */}
-      {!sensorsLoading && sensorsError && (
-        <div className="absolute bottom-2 left-2 rounded bg-red-900/70 px-3 py-1 text-xs text-red-100">
-          Failed to load sensors: {sensorsError}
-        </div>
-      )}
+        <MapContainer
+          center={center}
+          zoom={mapConfig.minZoom}
+          minZoom={mapConfig.minZoom}
+          maxZoom={mapConfig.maxZoom}
+          className="h-full w-full"
+          zoomControl={false}
+          whenCreated={(mapInstance) => {
+            setLeafletMap(mapInstance);
+          }}
+        >
+          <TileLayer
+            url={`${mapConfig.tileRoot}/{z}/{x}/{y}.jpg`}
+            attribution=""
+          />
 
-      {!sensorsLoading &&
-        !sensorsError &&
-        sensors.map((sensor) => {
-          const pos = projectSensor(sensor);
-          const activeAlert = activeAlertBySensorDbId.get(sensor.id) || null;
-          const hasAlert = !!activeAlert;
-          const isActive =
-            sensor.status && sensor.status.toLowerCase() === "active";
+          {/* Sensor markers - key prop forces re-render when alerts change */}
+          {sensors.map((sensor) => {
+            const alert = alertBySensorDbId[sensor.id];
+            const hasActiveAlert = !!alert && alert.status === "ACTIVE";
 
-          const label =
-            typeLabel[sensor.sensorType] || typeLabel["Other"] || "SEN";
-
-          const bgClass = hasAlert
-            ? "bg-red-600"
-            : isActive
-            ? "bg-green-600"
-            : "bg-gray-500";
-
-          return (
-            <button
-              key={sensor.id}
-              type="button"
-              onClick={() => handleSensorClick(sensor)}
-              style={{ left: pos.left, top: pos.top }}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
-            >
-              <div
-                className={`flex h-6 w-6 items-center justify-center rounded-full border-2 border-white ${bgClass} shadow-lg hover:scale-110 transition-transform`}
+            return (
+              <Marker
+                key={`${sensor.id}-${markerUpdateKey}`}
+                position={[sensor.latitude, sensor.longitude]}
+                icon={getSensorIcon(sensor, hasActiveAlert)}
+                eventHandlers={{
+                  click: () => openSensorModal(sensor),
+                }}
               >
-                <span className="text-[9px] font-bold text-white">{label}</span>
-              </div>
-            </button>
-          );
-        })}
-
-      {/* Alerts status indicator (optional) */}
-      <div className="absolute right-2 top-2 flex items-center gap-2 rounded bg-black/60 px-2 py-1 text-[10px] text-gray-300 md:right-4 md:top-4">
-        <span
-          className={`h-2 w-2 rounded-full ${
-            socketConnected ? "bg-green-500" : "bg-gray-500"
-          }`}
-        />
-        <span>
-          Alerts: {alertsLoading ? "…" : alertsError ? "Error" : alerts.length}
-        </span>
+                <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
+                  <div className="space-y-1 text-xs">
+                    <div className="font-semibold text-white">
+                      {sensor.name}
+                    </div>
+                    <div className="text-gray-200">{sensor.sensorType}</div>
+                    <div className="text-[10px] text-gray-300">
+                      Lat: {sensor.latitude.toFixed(5)}, Lon:{" "}
+                      {sensor.longitude.toFixed(5)}
+                    </div>
+                    {hasActiveAlert && (
+                      <div className="text-[10px] font-semibold text-red-300">
+                        🚨 ACTIVE ALERT
+                      </div>
+                    )}
+                  </div>
+                </Tooltip>
+              </Marker>
+            );
+          })}
+        </MapContainer>
       </div>
 
-      {/* Modal for sensor/alert actions */}
-      {isModalOpen && selectedSensor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg rounded-lg border border-[#333] bg-[#111] p-5 shadow-xl">
-            {/* Header */}
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <div className="mb-1 flex items-center gap-2">
-                  {selectedAlert ? (
-                    <AlertTriangle className="h-5 w-5 text-orange-500" />
-                  ) : (
-                    <Crosshair className="h-5 w-5 text-[#4A9FD4]" />
-                  )}
-                  <h2 className="text-lg font-semibold text-white">
-                    {selectedAlert ? "Active Alert" : "Sensor Details"}
-                  </h2>
+      {/* Modal for sensor / alert actions */}
+      <Dialog open={modalOpen} onOpenChange={(open) => !open && closeModal()}>
+        <DialogContent className="z-[100] max-w-lg border-[#333] bg-[#111] text-white">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">
+              {selectedSensor ? selectedSensor.name : "Sensor"}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-gray-400">
+              {selectedSensor?.sensorId} ·{" "}
+              {selectedSensor?.sensorType || "Unknown type"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedSensor && (
+            <div className="space-y-4 py-2 text-sm">
+              {/* Sensor meta */}
+              <div className="rounded-md border border-[#333] bg-[#1a1a1a] p-3">
+                <div className="flex justify-between text-xs text-gray-300">
+                  <span>
+                    Lat: {selectedSensor.latitude.toFixed(5)}, Lon:{" "}
+                    {selectedSensor.longitude.toFixed(5)}
+                  </span>
+                  <span>Status: {selectedSensor.status}</span>
                 </div>
-                <p className="text-xs text-gray-400">
-                  Sensor:{" "}
-                  <span className="font-mono text-[#4A9FD4]">
-                    {selectedSensor.sensorId}
-                  </span>{" "}
-                  • {selectedSensor.name}
-                </p>
-                {selectedAlert && (
-                  <p className="text-[11px] text-gray-500">
+                <div className="mt-2 text-xs text-gray-400">
+                  Area: {selectedSensor.area?.name || "Unassigned"}
+                </div>
+              </div>
+
+              {/* Alert info */}
+              {selectedAlert ? (
+                <div className="rounded-md border border-red-700 bg-red-950/40 p-3">
+                  <div className="text-xs font-semibold text-red-300">
+                    Active Alert
+                  </div>
+                  <div className="mt-1 text-sm text-red-100">
+                    {selectedAlert.message}
+                  </div>
+                  <div className="mt-2 text-[11px] text-red-200">
+                    Created at:{" "}
                     {new Date(selectedAlert.createdAt).toLocaleString()}
-                  </p>
-                )}
-              </div>
-
-              <Badge
-                className={`text-xs ${
-                  selectedAlert
-                    ? "bg-red-600"
-                    : selectedSensor.status.toLowerCase() === "active"
-                    ? "bg-green-600"
-                    : "bg-gray-600"
-                } text-white`}
-              >
-                {selectedAlert
-                  ? selectedAlert.status
-                  : selectedSensor.status || "Unknown"}
-              </Badge>
-            </div>
-
-            {/* Body: Info */}
-            <div className="mb-4 space-y-2 text-sm">
-              {selectedAlert && (
-                <p className="text-gray-200">{selectedAlert.message}</p>
-              )}
-
-              <div className="mt-3 rounded-md border border-[#333] bg-[#181818] p-3">
-                <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                  <Crosshair className="h-3 w-3" />
-                  Sensor Info
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-gray-500">Name:</span>{" "}
-                    <span className="text-gray-200">{selectedSensor.name}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Type:</span>{" "}
-                    <span className="text-gray-200">
-                      {selectedSensor.sensorType}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Status:</span>{" "}
-                    <span className="text-gray-200">
-                      {selectedSensor.status}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Area:</span>{" "}
-                    <span className="text-gray-200">
-                      {/* @ts-ignore – if your Sensor type has area optional */}
-                      {selectedSensor.area?.name || "Unassigned"}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3 text-gray-500" />
-                    <span className="text-gray-400">
-                      {typeof selectedSensor.latitude === "number" &&
-                      typeof selectedSensor.longitude === "number"
-                        ? `${selectedSensor.latitude.toFixed(
-                            5
-                          )}, ${selectedSensor.longitude.toFixed(5)}`
-                        : "N/A"}
-                    </span>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Drone selection */}
-            <div className="mb-4 space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Select Drone
-              </p>
-
-              {dronesLoading && (
-                <div className="flex items-center gap-2 text-xs text-gray-400">
-                  <Loader2 className="h-3 w-3 animate-spin text-[#4A9FD4]" />
-                  <span>Loading drones...</span>
+              ) : (
+                <div className="rounded-md border border-[#333] bg-[#18181b] p-3 text-xs text-gray-300">
+                  No active alert on this sensor.
+                  <br />
+                  You can still manually dispatch a drone from here.
                 </div>
               )}
 
-              {!dronesLoading && dronesError && (
-                <p className="text-xs text-red-500">{dronesError}</p>
-              )}
+              {/* Drone selection */}
+              <div className="space-y-2">
+                <div className="text-xs text-gray-300">
+                  Select Drone to Dispatch:
+                </div>
 
-              {!dronesLoading && !dronesError && drones.length === 0 && (
-                <p className="text-xs text-gray-500">
-                  No drones configured yet.
-                </p>
-              )}
-
-              {!dronesLoading && !dronesError && drones.length > 0 && (
-                <Select
-                  value={selectedDroneId}
-                  onValueChange={setSelectedDroneId}
-                >
-                  <SelectTrigger className="h-9 border-[#444] bg-[#181818] text-xs text-white focus:ring-[#4A9FD4]">
-                    <SelectValue placeholder="Select a drone to send" />
-                  </SelectTrigger>
-                  <SelectContent className="border-[#333] bg-[#181818] text-xs text-white">
-                    {drones.map((drone) => (
-                      <SelectItem
-                        key={drone.id}
-                        value={drone.id}
-                        className="text-xs text-white focus:bg-[#333] focus:text-white"
-                      >
-                        {drone.droneOSName} ({drone.droneType})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="mt-6 flex justify-end gap-3">
-              {/* Neutralise only if there is an active alert */}
-              {selectedAlert && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={actionLoading}
-                  onClick={handleNeutralise}
-                  className="border-[#444] bg-transparent text-xs text-gray-200 hover:bg-[#333]"
-                >
-                  {actionLoading ? "Processing..." : "Neutralise"}
-                </Button>
-              )}
-              <Button
-                type="button"
-                disabled={actionLoading || drones.length === 0}
-                onClick={handleSendDrone}
-                className="bg-[#2563EB] px-4 text-xs text-white hover:bg-[#1D4ED8] disabled:opacity-50"
-              >
-                {actionLoading ? (
-                  <>
-                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                    Sending...
-                  </>
-                ) : selectedAlert ? (
-                  "Send Drone for Alert"
+                {loadingDrones ? (
+                  <div className="flex items-center gap-2 rounded-md border border-[#333] bg-[#111] p-2 text-xs text-gray-400">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <span>Loading drones...</span>
+                  </div>
+                ) : drones.length === 0 ? (
+                  <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
+                    No drones configured yet. Please add drones in the Drone OS
+                    management section.
+                  </div>
                 ) : (
-                  "Send Drone (Manual)"
+                  <>
+                    {/* Temporary native select as fallback */}
+                    <select
+                      value={selectedDroneId}
+                      onChange={(e) => {
+                        console.log(
+                          "[MapView] Selected drone:",
+                          e.target.value
+                        );
+                        setSelectedDroneId(e.target.value);
+                      }}
+                      disabled={actionLoading}
+                      className="h-9 w-full rounded-md border border-[#333] bg-[#111] px-3 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                    >
+                      <option value="" className="bg-[#111] text-gray-400">
+                        Select a drone
+                      </option>
+                      {drones.map((drone) => (
+                        <option
+                          key={drone.id}
+                          value={drone.id}
+                          className="bg-[#111] text-gray-100"
+                        >
+                          {drone.droneOSName} · {drone.droneType}
+                        </option>
+                      ))}
+                    </select>
+                    {/* <div className="text-[10px] text-gray-500">
+                      Available: {drones.map((d) => d.droneOSName).join(", ")}
+                    </div> */}
+                  </>
                 )}
-              </Button>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="mt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
+            {/* Neutralise only if alert present */}
+            {selectedAlert && (
               <Button
                 type="button"
                 variant="outline"
+                className="border-red-700 bg-transparent text-red-400 hover:bg-red-900/30 hover:text-red-200"
                 disabled={actionLoading}
-                onClick={closeModal}
-                className="border-[#444] bg-transparent text-xs text-gray-300 hover:bg-[#333]"
+                onClick={handleNeutralise}
               >
-                Close
+                Neutralise Alert
               </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+            )}
+
+            <Button
+              type="button"
+              className="bg-[#2563EB] text-white hover:bg-[#1D4ED8] disabled:opacity-50"
+              disabled={
+                actionLoading ||
+                !selectedSensor ||
+                !selectedDroneId ||
+                drones.length === 0
+              }
+              onClick={handleSendDrone}
+            >
+              {selectedAlert ? "Send Drone for Alert" : "Send Drone"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
