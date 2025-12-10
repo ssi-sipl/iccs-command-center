@@ -603,16 +603,16 @@ export function MapView() {
               >
                 <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
                   <div className="space-y-1 text-xs">
-                    <div className="font-semibold text-white">
+                    <div className="font-semibold text-black">
                       {sensor.name}
                     </div>
-                    <div className="text-gray-200">{sensor.sensorType}</div>
-                    <div className="text-[10px] text-gray-300">
+                    <div className="text-black-200">{sensor.sensorType}</div>
+                    <div className="text-[10px] text-black-300">
                       Lat: {sensor.latitude.toFixed(5)}, Lon:{" "}
                       {sensor.longitude.toFixed(5)}
                     </div>
                     {hasActiveAlert && (
-                      <div className="text-[10px] font-semibold text-red-300">
+                      <div className="text-[10px] font-semibold text-red-500">
                         🚨 ACTIVE ALERT
                       </div>
                     )}

@@ -2025,10 +2025,6 @@
     background-color: var(--background);
   }
 
-  .bg-black {
-    background-color: var(--color-black);
-  }
-
   .bg-black\/50 {
     background-color: #00000080;
   }
@@ -2067,10 +2063,6 @@
     .bg-blue-500\/20 {
       background-color: color-mix(in oklab, var(--color-blue-500) 20%, transparent);
     }
-  }
-
-  .bg-blue-600 {
-    background-color: var(--color-blue-600);
   }
 
   .bg-blue-600\/20 {
@@ -2648,6 +2640,10 @@
     color: var(--background);
   }
 
+  .text-black {
+    color: var(--color-black);
+  }
+
   .text-blue-400 {
     color: var(--color-blue-400);
   }
@@ -2764,6 +2760,10 @@
 
   .text-red-500 {
     color: var(--color-red-500);
+  }
+
+  .text-red-900 {
+    color: var(--color-red-900);
   }
 
   .text-secondary-foreground {
@@ -3972,10 +3972,6 @@
 
   .disabled\:opacity-50:disabled {
     opacity: .5;
-  }
-
-  .disabled\:opacity-60:disabled {
-    opacity: .6;
   }
 
   :where([data-side="left"]) .in-data-\[side\=left\]\:cursor-w-resize {
