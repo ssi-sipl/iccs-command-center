@@ -1,5 +1,5 @@
 // app/sensors/[id]/edit/page.tsx
-// Updated Edit Sensor Page with Backend Integration
+// Updated Edit Sensor Page with Backend Integration + RTSP URL
 "use client";
 
 import type React from "react";
@@ -56,6 +56,7 @@ export default function EditSensorPage() {
     sensorType: "",
     alarmId: "",
     ipAddress: "",
+    rtspUrl: "", // 🔹 new
     latitude: "",
     longitude: "",
     battery: "",
@@ -75,6 +76,7 @@ export default function EditSensorPage() {
     if (params.id) {
       fetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchData = async () => {
@@ -100,6 +102,7 @@ export default function EditSensorPage() {
           sensorType: sensorData.sensorType,
           alarmId: sensorData.alarmId || "",
           ipAddress: sensorData.ipAddress || "",
+          rtspUrl: sensorData.rtspUrl || "", // 🔹 new
           latitude: sensorData.latitude.toString(),
           longitude: sensorData.longitude.toString(),
           battery: sensorData.battery || "",
@@ -199,6 +202,7 @@ export default function EditSensorPage() {
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
         ipAddress: formData.ipAddress.trim() || undefined,
+        rtspUrl: formData.rtspUrl.trim() || undefined, // 🔹 new
         battery: formData.battery.trim() || undefined,
         status: formData.status,
         sendDrone: formData.sendDrone,
@@ -460,6 +464,23 @@ export default function EditSensorPage() {
                       }
                       className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
                     />
+                  </div>
+
+                  {/* 🔹 RTSP URL */}
+                  <div className="space-y-2">
+                    <Label htmlFor="rtspUrl" className="text-gray-300">
+                      RTSP URL
+                    </Label>
+                    <Input
+                      id="rtspUrl"
+                      placeholder="rtsp://user:pass@ip:554/stream"
+                      value={formData.rtspUrl}
+                      onChange={(e) => handleChange("rtspUrl", e.target.value)}
+                      className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Optional – used for live video streaming.
+                    </p>
                   </div>
 
                   {/* Latitude */}

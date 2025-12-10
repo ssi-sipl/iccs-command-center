@@ -1,5 +1,5 @@
 // app/sensors/add/page.tsx
-// Updated Add Sensor Page with Backend Integration
+// Updated Add Sensor Page with Backend Integration + RTSP URL
 "use client";
 
 import type React from "react";
@@ -54,6 +54,7 @@ export default function AddSensorPage() {
     name: "",
     sensorId: "",
     ipAddress: "",
+    rtspUrl: "", // 🔹 NEW: RTSP URL field
     latitude: "",
     longitude: "",
     battery: "",
@@ -191,6 +192,7 @@ export default function AddSensorPage() {
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
         ipAddress: formData.ipAddress.trim() || undefined,
+        rtspUrl: formData.rtspUrl.trim() || undefined, // 🔹 pass RTSP URL if present
         battery: formData.battery.trim() || undefined,
         status: formData.status,
         sendDrone: formData.sendDrone,
@@ -208,10 +210,10 @@ export default function AddSensorPage() {
       } else {
         // Handle specific error cases
         if (response.error?.includes("already exists")) {
-          setValidationErrors({
-            ...validationErrors,
+          setValidationErrors((prev) => ({
+            ...prev,
             sensorId: "This Sensor ID already exists",
-          });
+          }));
         }
         toast({
           title: "Error",
@@ -286,7 +288,6 @@ export default function AddSensorPage() {
             <form onSubmit={handleSubmit}>
               {/* Form Grid */}
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {/* Choose Area */}
                 {/* Choose Area */}
                 <div className="space-y-2">
                   <Label className="text-gray-300">Choose Area:</Label>
@@ -381,6 +382,7 @@ export default function AddSensorPage() {
                     </SelectContent>
                   </Select>
                 </div>
+
                 {/* Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-gray-300">
@@ -433,6 +435,23 @@ export default function AddSensorPage() {
                     onChange={(e) => handleChange("ipAddress", e.target.value)}
                     className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
                   />
+                </div>
+
+                {/* RTSP URL (optional) */}
+                <div className="space-y-2">
+                  <Label htmlFor="rtspUrl" className="text-gray-300">
+                    RTSP URL:
+                  </Label>
+                  <Input
+                    id="rtspUrl"
+                    placeholder="e.g., rtsp://user:pass@192.168.1.100:554/stream"
+                    value={formData.rtspUrl}
+                    onChange={(e) => handleChange("rtspUrl", e.target.value)}
+                    className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Optional. Used for live video from camera sensors.
+                  </p>
                 </div>
 
                 {/* Latitude */}

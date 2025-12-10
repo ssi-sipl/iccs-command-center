@@ -8,6 +8,7 @@ export interface Sensor {
   latitude: number;
   longitude: number;
   ipAddress: string | null;
+  rtspUrl: string | null; // ✅ NEW FIELD
   battery: string | null;
   status: string;
   sendDrone: string;
@@ -136,6 +137,7 @@ export async function createSensor(sensorData: {
   latitude: number;
   longitude: number;
   ipAddress?: string;
+  rtspUrl?: string; // ✅ allow sending RTSP URL
   battery?: string;
   status: string;
   sendDrone?: string;
@@ -177,6 +179,7 @@ export async function updateSensor(
     latitude: number;
     longitude: number;
     ipAddress: string;
+    rtspUrl: string; // ✅ allow updating RTSP URL
     battery: string;
     status: string;
     sendDrone: string;

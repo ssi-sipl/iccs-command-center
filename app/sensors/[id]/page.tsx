@@ -1,5 +1,5 @@
 // app/sensors/[id]/page.tsx
-// Updated View Sensor Page with Backend Integration
+// Updated View Sensor Page with Backend Integration + RTSP URL
 "use client";
 
 import { useState, useEffect } from "react";
@@ -35,7 +35,6 @@ import {
   Plane,
   Power,
   Loader2,
-  Calendar,
 } from "lucide-react";
 import { getSensorById, deleteSensor, type Sensor } from "@/lib/api/sensors";
 import { useToast } from "@/hooks/use-toast";
@@ -54,6 +53,7 @@ export default function ViewSensorPage() {
     if (params.id) {
       fetchSensorDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchSensorDetails = async () => {
@@ -375,6 +375,15 @@ export default function ViewSensorPage() {
                       {sensor.ipAddress || "N/A"}
                     </span>
                   </div>
+
+                  {/* 🔹 RTSP URL row */}
+                  <div className="flex items-center justify-between border-b border-[#333] pb-3">
+                    <span className="text-gray-400">RTSP URL</span>
+                    <span className="max-w-[260px] truncate font-mono text-white">
+                      {sensor.rtspUrl || "N/A"}
+                    </span>
+                  </div>
+
                   <div className="flex items-center justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Status</span>
                     {getStatusBadge(sensor.status)}
@@ -483,7 +492,7 @@ export default function ViewSensorPage() {
               </CardHeader>
               <CardContent>
                 <div className="relative h-48 overflow-hidden rounded-lg bg-[#1a1a1a] sm:h-64">
-                  {/* You can replace this with actual map integration */}
+                  {/* Placeholder preview - actual map is in main dashboard */}
                   <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
                     <div className="flex flex-col items-center gap-2">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4A9FD4] shadow-lg">

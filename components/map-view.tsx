@@ -612,7 +612,7 @@ export function MapView() {
                       {sensor.longitude.toFixed(5)}
                     </div>
                     {hasActiveAlert && (
-                      <div className="text-[10px] font-semibold text-red-500">
+                      <div className="text-[10px] font-semibold text-red-00">
                         🚨 ACTIVE ALERT
                       </div>
                     )}

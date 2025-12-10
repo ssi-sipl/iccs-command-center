@@ -38,6 +38,7 @@ import {
   Battery,
   Wifi,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { getAllSensors, deleteSensor, type Sensor } from "@/lib/api/sensors";
 import { useToast } from "@/hooks/use-toast";
@@ -261,6 +262,7 @@ export default function SensorsPage() {
                       <TableHead className="text-gray-400">Area</TableHead>
                       <TableHead className="text-gray-400">Type</TableHead>
                       <TableHead className="text-gray-400">Battery</TableHead>
+                      <TableHead className="text-gray-400">RTSP</TableHead>
                       <TableHead className="text-gray-400">Status</TableHead>
                       <TableHead className="text-right text-gray-400">
                         Actions
@@ -288,6 +290,29 @@ export default function SensorsPage() {
                         <TableCell className="text-gray-300">
                           {sensor.battery || "N/A"}
                         </TableCell>
+
+                        {/* RTSP column */}
+                        <TableCell className="text-gray-300">
+                          {sensor.rtspUrl ? (
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={sensor.rtspUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm hover:underline"
+                                title="Open RTSP (if supported) or copy to external player"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                <span className="truncate max-w-[140px]">
+                                  {sensor.rtspUrl}
+                                </span>
+                              </a>
+                            </div>
+                          ) : (
+                            <span className="text-gray-500">N/A</span>
+                          )}
+                        </TableCell>
+
                         <TableCell>{getStatusBadge(sensor.status)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
@@ -401,6 +426,39 @@ export default function SensorsPage() {
                             {sensor.ipAddress || "N/A"}
                           </span>
                         </div>
+
+                        {/* RTSP on mobile */}
+                        <div>
+                          <span className="text-gray-400">RTSP: </span>
+                          <span className="text-gray-300 break-all">
+                            {sensor.rtspUrl || "N/A"}
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          {sensor.rtspUrl ? (
+                            <a
+                              href={sensor.rtspUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-block"
+                            >
+                              <Button
+                                variant="outline"
+                                className="w-full border-[#444] bg-transparent text-gray-300 hover:bg-[#333]"
+                              >
+                                <ExternalLink className="mr-2 h-4 w-4" /> Open
+                              </Button>
+                            </a>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              className="w-full border-[#444] bg-transparent text-gray-300"
+                              disabled
+                            >
+                              No Stream
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <div className="flex gap-2">
                         <Link href={`/sensors/${sensor.id}`} className="flex-1">
@@ -408,8 +466,7 @@ export default function SensorsPage() {
                             variant="outline"
                             className="w-full border-[#444] bg-transparent text-gray-300 hover:bg-[#333]"
                           >
-                            <Eye className="mr-2 h-4 w-4" />
-                            View
+                            <Eye className="mr-2 h-4 w-4" /> View
                           </Button>
                         </Link>
                         <Link
@@ -420,8 +477,7 @@ export default function SensorsPage() {
                             variant="outline"
                             className="w-full border-[#444] bg-transparent text-gray-300 hover:bg-[#333]"
                           >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
                           </Button>
                         </Link>
                         <AlertDialog>
@@ -477,8 +533,7 @@ export default function SensorsPage() {
                 <p className="mt-4 text-gray-400">No sensors found</p>
                 <Link href="/sensors/add">
                   <Button className="mt-4 bg-[#2563EB] text-white hover:bg-[#1D4ED8]">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add First Sensor
+                    <Plus className="mr-2 h-4 w-4" /> Add First Sensor
                   </Button>
                 </Link>
               </div>
