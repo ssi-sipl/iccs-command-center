@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import Image from "next/image";
 
 const navItems = [
   { icon: Eye, label: "MAIN SCREEN", href: "/" },
@@ -43,15 +44,16 @@ export function DashboardHeader({
     <header className="flex h-14 items-center justify-between border-b border-[#333] bg-[#1a1a1a] px-3 md:px-4">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 md:gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded bg-[#8B0000] md:h-10 md:w-10">
-          <svg
-            viewBox="0 0 24 24"
-            className="h-5 w-5 text-[#FFD700] md:h-6 md:w-6"
-            fill="currentColor"
-          >
-            <path d="M12 2L8 6H4v4l-4 4 4 4v4h4l4 4 4-4h4v-4l4-4-4-4V6h-4L12 2zm0 3l2.5 2.5H17v2.5L19.5 12 17 14.5V17h-2.5L12 19.5 9.5 17H7v-2.5L4.5 12 7 9.5V7h2.5L12 5z" />
-          </svg>
+        <div className="flex items-center justify-center">
+          <Image
+            src="/icon.svg"
+            alt="Rudrarakshak Logo"
+            width={24}
+            height={24}
+            className="h-10 w-10 md:h-10 md:w-10 object-contain"
+          />
         </div>
+
         <span className="text-base font-bold tracking-wide text-white md:text-xl">
           RUDRARAKSHAK
         </span>

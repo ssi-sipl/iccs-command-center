@@ -126,6 +126,17 @@
   z-index: 0 !important;
 }
 
+.leaflet-container {
+  background: #000 !important;
+}
+
+.leaflet-pane,
+.leaflet-map-pane,
+.leaflet-tile-pane,
+.leaflet-overlay-pane {
+  background: #000 !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

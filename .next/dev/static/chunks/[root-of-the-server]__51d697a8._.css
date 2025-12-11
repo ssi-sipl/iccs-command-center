@@ -2037,6 +2037,10 @@
     background-color: var(--background);
   }
 
+  .bg-black {
+    background-color: var(--color-black);
+  }
+
   .bg-black\/50 {
     background-color: #00000080;
   }
@@ -2308,6 +2312,10 @@
 
   .fill-primary {
     fill: var(--primary);
+  }
+
+  .object-contain {
+    object-fit: contain;
   }
 
   .p-0 {
@@ -2638,10 +2646,6 @@
 
   .text-\[\#2563EB\] {
     color: #2563eb;
-  }
-
-  .text-\[\#FFD700\] {
-    color: gold;
   }
 
   .text-accent-foreground {
@@ -3052,10 +3056,6 @@
 
   .\[--cell-size\:--spacing\(8\)\] {
     --cell-size: calc(var(--spacing) * 8);
-  }
-
-  .running {
-    animation-play-state: running;
   }
 
   .group-focus-within\/menu-item\:opacity-100:is(:where(.group\/menu-item):focus-within *) {
@@ -5157,20 +5157,8 @@
   }
 
   @media (min-width: 48rem) {
-    .md\:h-6 {
-      height: calc(var(--spacing) * 6);
-    }
-  }
-
-  @media (min-width: 48rem) {
     .md\:h-10 {
       height: calc(var(--spacing) * 10);
-    }
-  }
-
-  @media (min-width: 48rem) {
-    .md\:w-6 {
-      width: calc(var(--spacing) * 6);
     }
   }
 
@@ -6398,6 +6386,10 @@
 
 .leaflet-container, .leaflet-pane, .leaflet-top, .leaflet-bottom {
   z-index: 0 !important;
+}
+
+.leaflet-container, .leaflet-pane, .leaflet-map-pane, .leaflet-tile-pane, .leaflet-overlay-pane {
+  background: #000 !important;
 }
 
 @property --tw-translate-x {

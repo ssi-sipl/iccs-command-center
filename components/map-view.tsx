@@ -582,7 +582,7 @@ export function MapView() {
           zoom={mapConfig.minZoom}
           minZoom={mapConfig.minZoom}
           maxZoom={mapConfig.maxZoom}
-          className="h-full w-full"
+          className="h-full w-full bg-black"
           zoomControl={false}
           whenCreated={(mapInstance) => {
             setLeafletMap(mapInstance);

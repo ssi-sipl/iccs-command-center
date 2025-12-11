@@ -1,25 +1,38 @@
-[00:00:01.333] Server  LOG      ✓ Ready in 933ms
-[00:00:23.344] Server  LOG      ○ Compiling / ...
-[00:00:28.417] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:28.712] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
-[00:00:28.712] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
-[00:00:28.713] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765446326347}
-[00:00:28.713] Browser LOG     ✅ Connected to alerts socket: t_vTNz2DqqaN1RYyAAAB
-[00:00:28.713] Browser LOG     [MapView] Socket connected oQUA48AoKzUCQWQYAAAD
-[00:01:10.766] Server  LOG      ✓ Compiled in 177ms
-[00:04:42.772] Browser LOG     [MapView] Socket disconnected
-[00:04:42.772] Browser LOG     ❌ Disconnected from alerts socket
-[00:04:44.789] Browser LOG     [MapView] Socket connected uoqLyFv8r69H5ewMAAAB
-[00:04:45.834] Browser LOG     ✅ Connected to alerts socket: pzxaP4Eq9X0fv4waAAAD
-[00:05:03.249] Browser LOG     ❌ Disconnected from alerts socket
-[00:05:03.249] Browser LOG     [MapView] Socket disconnected
-[00:05:30.293] Browser LOG     ✅ Connected to alerts socket: 7teHbwiv4_2mYNcrAAAB
-[00:05:30.293] Browser LOG     [MapView] Socket connected -n3c56Ap7O7JRgmuAAAD
-[00:10:49.263] Browser LOG     ❌ Disconnected from alerts socket
-[00:10:49.263] Browser LOG     [MapView] Socket disconnected
-[00:10:50.286] Browser LOG     ✅ Connected to alerts socket: -QMTn5Fy75q2I5k8AAAB
-[00:10:51.305] Browser LOG     [MapView] Socket connected 904K36pKtUrre5XSAAAD
-[00:14:12.219] Server  LOG      ✓ Compiled in 275ms
-[00:14:13.383] Browser LOG     [MapView] Socket disconnected
-[00:14:13.383] Browser LOG     [MapView] Socket connected Cu9ogAZLVgCORkYBAAAF
-[00:17:03.355] Server  LOG      ✓ Compiled in 221ms
+[00:00:01.089] Server  LOG      ✓ Ready in 792ms
+[00:00:12.275] Server  LOG      ○ Compiling / ...
+[00:00:15.453] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:15.828] Browser LOG     ✅ Connected to alerts socket: GZrs8LlnfkvX3DTFAAAB
+[00:00:15.828] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:00:15.828] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:00:15.828] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765448310705}
+[00:00:15.828] Browser LOG     [MapView] Socket connected xdv4s6ZJwfh2mk9rAAAD
+[00:12:29.124] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:12:29.437] Browser LOG     ✅ Connected to alerts socket: 57ng798BuY8nnR70AAAG
+[00:12:29.437] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:12:29.437] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:12:29.437] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765449044284}
+[00:12:29.437] Browser LOG     [MapView] Socket connected Nsw6F-6y7Ow61-9-AAAH
+[00:12:35.935] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:12:36.156] Browser LOG     ✅ Connected to alerts socket: 1sc7GtYzv2lpncOfAAAK
+[00:12:36.156] Browser LOG     [MapView] Socket connected iEqWNHGKWPxeiKVUAAAL
+[00:12:36.445] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:12:36.445] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:12:36.445] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765449051411}
+[00:14:54.777] Server  LOG      ✓ Compiled in 244ms
+[00:16:07.447] Server  LOG      ✓ Compiled in 113ms
+[00:16:32.838] Server  LOG      ✓ Compiled in 212ms
+[00:16:38.685] Server  LOG      ✓ Compiled in 209ms
+[00:16:39.929] Server  LOG      ✓ Compiled in 143ms
+[00:16:43.667] Server  LOG      ✓ Compiled in 85ms
+[00:16:45.754] Server  LOG      ✓ Compiled in 122ms
+[00:16:54.828] Server  LOG      ✓ Compiled in 67ms
+[00:17:00.099] Server  LOG      ✓ Compiled in 75ms
+[00:19:21.020] Server  LOG      ✓ Compiled in 178ms
+[00:19:22.987] Server  LOG      ✓ Compiled in 226ms
+[00:19:27.133] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:19:27.529] Browser LOG     ✅ Connected to alerts socket: u9o_3VaiMWvBq7FBAAAO
+[00:19:27.529] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:19:27.529] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:19:27.529] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765449462289}
+[00:19:27.529] Browser LOG     [MapView] Socket connected aG09eJRJ04f8VCHtAAAP
+[00:19:44.686] Server  LOG      ✓ Compiled in 414ms
