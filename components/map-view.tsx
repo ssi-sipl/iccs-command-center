@@ -32,6 +32,7 @@ import { getAllSensors, type Sensor } from "@/lib/api/sensors";
 import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos";
 import { useToast } from "@/hooks/use-toast";
 import { getActiveMap, OfflineMap } from "@/lib/api/maps";
+import { openRtspBySensor } from "@/lib/api/rtsp";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -177,29 +178,9 @@ export function MapView() {
       setLoadingDrones(true);
       try {
         const res = await getAllDroneOS();
-        console.log("[MapView] Drones response:", res);
-
-        if (res.success && res.data) {
-          console.log("[MapView] Loaded drones:", res.data);
-          setDrones(res.data);
-        } else {
-          console.error("[MapView] Failed to load drones:", res.error);
-          // Don't show toast on initial load if no drones exist
-          if (res.error && !res.error.includes("No drone")) {
-            toast({
-              title: "Error",
-              description: res.error || "Failed to load drones",
-              variant: "destructive",
-            });
-          }
-        }
+        if (res.success && res.data) setDrones(res.data);
       } catch (err) {
         console.error("Error loading drones:", err);
-        toast({
-          title: "Error",
-          description: "Failed to load drones",
-          variant: "destructive",
-        });
       } finally {
         setLoadingDrones(false);
       }
@@ -254,21 +235,15 @@ export function MapView() {
       setSocketConnected(false);
     });
 
-    // Listen for new alerts (alert_active is what sidebar uses)
     s.on("alert_active", (alert: Alert) => {
-      console.log("[MapView] 🔔 alert_active:", alert);
       setActiveAlerts((prev) => {
-        // if we already have it, ignore
         if (prev.some((a) => a.id === alert.id)) return prev;
         return [alert, ...prev];
       });
-      // Force marker re-render
       setMarkerUpdateKey((k) => k + 1);
     });
 
-    // Also listen for alert_created (your original event)
     s.on("alert_created", (alert: Alert) => {
-      console.log("[MapView] 🔔 alert_created:", alert);
       setActiveAlerts((prev) => {
         if (prev.some((a) => a.id === alert.id)) return prev;
         return [alert, ...prev];
@@ -276,45 +251,28 @@ export function MapView() {
       setMarkerUpdateKey((k) => k + 1);
     });
 
-    // Listen for resolved alerts
     s.on("alert_resolved", (payload: { id: string; status: string }) => {
-      console.log("[MapView] ✅ alert_resolved:", payload);
       setActiveAlerts((prev) => prev.filter((a) => a.id !== payload.id));
-
-      // Update selected alert if it was resolved
       setSelectedAlert((current) =>
         current && current.id === payload.id ? null : current
       );
-
-      // Close modal if the resolved alert was open
       setModalOpen((open) =>
         selectedAlert && selectedAlert.id === payload.id ? false : open
       );
-
-      // Force marker re-render
       setMarkerUpdateKey((k) => k + 1);
     });
 
-    // Listen for alert updates
     s.on("alert_updated", (alert: Alert) => {
-      console.log("[MapView] 🔄 alert_updated:", alert);
       setActiveAlerts((prev) => {
         const filtered = prev.filter((a) => a.id !== alert.id);
-        // keep it in list only if still ACTIVE
-        if (alert.status === "ACTIVE") {
-          return [alert, ...filtered];
-        }
+        if (alert.status === "ACTIVE") return [alert, ...filtered];
         return filtered;
       });
-
-      // If the modal is open on this alert and it is no longer ACTIVE, update modal state
       setSelectedAlert((prev) => {
         if (!prev) return prev;
         if (prev.id !== alert.id) return prev;
         return alert.status === "ACTIVE" ? alert : null;
       });
-
-      // Force marker re-render
       setMarkerUpdateKey((k) => k + 1);
     });
 
@@ -431,7 +389,6 @@ export function MapView() {
       return;
     }
 
-    // If we have an ACTIVE alert -> use alert API
     if (selectedAlert && selectedAlert.status === "ACTIVE") {
       try {
         setActionLoading(true);
@@ -460,11 +417,6 @@ export function MapView() {
         setActionLoading(false);
       }
     } else {
-      // No active alert: (manual dispatch placeholder)
-      console.warn("[MapView] Manual drone dispatch not yet wired to backend", {
-        sensorId: selectedSensor.id,
-        droneId: selectedDroneId,
-      });
       toast({
         title: "Manual dispatch (stub)",
         description:
@@ -501,6 +453,60 @@ export function MapView() {
       toast({
         title: "Error",
         description: "Failed to neutralise alert",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // ============================================
+  // RTSP handlers (calls lib/api/rtsp)
+  // ============================================
+  const handleOpenVideoFeed = async () => {
+    if (!selectedSensor) return;
+
+    if (!("rtspUrl" in selectedSensor) || !selectedSensor.rtspUrl) {
+      toast({
+        title: "No RTSP configured",
+        description: "This sensor has no RTSP URL configured in the backend.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      const res = await openRtspBySensor(selectedSensor.id);
+
+      if (res && res.success) {
+        // friendly success with available info
+        const extra = res.data
+          ? ` ${res.data.pid ? `(pid ${res.data.pid})` : ""}`
+          : "";
+        toast({
+          title: "Video Feed launched",
+          description:
+            res.message || `Launched video on server.${extra}`.trim(),
+        });
+      } else {
+        // server responded but unsuccessful
+        const msg =
+          (res && (res.error || (res.details && String(res.details)))) ||
+          "Server could not launch the video feed.";
+        toast({
+          title: "Failed to launch video",
+          description: msg,
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      console.error("Error opening RTSP:", err);
+      // network or unexpected error
+      toast({
+        title: "Network / Server error",
+        description:
+          err instanceof Error ? err.message : "Unable to reach backend.",
         variant: "destructive",
       });
     } finally {
@@ -612,7 +618,7 @@ export function MapView() {
                       {sensor.longitude.toFixed(5)}
                     </div>
                     {hasActiveAlert && (
-                      <div className="text-[10px] font-semibold text-red-00">
+                      <div className="text-[10px] font-semibold text-red-500">
                         🚨 ACTIVE ALERT
                       </div>
                     )}
@@ -693,14 +699,9 @@ export function MapView() {
                   </div>
                 ) : (
                   <>
-                    {/* Temporary native select as fallback */}
                     <select
                       value={selectedDroneId}
                       onChange={(e) => {
-                        console.log(
-                          "[MapView] Selected drone:",
-                          e.target.value
-                        );
                         setSelectedDroneId(e.target.value);
                       }}
                       disabled={actionLoading}
@@ -719,9 +720,6 @@ export function MapView() {
                         </option>
                       ))}
                     </select>
-                    {/* <div className="text-[10px] text-gray-500">
-                      Available: {drones.map((d) => d.droneOSName).join(", ")}
-                    </div> */}
                   </>
                 )}
               </div>
@@ -741,6 +739,37 @@ export function MapView() {
                 Neutralise Alert
               </Button>
             )}
+
+            {/* Video Feed button (single action) */}
+            <Button
+              type="button"
+              variant="ghost"
+              className="border-[#333] bg-[#111] text-white hover:bg-[#222]"
+              onClick={handleOpenVideoFeed}
+              disabled={
+                actionLoading ||
+                !selectedSensor ||
+                !("rtspUrl" in (selectedSensor || {})) ||
+                !selectedSensor?.rtspUrl
+              }
+              title={
+                !selectedSensor
+                  ? "Select a sensor"
+                  : !("rtspUrl" in (selectedSensor || {})) ||
+                    !selectedSensor?.rtspUrl
+                  ? "No RTSP URL configured for this sensor"
+                  : "Open the video feed (server will launch the player)"
+              }
+            >
+              {actionLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Launching...
+                </>
+              ) : (
+                "Video Feed"
+              )}
+            </Button>
 
             <Button
               type="button"

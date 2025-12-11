@@ -104,7 +104,6 @@
     --color-red-900: #82181a;
     --color-red-950: #460809;
     --color-orange-500: #fe6e00;
-    --color-amber-100: #fef3c6;
     --color-amber-200: #fee685;
     --color-amber-700: #b75000;
     --color-amber-950: #461901;
@@ -193,7 +192,6 @@
       --color-red-900: lab(28.5139% 44.5539 29.0463);
       --color-red-950: lab(13.003% 29.04 16.7519);
       --color-orange-500: lab(64.272% 57.1788 90.3583);
-      --color-amber-100: lab(95.916% -1.21653 23.111);
       --color-amber-200: lab(91.7203% -.505269 49.9084);
       --color-amber-700: lab(47.2709% 42.9082 69.2966);
       --color-amber-950: lab(15.8111% 20.9107 23.3752);
@@ -1047,10 +1045,6 @@
     height: calc(var(--spacing) * 32);
   }
 
-  .h-44 {
-    height: calc(var(--spacing) * 44);
-  }
-
   .h-48 {
     height: calc(var(--spacing) * 48);
   }
@@ -1831,10 +1825,6 @@
     border-color: #444;
   }
 
-  .border-\[\#2563EB\] {
-    border-color: #2563eb;
-  }
-
   .border-amber-700 {
     border-color: var(--color-amber-700);
   }
@@ -1937,10 +1927,6 @@
     background-color: #18181b;
   }
 
-  .bg-\[\#050507\] {
-    background-color: #050507;
-  }
-
   .bg-\[\#181818\] {
     background-color: #181818;
   }
@@ -1965,10 +1951,6 @@
 
   .bg-background {
     background-color: var(--background);
-  }
-
-  .bg-black {
-    background-color: var(--color-black);
   }
 
   .bg-black\/50 {
@@ -2578,16 +2560,8 @@
     color: gold;
   }
 
-  .text-\[\#bfdbfe\] {
-    color: #bfdbfe;
-  }
-
   .text-accent-foreground {
     color: var(--accent-foreground);
-  }
-
-  .text-amber-100 {
-    color: var(--color-amber-100);
   }
 
   .text-amber-200 {
@@ -2718,10 +2692,6 @@
 
   .text-red-500 {
     color: var(--color-red-500);
-  }
-
-  .text-red-900 {
-    color: var(--color-red-900);
   }
 
   .text-secondary-foreground {
@@ -2998,6 +2968,10 @@
 
   .\[--cell-size\:--spacing\(8\)\] {
     --cell-size: calc(var(--spacing) * 8);
+  }
+
+  .running {
+    animation-play-state: running;
   }
 
   .group-focus-within\/menu-item\:opacity-100:is(:where(.group\/menu-item):focus-within *) {
@@ -3410,12 +3384,6 @@
   }
 
   @media (hover: hover) {
-    .hover\:bg-\[\#1d283a\]:hover {
-      background-color: #1d283a;
-    }
-  }
-
-  @media (hover: hover) {
     .hover\:bg-\[\#2a2a2a\]:hover {
       background-color: #2a2a2a;
     }
@@ -3424,6 +3392,12 @@
   @media (hover: hover) {
     .hover\:bg-\[\#6B0000\]:hover {
       background-color: #6b0000;
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:bg-\[\#222\]:hover {
+      background-color: #222;
     }
   }
 
@@ -4945,12 +4919,6 @@
   @media (min-width: 40rem) {
     .sm\:flex {
       display: flex;
-    }
-  }
-
-  @media (min-width: 40rem) {
-    .sm\:h-56 {
-      height: calc(var(--spacing) * 56);
     }
   }
 
