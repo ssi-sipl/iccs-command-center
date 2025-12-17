@@ -44,7 +44,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const ITEMS_PER_PAGE = 50;
+const ITEMS_PER_PAGE = 10;
 
 export default function ReportPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
