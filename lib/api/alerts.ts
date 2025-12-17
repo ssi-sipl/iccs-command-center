@@ -24,6 +24,7 @@ export interface Alert {
     longitude: number;
     area?: {
       id: string;
+      areaId: string;
       name: string;
     };
   };
@@ -36,6 +37,77 @@ export interface ApiResponse<T> {
   error?: string;
   message?: string;
   skipped?: boolean;
+  pagination?: {
+    total: number;
+    limit: number;
+    skip: number;
+    hasMore: boolean;
+  };
+}
+
+export interface GetAllAlertsParams {
+  status?: AlertStatus;
+  limit?: number;
+  skip?: number;
+  sortBy?: "createdAt" | "decidedAt";
+  sortOrder?: "asc" | "desc";
+}
+
+// ============================================
+// GET ALL ALERTS
+// ============================================
+/**
+ * Get all alerts with optional filtering and pagination
+ * @param params - Query parameters for filtering, sorting, and pagination
+ */
+export async function getAllAlerts(
+  params?: GetAllAlertsParams
+): Promise<ApiResponse<Alert[]>> {
+  try {
+    // Build query string
+    const queryParams = new URLSearchParams();
+
+    if (params?.status) {
+      queryParams.append("status", params.status);
+    }
+    if (params?.limit) {
+      queryParams.append("limit", params.limit.toString());
+    }
+    if (params?.skip) {
+      queryParams.append("skip", params.skip.toString());
+    }
+    if (params?.sortBy) {
+      queryParams.append("sortBy", params.sortBy);
+    }
+    if (params?.sortOrder) {
+      queryParams.append("sortOrder", params.sortOrder);
+    }
+
+    const url = `${API_BASE_URL}/api/alerts/alerts${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch alerts");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching all alerts:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch alerts",
+    };
+  }
 }
 
 // ============================================
