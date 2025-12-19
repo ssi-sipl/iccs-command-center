@@ -87,6 +87,8 @@ export async function getAllAlerts(
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
 
+    console.log("Fetching alerts from:", url);
+
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -95,12 +97,48 @@ export async function getAllAlerts(
       cache: "no-store",
     });
 
+    console.log("Response status:", response.status);
+    console.log("Response headers:", response.headers.get("content-type"));
+
+    // Check if response is OK
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch alerts");
+      const contentType = response.headers.get("content-type");
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+      // Try to parse error response
+      if (contentType && contentType.includes("application/json")) {
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch (parseError) {
+          console.error("Failed to parse error response:", parseError);
+        }
+      } else {
+        // If not JSON, get text response
+        const textResponse = await response.text();
+        console.error("Non-JSON error response:", textResponse);
+        errorMessage = `Server returned ${response.status}. Check if the API endpoint exists.`;
+      }
+
+      throw new Error(errorMessage);
     }
 
-    return await response.json();
+    // Check content type before parsing
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      const textResponse = await response.text();
+      console.error("Non-JSON response received:", textResponse);
+      throw new Error(
+        "Server returned invalid response format. Expected JSON but got: " +
+          (contentType || "unknown")
+      );
+    }
+
+    // Parse JSON response
+    const data = await response.json();
+    console.log("Successfully fetched alerts:", data);
+
+    return data;
   } catch (error) {
     console.error("Error fetching all alerts:", error);
     return {
@@ -128,8 +166,18 @@ export async function getActiveAlerts(): Promise<ApiResponse<Alert[]>> {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch active alerts");
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch active alerts");
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Server returned non-JSON response");
     }
 
     return await response.json();
@@ -168,8 +216,18 @@ export async function getAlertsBySensor(
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch sensor alerts");
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch sensor alerts");
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Server returned non-JSON response");
     }
 
     return await response.json();
@@ -220,8 +278,18 @@ export async function sendDroneForAlert(
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to send drone");
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send drone");
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Server returned non-JSON response");
     }
 
     return await response.json();
@@ -260,8 +328,18 @@ export async function neutraliseAlert(
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to neutralise alert");
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to neutralise alert");
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Server returned non-JSON response");
     }
 
     return await response.json();
@@ -271,6 +349,93 @@ export async function neutraliseAlert(
       success: false,
       error:
         error instanceof Error ? error.message : "Failed to neutralise alert",
+    };
+  }
+}
+
+// ============================================
+// GET ALERT BY ID
+// ============================================
+/**
+ * Get a single alert by ID with full details
+ * @param alertId - MongoDB ObjectId of the alert
+ */
+export async function getAlertById(
+  alertId: string
+): Promise<ApiResponse<Alert>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/alerts/${alertId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch alert");
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Server returned non-JSON response");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching alert:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch alert",
+    };
+  }
+}
+
+// ============================================
+// DELETE ALERT
+// ============================================
+/**
+ * Delete an alert by ID
+ * @param alertId - MongoDB ObjectId of the alert
+ */
+export async function deleteAlert(
+  alertId: string
+): Promise<ApiResponse<{ id: string }>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/alerts/${alertId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete alert");
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Server returned non-JSON response");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error deleting alert:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to delete alert",
     };
   }
 }

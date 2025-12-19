@@ -22,6 +22,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   Search,
   AlertTriangle,
   CheckCircle,
@@ -33,8 +41,11 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  Trash2,
+  Crosshair,
 } from "lucide-react";
-import { getAllAlerts } from "@/lib/api/alerts";
+import { getAllAlerts, getAlertById, deleteAlert } from "@/lib/api/alerts";
 import type { Alert, AlertStatus } from "@/lib/api/alerts";
 import {
   Select,
@@ -43,6 +54,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -57,6 +69,18 @@ export default function ReportPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalAlerts, setTotalAlerts] = useState(0);
 
+  // View modal state
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
+
+  // Delete confirmation state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [alertToDelete, setAlertToDelete] = useState<Alert | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const { toast } = useToast();
+
   // Fetch alerts from API
   const fetchAlerts = async () => {
     try {
@@ -64,7 +88,7 @@ export default function ReportPage() {
       setError(null);
 
       const params = {
-        limit: 1000, // Fetch more for client-side filtering
+        limit: 1000,
         skip: 0,
         sortBy: "createdAt" as const,
         sortOrder: "desc" as const,
@@ -91,6 +115,77 @@ export default function ReportPage() {
   useEffect(() => {
     fetchAlerts();
   }, [statusFilter]);
+
+  // Handle view alert
+  const handleViewAlert = async (alert: Alert) => {
+    setViewLoading(true);
+    setViewModalOpen(true);
+
+    try {
+      const response = await getAlertById(alert.id);
+      if (response.success && response.data) {
+        setSelectedAlert(response.data);
+      } else {
+        toast({
+          title: "Error",
+          description: response.error || "Failed to fetch alert details",
+          variant: "destructive",
+        });
+        setViewModalOpen(false);
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch alert details",
+        variant: "destructive",
+      });
+      setViewModalOpen(false);
+    } finally {
+      setViewLoading(false);
+    }
+  };
+
+  // Handle delete alert
+  const handleDeleteAlert = async () => {
+    if (!alertToDelete) return;
+
+    setDeleteLoading(true);
+    try {
+      const response = await deleteAlert(alertToDelete.id);
+
+      if (response.success) {
+        toast({
+          title: "Alert deleted",
+          description: "The alert has been successfully deleted.",
+        });
+
+        // Remove from local state
+        setAlerts((prev) => prev.filter((a) => a.id !== alertToDelete.id));
+        setDeleteModalOpen(false);
+        setAlertToDelete(null);
+      } else {
+        toast({
+          title: "Error",
+          description: response.error || "Failed to delete alert",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to delete alert",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // Open delete confirmation
+  const openDeleteConfirmation = (alert: Alert) => {
+    setAlertToDelete(alert);
+    setDeleteModalOpen(true);
+  };
 
   // Get unique alert types
   const alertTypes = useMemo(() => {
@@ -385,9 +480,7 @@ export default function ReportPage() {
                         <TableHead className="text-gray-400">Message</TableHead>
                         <TableHead className="text-gray-400">Status</TableHead>
                         <TableHead className="text-gray-400">Created</TableHead>
-                        <TableHead className="text-gray-400">
-                          Decision
-                        </TableHead>
+                        <TableHead className="text-gray-400">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -423,14 +516,25 @@ export default function ReportPage() {
                               {formatDate(alert.createdAt)}
                             </div>
                           </TableCell>
-                          <TableCell className="text-sm text-gray-400">
-                            {alert.decision ? (
-                              <span className="rounded bg-[#333] px-2 py-1 text-xs">
-                                {alert.decision.replace(/_/g, " ")}
-                              </span>
-                            ) : (
-                              "-"
-                            )}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                onClick={() => handleViewAlert(alert)}
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-blue-400 hover:bg-blue-600/20 hover:text-blue-300"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                onClick={() => openDeleteConfirmation(alert)}
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-red-400 hover:bg-red-600/20 hover:text-red-300"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -456,7 +560,7 @@ export default function ReportPage() {
                           {alert.message}
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-2 text-sm">
+                      <CardContent className="space-y-3 text-sm">
                         <div className="flex items-center gap-2 text-gray-400">
                           <MapPin className="h-4 w-4" />
                           <span>
@@ -467,11 +571,25 @@ export default function ReportPage() {
                           <Calendar className="h-4 w-4" />
                           <span>{formatDate(alert.createdAt)}</span>
                         </div>
-                        {alert.decision && (
-                          <div className="mt-2 rounded bg-[#333] px-3 py-2 text-xs text-gray-300">
-                            Decision: {alert.decision.replace(/_/g, " ")}
-                          </div>
-                        )}
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            onClick={() => handleViewAlert(alert)}
+                            size="sm"
+                            className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View
+                          </Button>
+                          <Button
+                            onClick={() => openDeleteConfirmation(alert)}
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 border-red-600/20 text-red-400 hover:bg-red-600/20"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -529,6 +647,191 @@ export default function ReportPage() {
           </div>
         </main>
       </div>
+
+      {/* View Alert Modal */}
+      <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
+        <DialogContent className="border-[#333] bg-[#111] text-white sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-400" />
+              Alert Details
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Complete information about this alert
+            </DialogDescription>
+          </DialogHeader>
+
+          {viewLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+            </div>
+          ) : selectedAlert ? (
+            <div className="space-y-4">
+              {/* Alert Status & Type */}
+              <div className="flex gap-2">
+                {getTypeBadge(selectedAlert.type)}
+                {getStatusBadge(selectedAlert.status)}
+              </div>
+
+              {/* Alert Message */}
+              <div>
+                <p className="text-sm font-semibold text-gray-400">Message</p>
+                <p className="text-base text-white">{selectedAlert.message}</p>
+              </div>
+
+              {/* Sensor Details */}
+              <div className="rounded-md border border-[#333] bg-[#181818] p-3">
+                <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  <Crosshair className="h-3 w-3" />
+                  Sensor Details
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-gray-500">Name:</span>{" "}
+                    <span className="text-gray-200">
+                      {selectedAlert.sensor?.name || "Unknown"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Sensor ID:</span>{" "}
+                    <span className="font-mono text-blue-400">
+                      {selectedAlert.sensorId}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Area:</span>{" "}
+                    <span className="text-gray-200">
+                      {selectedAlert.sensor?.area?.name || "Unassigned"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Area ID:</span>{" "}
+                    <span className="font-mono text-gray-400">
+                      {selectedAlert.sensor?.area?.areaId || "N/A"}
+                    </span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-gray-500">Location:</span>{" "}
+                    <span className="font-mono text-gray-400">
+                      {typeof selectedAlert.sensor?.latitude === "number" &&
+                      typeof selectedAlert.sensor?.longitude === "number"
+                        ? `${selectedAlert.sensor.latitude.toFixed(
+                            6
+                          )}, ${selectedAlert.sensor.longitude.toFixed(6)}`
+                        : "N/A"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timestamps */}
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-gray-500">Created:</span>{" "}
+                  <span className="text-gray-200">
+                    {formatDate(selectedAlert.createdAt)}
+                  </span>
+                </div>
+                {selectedAlert.decidedAt && (
+                  <div>
+                    <span className="text-gray-500">Decided:</span>{" "}
+                    <span className="text-gray-200">
+                      {formatDate(selectedAlert.decidedAt)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Decision */}
+              {selectedAlert.decision && (
+                <div>
+                  <span className="text-sm text-gray-500">Decision:</span>{" "}
+                  <span className="rounded bg-[#333] px-2 py-1 text-sm text-gray-300">
+                    {selectedAlert.decision.replace(/_/g, " ")}
+                  </span>
+                </div>
+              )}
+
+              {/* Alert ID */}
+              <div className="rounded bg-[#222] p-2 text-xs">
+                <span className="text-gray-500">Alert ID:</span>{" "}
+                <span className="font-mono text-gray-400">
+                  {selectedAlert.id}
+                </span>
+              </div>
+            </div>
+          ) : null}
+
+          <DialogFooter>
+            <Button
+              onClick={() => setViewModalOpen(false)}
+              className="bg-[#333] text-white hover:bg-[#444]"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent className="border-[#333] bg-[#111] text-white sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-400">
+              <Trash2 className="h-5 w-5" />
+              Delete Alert
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Are you sure you want to delete this alert? This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          {alertToDelete && (
+            <div className="rounded-md border border-red-600/20 bg-red-600/10 p-3">
+              <p className="text-sm text-gray-300">
+                <span className="font-semibold">Sensor:</span>{" "}
+                {alertToDelete.sensor?.name || alertToDelete.sensorId}
+              </p>
+              <p className="text-sm text-gray-300">
+                <span className="font-semibold">Message:</span>{" "}
+                {alertToDelete.message}
+              </p>
+              <p className="text-xs text-gray-400">
+                {formatDate(alertToDelete.createdAt)}
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              onClick={() => setDeleteModalOpen(false)}
+              disabled={deleteLoading}
+              variant="outline"
+              className="border-[#444] bg-transparent text-gray-300 hover:bg-[#333]"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteAlert}
+              disabled={deleteLoading}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {deleteLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Alert
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
