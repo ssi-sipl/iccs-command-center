@@ -13,6 +13,7 @@ export interface Area {
   updatedAt: string;
   sensors?: any[];
   alarms?: any[];
+  drones?: any[]; // NEW: Drones relation
 }
 
 export interface ApiResponse<T> {
@@ -24,6 +25,7 @@ export interface ApiResponse<T> {
 }
 
 // Get all areas
+// NOW INCLUDES: drones array when include=true
 export async function getAllAreas(params?: {
   status?: string;
   include?: boolean;
@@ -60,6 +62,7 @@ export async function getAllAreas(params?: {
 }
 
 // Get single area by ID
+// NOW INCLUDES: drones array when includeRelations=true
 export async function getAreaById(
   id: string,
   includeRelations = false

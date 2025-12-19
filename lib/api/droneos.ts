@@ -4,8 +4,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export interface DroneOS {
   id: string;
+  droneId: string; // NEW: Unique drone identifier
   droneOSName: string;
   droneType: string;
+  videoLink?: string | null; // NEW: Video feed link
   gpsFix: string;
   minHDOP: number;
   minSatCount: number;
@@ -19,6 +21,16 @@ export interface DroneOS {
   batteryFailSafe: string;
   gpsName: string;
   maxAltitude: number;
+  areaId?: string | null; // NEW: Area relation
+  area?: {
+    // NEW: Area details when included
+    id: string;
+    areaId: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+    status: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -32,9 +44,20 @@ export interface ApiResponse<T> {
 }
 
 // Get all drone OS settings
-export async function getAllDroneOS(): Promise<ApiResponse<DroneOS[]>> {
+export async function getAllDroneOS(params?: {
+  areaId?: string;
+  include?: boolean;
+}): Promise<ApiResponse<DroneOS[]>> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/droneos`, {
+    const queryParams = new URLSearchParams();
+    if (params?.areaId) queryParams.append("areaId", params.areaId);
+    if (params?.include) queryParams.append("include", "true");
+
+    const url = `${API_BASE_URL}/api/droneos${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -62,10 +85,15 @@ export async function getAllDroneOS(): Promise<ApiResponse<DroneOS[]>> {
 
 // Get single drone OS by ID
 export async function getDroneOSById(
-  id: string
+  id: string,
+  includeArea = false
 ): Promise<ApiResponse<DroneOS>> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/droneos/${id}`, {
+    const url = `${API_BASE_URL}/api/droneos/${id}${
+      includeArea ? "?include=true" : ""
+    }`;
+
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -89,10 +117,48 @@ export async function getDroneOSById(
   }
 }
 
+// Get drones by area ID
+export async function getDronesByArea(
+  areaId: string,
+  includeArea = false
+): Promise<ApiResponse<DroneOS[]>> {
+  try {
+    const url = `${API_BASE_URL}/api/droneos/area/${areaId}${
+      includeArea ? "?include=true" : ""
+    }`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch drones by area");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching drones by area:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch drones by area",
+    };
+  }
+}
+
 // Create new drone OS
 export async function createDroneOS(droneData: {
+  droneId: string; // REQUIRED: Unique drone identifier
   droneOSName: string;
   droneType: string;
+  videoLink?: string; // OPTIONAL: Video feed link
   gpsFix: string;
   minHDOP: number;
   minSatCount: number;
@@ -106,6 +172,7 @@ export async function createDroneOS(droneData: {
   batteryFailSafe: string;
   gpsName: string;
   maxAltitude: number;
+  areaId?: string; // OPTIONAL: Area ID
 }): Promise<ApiResponse<DroneOS>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/droneos`, {
@@ -136,8 +203,10 @@ export async function createDroneOS(droneData: {
 export async function updateDroneOS(
   id: string,
   droneData: Partial<{
+    droneId: string;
     droneOSName: string;
     droneType: string;
+    videoLink: string | null;
     gpsFix: string;
     minHDOP: number;
     minSatCount: number;
@@ -151,6 +220,7 @@ export async function updateDroneOS(
     batteryFailSafe: string;
     gpsName: string;
     maxAltitude: number;
+    areaId: string | null;
   }>
 ): Promise<ApiResponse<DroneOS>> {
   try {
