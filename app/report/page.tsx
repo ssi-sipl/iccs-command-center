@@ -29,24 +29,27 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
   AlertTriangle,
   CheckCircle,
   Send,
-  MapPin,
+  Plane,
   Calendar,
   Filter,
   Loader2,
   RefreshCw,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   Trash2,
-  Crosshair,
+  Clock,
+  Zap,
+  Wind,
 } from "lucide-react";
 import { getAllAlerts, getAlertById, deleteAlert } from "@/lib/api/alerts";
 import type { Alert, AlertStatus } from "@/lib/api/alerts";
+import { getAllFlightHistory } from "@/lib/api/flightHistory";
+import type { FlightHistory } from "@/lib/api/flightHistory";
 import {
   Select,
   SelectContent,
@@ -60,32 +63,45 @@ const ITEMS_PER_PAGE = 10;
 
 export default function ReportPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("alerts");
+
+  // Alert states
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [alertsLoading, setAlertsLoading] = useState(true);
+  const [alertsError, setAlertsError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<AlertStatus | "ALL">("ALL");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalAlerts, setTotalAlerts] = useState(0);
+  const [alertCurrentPage, setAlertCurrentPage] = useState(1);
 
-  // View modal state
+  // Flight history states
+  const [flights, setFlights] = useState<FlightHistory[]>([]);
+  const [flightsLoading, setFlightsLoading] = useState(true);
+  const [flightsError, setFlightsError] = useState<string | null>(null);
+  const [flightSearchTerm, setFlightSearchTerm] = useState("");
+  const [flightStatusFilter, setFlightStatusFilter] = useState<string>("ALL");
+  const [flightCurrentPage, setFlightCurrentPage] = useState(1);
+
+  // View modal states
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const [selectedFlight, setSelectedFlight] = useState<FlightHistory | null>(
+    null
+  );
   const [viewLoading, setViewLoading] = useState(false);
 
-  // Delete confirmation state
+  // Delete confirmation states
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [alertToDelete, setAlertToDelete] = useState<Alert | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { toast } = useToast();
 
-  // Fetch alerts from API
+  // Fetch alerts
   const fetchAlerts = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setAlertsLoading(true);
+      setAlertsError(null);
 
       const params = {
         limit: 1000,
@@ -99,24 +115,52 @@ export default function ReportPage() {
 
       if (response.success && response.data) {
         setAlerts(response.data);
-        setTotalAlerts(response.pagination?.total || response.data.length);
       } else {
-        setError(response.error || "Failed to fetch alerts");
+        setAlertsError(response.error || "Failed to fetch alerts");
       }
     } catch (err) {
-      setError("An unexpected error occurred");
+      setAlertsError("An unexpected error occurred");
       console.error("Error fetching alerts:", err);
     } finally {
-      setLoading(false);
+      setAlertsLoading(false);
     }
   };
 
-  // Initial load
+  // Fetch flight history
+  const fetchFlightHistory = async () => {
+    try {
+      setFlightsLoading(true);
+      setFlightsError(null);
+
+      const params = {
+        limit: 1000,
+        skip: 0,
+        sortBy: "dispatchedAt" as const,
+        sortOrder: "desc" as const,
+        ...(flightStatusFilter !== "ALL" && { status: flightStatusFilter }),
+      };
+
+      const response = await getAllFlightHistory(params);
+
+      if (response.success && response.data) {
+        setFlights(response.data);
+      } else {
+        setFlightsError(response.error || "Failed to fetch flight history");
+      }
+    } catch (err) {
+      setFlightsError("An unexpected error occurred");
+      console.error("Error fetching flight history:", err);
+    } finally {
+      setFlightsLoading(false);
+    }
+  };
+
+  // Initial load for both
   useEffect(() => {
     fetchAlerts();
-  }, [statusFilter]);
+    fetchFlightHistory();
+  }, [statusFilter, flightStatusFilter]);
 
-  // Handle view alert
   const handleViewAlert = async (alert: Alert) => {
     setViewLoading(true);
     setViewModalOpen(true);
@@ -125,6 +169,7 @@ export default function ReportPage() {
       const response = await getAlertById(alert.id);
       if (response.success && response.data) {
         setSelectedAlert(response.data);
+        setSelectedFlight(null);
       } else {
         toast({
           title: "Error",
@@ -145,6 +190,13 @@ export default function ReportPage() {
     }
   };
 
+  const handleViewFlight = (flight: FlightHistory) => {
+    setSelectedFlight(flight);
+    setSelectedAlert(null);
+    setViewModalOpen(true);
+    setViewLoading(false);
+  };
+
   // Handle delete alert
   const handleDeleteAlert = async () => {
     if (!alertToDelete) return;
@@ -159,7 +211,6 @@ export default function ReportPage() {
           description: "The alert has been successfully deleted.",
         });
 
-        // Remove from local state
         setAlerts((prev) => prev.filter((a) => a.id !== alertToDelete.id));
         setDeleteModalOpen(false);
         setAlertToDelete(null);
@@ -181,7 +232,6 @@ export default function ReportPage() {
     }
   };
 
-  // Open delete confirmation
   const openDeleteConfirmation = (alert: Alert) => {
     setAlertToDelete(alert);
     setDeleteModalOpen(true);
@@ -193,9 +243,15 @@ export default function ReportPage() {
     return Array.from(types);
   }, [alerts]);
 
-  // Filter alerts (client-side for search and type)
+  // Get unique flight statuses
+  const flightStatuses = useMemo(() => {
+    const statuses = new Set(flights.map((f) => f.status));
+    return Array.from(statuses);
+  }, [flights]);
+
+  // Filter alerts
   const filteredAlerts = useMemo(() => {
-    let filtered = alerts.filter((alert) => {
+    return alerts.filter((alert) => {
       const matchesSearch =
         alert.sensorId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         alert.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -208,26 +264,43 @@ export default function ReportPage() {
 
       return matchesSearch && matchesType;
     });
-
-    return filtered;
   }, [alerts, searchTerm, typeFilter]);
 
-  // Paginate filtered alerts
+  // Filter flights
+  const filteredFlights = useMemo(() => {
+    return flights.filter((flight) => {
+      const matchesSearch =
+        flight.droneId.toLowerCase().includes(flightSearchTerm.toLowerCase()) ||
+        flight.sensorId
+          .toLowerCase()
+          .includes(flightSearchTerm.toLowerCase()) ||
+        flight.drone?.droneOSName
+          .toLowerCase()
+          .includes(flightSearchTerm.toLowerCase());
+
+      const matchesStatus =
+        flightStatusFilter === "ALL" || flight.status === flightStatusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [flights, flightSearchTerm, flightStatusFilter]);
+
+  // Paginate alerts
   const paginatedAlerts = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const startIndex = (alertCurrentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     return filteredAlerts.slice(startIndex, endIndex);
-  }, [filteredAlerts, currentPage]);
+  }, [filteredAlerts, alertCurrentPage]);
 
-  const totalPages = Math.ceil(filteredAlerts.length / ITEMS_PER_PAGE);
+  // Paginate flights
+  const paginatedFlights = useMemo(() => {
+    const startIndex = (flightCurrentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredFlights.slice(startIndex, endIndex);
+  }, [filteredFlights, flightCurrentPage]);
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter, typeFilter]);
-
-  // Calculate stats
-  const stats = useMemo(() => {
+  // Calculate alert stats
+  const alertStats = useMemo(() => {
     return {
       total: alerts.length,
       active: alerts.filter((a) => a.status === "ACTIVE").length,
@@ -236,7 +309,18 @@ export default function ReportPage() {
     };
   }, [alerts]);
 
-  const getStatusBadge = (status: AlertStatus) => {
+  // Calculate flight stats
+  const flightStats = useMemo(() => {
+    return {
+      total: flights.length,
+      completed: flights.filter((f) => f.status === "Completed").length,
+      inFlight: flights.filter((f) => f.status === "In Flight").length,
+      dispatched: flights.filter((f) => f.status === "Dispatched").length,
+      aborted: flights.filter((f) => f.status === "Aborted").length,
+    };
+  }, [flights]);
+
+  const getAlertStatusBadge = (status: AlertStatus) => {
     switch (status) {
       case "ACTIVE":
         return (
@@ -259,7 +343,21 @@ export default function ReportPage() {
     }
   };
 
-  const getTypeBadge = (type: string) => {
+  const getFlightStatusBadge = (status: string) => {
+    const statusConfig: Record<string, string> = {
+      Dispatched: "bg-yellow-600/20 text-yellow-400",
+      "In Flight": "bg-blue-600/20 text-blue-400",
+      Completed: "bg-green-600/20 text-green-400",
+      Aborted: "bg-red-600/20 text-red-400",
+    };
+    return (
+      <Badge className={statusConfig[status] || "bg-gray-600/20 text-gray-400"}>
+        {status}
+      </Badge>
+    );
+  };
+
+  const getAlertTypeBadge = (type: string) => {
     const colors: Record<string, string> = {
       INTRUSION: "bg-orange-600/20 text-orange-400",
       THERMAL: "bg-yellow-600/20 text-yellow-400",
@@ -289,6 +387,14 @@ export default function ReportPage() {
     });
   };
 
+  const formatDuration = (seconds: number | null) => {
+    if (!seconds) return "-";
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+
   return (
     <div className="flex h-screen flex-col bg-[#1a1a1a]">
       <DashboardHeader activeItem="REPORT" />
@@ -303,18 +409,28 @@ export default function ReportPage() {
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-white md:text-3xl">
-                  Alert History Report
+                  Report Dashboard
                 </h1>
                 <p className="mt-1 text-sm text-gray-400">
-                  View and analyze all alert records
+                  View and analyze alert and drone flight records
                 </p>
               </div>
               <Button
-                onClick={fetchAlerts}
-                disabled={loading}
+                onClick={() => {
+                  if (activeTab === "alerts") {
+                    fetchAlerts();
+                  } else {
+                    fetchFlightHistory();
+                  }
+                }}
+                disabled={
+                  activeTab === "alerts" ? alertsLoading : flightsLoading
+                }
                 className="bg-[#8B0000] text-white hover:bg-[#6B0000]"
               >
-                {loading ? (
+                {activeTab === "alerts" && alertsLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : activeTab === "flights" && flightsLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <RefreshCw className="h-4 w-4" />
@@ -323,511 +439,778 @@ export default function ReportPage() {
               </Button>
             </div>
 
-            {/* Error State */}
-            {error && (
-              <Card className="mb-6 border-red-600/20 bg-red-600/10">
-                <CardContent className="flex items-center gap-3 py-4">
-                  <AlertTriangle className="h-5 w-5 text-red-400" />
-                  <div>
-                    <p className="font-medium text-red-400">Error</p>
-                    <p className="text-sm text-red-300">{error}</p>
-                  </div>
-                  <Button
-                    onClick={fetchAlerts}
-                    variant="outline"
-                    size="sm"
-                    className="ml-auto"
-                  >
-                    Retry
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
+            {/* Tabs */}
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <TabsList className="mb-6 grid w-full grid-cols-2 bg-[#222] p-1">
+                <TabsTrigger
+                  value="alerts"
+                  className="data-[state=active]:bg-[#8B0000] data-[state=active]:text-white"
+                >
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  Alert History
+                </TabsTrigger>
+                <TabsTrigger
+                  value="flights"
+                  className="data-[state=active]:bg-[#8B0000] data-[state=active]:text-white"
+                >
+                  <Plane className="mr-2 h-4 w-4" />
+                  Flight History
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Loading State */}
-            {loading && (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="mb-4 h-12 w-12 animate-spin text-[#8B0000]" />
-                <p className="text-gray-400">Loading alerts...</p>
-              </div>
-            )}
-
-            {/* Content */}
-            {!loading && !error && (
-              <>
-                {/* Stats Cards */}
-                <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <Card className="border-[#333] bg-[#222]">
-                    <CardHeader className="pb-3">
-                      <CardDescription className="text-gray-400">
-                        Total Alerts
-                      </CardDescription>
-                      <CardTitle className="text-3xl text-white">
-                        {stats.total}
-                      </CardTitle>
-                    </CardHeader>
-                  </Card>
-                  <Card className="border-[#333] bg-[#222]">
-                    <CardHeader className="pb-3">
-                      <CardDescription className="flex items-center gap-2 text-red-400">
-                        <AlertTriangle className="h-4 w-4" />
-                        Active
-                      </CardDescription>
-                      <CardTitle className="text-3xl text-white">
-                        {stats.active}
-                      </CardTitle>
-                    </CardHeader>
-                  </Card>
-                  <Card className="border-[#333] bg-[#222]">
-                    <CardHeader className="pb-3">
-                      <CardDescription className="flex items-center gap-2 text-blue-400">
-                        <Send className="h-4 w-4" />
-                        Drone Sent
-                      </CardDescription>
-                      <CardTitle className="text-3xl text-white">
-                        {stats.sent}
-                      </CardTitle>
-                    </CardHeader>
-                  </Card>
-                  <Card className="border-[#333] bg-[#222]">
-                    <CardHeader className="pb-3">
-                      <CardDescription className="flex items-center gap-2 text-gray-400">
-                        <CheckCircle className="h-4 w-4" />
-                        Neutralised
-                      </CardDescription>
-                      <CardTitle className="text-3xl text-white">
-                        {stats.neutralised}
-                      </CardTitle>
-                    </CardHeader>
-                  </Card>
-                </div>
-
-                {/* Filters */}
-                <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center">
-                  <div className="relative flex-1 lg:max-w-md">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                    <Input
-                      placeholder="Search by sensor, area, or message..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="border-[#333] bg-[#222] pl-10 text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <Select
-                      value={statusFilter}
-                      onValueChange={(value) =>
-                        setStatusFilter(value as AlertStatus | "ALL")
-                      }
-                    >
-                      <SelectTrigger className="w-[150px] border-[#333] bg-[#222] text-white">
-                        <Filter className="mr-2 h-4 w-4" />
-                        <SelectValue placeholder="Status" />
-                      </SelectTrigger>
-                      <SelectContent className="border-[#333] bg-[#222]">
-                        <SelectItem value="ALL" className="text-white">
-                          All Status
-                        </SelectItem>
-                        <SelectItem value="ACTIVE" className="text-white">
-                          Active
-                        </SelectItem>
-                        <SelectItem value="SENT" className="text-white">
-                          Sent
-                        </SelectItem>
-                        <SelectItem value="NEUTRALISED" className="text-white">
-                          Neutralised
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select value={typeFilter} onValueChange={setTypeFilter}>
-                      <SelectTrigger className="w-[150px] border-[#333] bg-[#222] text-white">
-                        <Filter className="mr-2 h-4 w-4" />
-                        <SelectValue placeholder="Type" />
-                      </SelectTrigger>
-                      <SelectContent className="border-[#333] bg-[#222]">
-                        <SelectItem value="ALL" className="text-white">
-                          All Types
-                        </SelectItem>
-                        {alertTypes.map((type) => (
-                          <SelectItem
-                            key={type}
-                            value={type}
-                            className="text-white"
-                          >
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <p className="text-sm text-gray-400 lg:ml-auto">
-                    Showing {paginatedAlerts.length} of {filteredAlerts.length}{" "}
-                    alerts
-                  </p>
-                </div>
-
-                {/* Table - Desktop */}
-                <div className="hidden rounded-lg border border-[#333] bg-[#222] lg:block">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-[#333] hover:bg-transparent">
-                        <TableHead className="text-gray-400">
-                          Alert ID
-                        </TableHead>
-                        <TableHead className="text-gray-400">Type</TableHead>
-                        <TableHead className="text-gray-400">Sensor</TableHead>
-                        <TableHead className="text-gray-400">Area</TableHead>
-                        <TableHead className="text-gray-400">Message</TableHead>
-                        <TableHead className="text-gray-400">Status</TableHead>
-                        <TableHead className="text-gray-400">Created</TableHead>
-                        <TableHead className="text-gray-400">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paginatedAlerts.map((alert) => (
-                        <TableRow
-                          key={alert.id}
-                          className="border-[#333] hover:bg-[#2a2a2a]"
-                        >
-                          <TableCell className="font-mono text-xs text-white">
-                            {alert.id.slice(0, 8)}...
-                          </TableCell>
-                          <TableCell>{getTypeBadge(alert.type)}</TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium text-white">
-                                {alert.sensor?.name || "Unknown"}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {alert.sensorId}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-gray-300">
-                            {alert.sensor?.area?.name || "-"}
-                          </TableCell>
-                          <TableCell className="max-w-xs truncate text-gray-300">
-                            {alert.message}
-                          </TableCell>
-                          <TableCell>{getStatusBadge(alert.status)}</TableCell>
-                          <TableCell className="text-sm text-gray-400">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {formatDate(alert.createdAt)}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                onClick={() => handleViewAlert(alert)}
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0 text-blue-400 hover:bg-blue-600/20 hover:text-blue-300"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                onClick={() => openDeleteConfirmation(alert)}
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0 text-red-400 hover:bg-red-600/20 hover:text-red-300"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-
-                {/* Cards - Mobile & Tablet */}
-                <div className="flex flex-col gap-4 lg:hidden">
-                  {paginatedAlerts.map((alert) => (
-                    <Card key={alert.id} className="border-[#333] bg-[#222]">
-                      <CardHeader className="pb-3">
-                        <div className="mb-2 flex items-start justify-between">
-                          <div className="flex gap-2">
-                            {getTypeBadge(alert.type)}
-                            {getStatusBadge(alert.status)}
-                          </div>
-                        </div>
-                        <CardTitle className="text-base text-white">
-                          {alert.sensor?.name || "Unknown Sensor"}
-                        </CardTitle>
-                        <CardDescription className="text-sm text-gray-400">
-                          {alert.message}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-3 text-sm">
-                        <div className="flex items-center gap-2 text-gray-400">
-                          <MapPin className="h-4 w-4" />
-                          <span>
-                            {alert.sensor?.area?.name || "Unknown Area"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-400">
-                          <Calendar className="h-4 w-4" />
-                          <span>{formatDate(alert.createdAt)}</span>
-                        </div>
-                        <div className="flex gap-2 pt-2">
-                          <Button
-                            onClick={() => handleViewAlert(alert)}
-                            size="sm"
-                            className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            View
-                          </Button>
-                          <Button
-                            onClick={() => openDeleteConfirmation(alert)}
-                            size="sm"
-                            variant="outline"
-                            className="flex-1 border-red-600/20 text-red-400 hover:bg-red-600/20"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="mt-6 flex items-center justify-between">
-                    <p className="text-sm text-gray-400">
-                      Page {currentPage} of {totalPages}
-                    </p>
-                    <div className="flex gap-2">
+              {/* ALERTS TAB */}
+              <TabsContent value="alerts" className="space-y-6">
+                {/* Error State */}
+                {alertsError && (
+                  <Card className="border-red-600/20 bg-red-600/10">
+                    <CardContent className="flex items-center gap-3 py-4">
+                      <AlertTriangle className="h-5 w-5 text-red-400" />
+                      <div>
+                        <p className="font-medium text-red-400">Error</p>
+                        <p className="text-sm text-red-300">{alertsError}</p>
+                      </div>
                       <Button
-                        onClick={() =>
-                          setCurrentPage((p) => Math.max(1, p - 1))
-                        }
-                        disabled={currentPage === 1}
+                        onClick={fetchAlerts}
                         variant="outline"
                         size="sm"
-                        className="border-[#333] bg-[#222] text-white hover:bg-[#2a2a2a]"
+                        className="ml-auto bg-transparent"
                       >
-                        <ChevronLeft className="h-4 w-4" />
-                        Previous
+                        Retry
                       </Button>
-                      <Button
-                        onClick={() =>
-                          setCurrentPage((p) => Math.min(totalPages, p + 1))
-                        }
-                        disabled={currentPage === totalPages}
-                        variant="outline"
-                        size="sm"
-                        className="border-[#333] bg-[#222] text-white hover:bg-[#2a2a2a]"
-                      >
-                        Next
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Loading State */}
+                {alertsLoading && (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <Loader2 className="mb-4 h-12 w-12 animate-spin text-[#8B0000]" />
+                    <p className="text-gray-400">Loading alerts...</p>
+                  </div>
+                )}
+
+                {!alertsLoading && !alertsError && (
+                  <>
+                    {/* Stats Cards */}
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <Card className="border-[#333] bg-[#222]">
+                        <CardHeader className="pb-3">
+                          <CardDescription className="text-gray-400">
+                            Total Alerts
+                          </CardDescription>
+                          <CardTitle className="text-3xl text-white">
+                            {alertStats.total}
+                          </CardTitle>
+                        </CardHeader>
+                      </Card>
+                      <Card className="border-[#333] bg-[#222]">
+                        <CardHeader className="pb-3">
+                          <CardDescription className="flex items-center gap-2 text-red-400">
+                            <AlertTriangle className="h-4 w-4" />
+                            Active
+                          </CardDescription>
+                          <CardTitle className="text-3xl text-white">
+                            {alertStats.active}
+                          </CardTitle>
+                        </CardHeader>
+                      </Card>
+                      <Card className="border-[#333] bg-[#222]">
+                        <CardHeader className="pb-3">
+                          <CardDescription className="flex items-center gap-2 text-blue-400">
+                            <Send className="h-4 w-4" />
+                            Drone Sent
+                          </CardDescription>
+                          <CardTitle className="text-3xl text-white">
+                            {alertStats.sent}
+                          </CardTitle>
+                        </CardHeader>
+                      </Card>
+                      <Card className="border-[#333] bg-[#222]">
+                        <CardHeader className="pb-3">
+                          <CardDescription className="flex items-center gap-2 text-gray-400">
+                            <CheckCircle className="h-4 w-4" />
+                            Neutralised
+                          </CardDescription>
+                          <CardTitle className="text-3xl text-white">
+                            {alertStats.neutralised}
+                          </CardTitle>
+                        </CardHeader>
+                      </Card>
                     </div>
+
+                    {/* Filters */}
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                      <div className="relative flex-1 lg:max-w-md">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                        <Input
+                          placeholder="Search by sensor, area, or message..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="border-[#333] bg-[#222] pl-10 text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                        />
+                      </div>
+                      <div className="flex gap-3">
+                        <Select
+                          value={statusFilter}
+                          onValueChange={(value) =>
+                            setStatusFilter(value as AlertStatus | "ALL")
+                          }
+                        >
+                          <SelectTrigger className="w-[150px] border-[#333] bg-[#222] text-white">
+                            <Filter className="mr-2 h-4 w-4" />
+                            <SelectValue placeholder="Status" />
+                          </SelectTrigger>
+                          <SelectContent className="border-[#333] bg-[#222]">
+                            <SelectItem value="ALL" className="text-white">
+                              All Status
+                            </SelectItem>
+                            <SelectItem value="ACTIVE" className="text-white">
+                              Active
+                            </SelectItem>
+                            <SelectItem value="SENT" className="text-white">
+                              Sent
+                            </SelectItem>
+                            <SelectItem
+                              value="NEUTRALISED"
+                              className="text-white"
+                            >
+                              Neutralised
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={typeFilter}
+                          onValueChange={setTypeFilter}
+                        >
+                          <SelectTrigger className="w-[150px] border-[#333] bg-[#222] text-white">
+                            <Filter className="mr-2 h-4 w-4" />
+                            <SelectValue placeholder="Type" />
+                          </SelectTrigger>
+                          <SelectContent className="border-[#333] bg-[#222]">
+                            <SelectItem value="ALL" className="text-white">
+                              All Types
+                            </SelectItem>
+                            {alertTypes.map((type) => (
+                              <SelectItem
+                                key={type}
+                                value={type}
+                                className="text-white"
+                              >
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <p className="text-sm text-gray-400 lg:ml-auto">
+                        Showing {paginatedAlerts.length} of{" "}
+                        {filteredAlerts.length} alerts
+                      </p>
+                    </div>
+
+                    {/* Table - Desktop */}
+                    <div className="hidden rounded-lg border border-[#333] bg-[#222] lg:block">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-[#333] hover:bg-transparent">
+                            <TableHead className="text-gray-400">
+                              Alert ID
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Type
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Sensor
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Area
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Message
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Status
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Created
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Actions
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {paginatedAlerts.map((alert) => (
+                            <TableRow
+                              key={alert.id}
+                              className="border-[#333] hover:bg-[#2a2a2a]"
+                            >
+                              <TableCell className="font-mono text-xs text-white">
+                                {alert.id.slice(0, 8)}...
+                              </TableCell>
+                              <TableCell>
+                                {getAlertTypeBadge(alert.type)}
+                              </TableCell>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium text-white">
+                                    {alert.sensor?.name || "Unknown"}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {alert.sensorId}
+                                  </p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-gray-300">
+                                {alert.sensor?.area?.name || "-"}
+                              </TableCell>
+                              <TableCell className="max-w-xs truncate text-gray-300">
+                                {alert.message}
+                              </TableCell>
+                              <TableCell>
+                                {getAlertStatusBadge(alert.status)}
+                              </TableCell>
+                              <TableCell className="text-sm text-gray-400">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {formatDate(alert.createdAt)}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    onClick={() => handleViewAlert(alert)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 text-blue-400 hover:bg-blue-600/20 hover:text-blue-300"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    onClick={() =>
+                                      openDeleteConfirmation(alert)
+                                    }
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 text-red-400 hover:bg-red-600/20 hover:text-red-300"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    {Math.ceil(filteredAlerts.length / ITEMS_PER_PAGE) > 1 && (
+                      <div className="flex items-center justify-between">
+                        <Button
+                          onClick={() =>
+                            setAlertCurrentPage(
+                              Math.max(alertCurrentPage - 1, 1)
+                            )
+                          }
+                          disabled={alertCurrentPage === 1}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Previous
+                        </Button>
+                        <span className="text-sm text-gray-400">
+                          Page {alertCurrentPage} of{" "}
+                          {Math.ceil(filteredAlerts.length / ITEMS_PER_PAGE)}
+                        </span>
+                        <Button
+                          onClick={() =>
+                            setAlertCurrentPage(
+                              Math.min(
+                                alertCurrentPage + 1,
+                                Math.ceil(
+                                  filteredAlerts.length / ITEMS_PER_PAGE
+                                )
+                              )
+                            )
+                          }
+                          disabled={
+                            alertCurrentPage ===
+                            Math.ceil(filteredAlerts.length / ITEMS_PER_PAGE)
+                          }
+                          variant="outline"
+                          size="sm"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </TabsContent>
+
+              {/* FLIGHTS TAB */}
+              <TabsContent value="flights" className="space-y-6">
+                {/* Error State */}
+                {flightsError && (
+                  <Card className="border-red-600/20 bg-red-600/10">
+                    <CardContent className="flex items-center gap-3 py-4">
+                      <AlertTriangle className="h-5 w-5 text-red-400" />
+                      <div>
+                        <p className="font-medium text-red-400">Error</p>
+                        <p className="text-sm text-red-300">{flightsError}</p>
+                      </div>
+                      <Button
+                        onClick={fetchFlightHistory}
+                        variant="outline"
+                        size="sm"
+                        className="ml-auto bg-transparent"
+                      >
+                        Retry
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Loading State */}
+                {flightsLoading && (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <Loader2 className="mb-4 h-12 w-12 animate-spin text-[#8B0000]" />
+                    <p className="text-gray-400">Loading flight history...</p>
                   </div>
                 )}
 
-                {/* Empty State */}
-                {filteredAlerts.length === 0 && (
-                  <div className="flex flex-col items-center justify-center rounded-lg border border-[#333] bg-[#222] py-12">
-                    <AlertTriangle className="mb-4 h-12 w-12 text-gray-600" />
-                    <p className="text-lg font-medium text-gray-400">
-                      No alerts found
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Try adjusting your filters or search term
-                    </p>
-                  </div>
+                {!flightsLoading && !flightsError && (
+                  <>
+                    {/* Stats Cards */}
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                      <Card className="border-[#333] bg-[#222]">
+                        <CardHeader className="pb-3">
+                          <CardDescription className="text-gray-400">
+                            Total Flights
+                          </CardDescription>
+                          <CardTitle className="text-3xl text-white">
+                            {flightStats.total}
+                          </CardTitle>
+                        </CardHeader>
+                      </Card>
+                      <Card className="border-[#333] bg-[#222]">
+                        <CardHeader className="pb-3">
+                          <CardDescription className="flex items-center gap-2 text-green-400">
+                            <CheckCircle className="h-4 w-4" />
+                            Completed
+                          </CardDescription>
+                          <CardTitle className="text-3xl text-white">
+                            {flightStats.completed}
+                          </CardTitle>
+                        </CardHeader>
+                      </Card>
+                      <Card className="border-[#333] bg-[#222]">
+                        <CardHeader className="pb-3">
+                          <CardDescription className="flex items-center gap-2 text-blue-400">
+                            <Plane className="h-4 w-4" />
+                            In Flight
+                          </CardDescription>
+                          <CardTitle className="text-3xl text-white">
+                            {flightStats.inFlight}
+                          </CardTitle>
+                        </CardHeader>
+                      </Card>
+                      <Card className="border-[#333] bg-[#222]">
+                        <CardHeader className="pb-3">
+                          <CardDescription className="flex items-center gap-2 text-yellow-400">
+                            <Send className="h-4 w-4" />
+                            Dispatched
+                          </CardDescription>
+                          <CardTitle className="text-3xl text-white">
+                            {flightStats.dispatched}
+                          </CardTitle>
+                        </CardHeader>
+                      </Card>
+                      <Card className="border-[#333] bg-[#222]">
+                        <CardHeader className="pb-3">
+                          <CardDescription className="flex items-center gap-2 text-red-400">
+                            <AlertTriangle className="h-4 w-4" />
+                            Aborted
+                          </CardDescription>
+                          <CardTitle className="text-3xl text-white">
+                            {flightStats.aborted}
+                          </CardTitle>
+                        </CardHeader>
+                      </Card>
+                    </div>
+
+                    {/* Filters */}
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                      <div className="relative flex-1 lg:max-w-md">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                        <Input
+                          placeholder="Search by drone, sensor..."
+                          value={flightSearchTerm}
+                          onChange={(e) => setFlightSearchTerm(e.target.value)}
+                          className="border-[#333] bg-[#222] pl-10 text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                        />
+                      </div>
+                      <Select
+                        value={flightStatusFilter}
+                        onValueChange={setFlightStatusFilter}
+                      >
+                        <SelectTrigger className="w-[150px] border-[#333] bg-[#222] text-white">
+                          <Filter className="mr-2 h-4 w-4" />
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent className="border-[#333] bg-[#222]">
+                          <SelectItem value="ALL" className="text-white">
+                            All Status
+                          </SelectItem>
+                          {flightStatuses.map((status) => (
+                            <SelectItem
+                              key={status}
+                              value={status}
+                              className="text-white"
+                            >
+                              {status}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-sm text-gray-400 lg:ml-auto">
+                        Showing {paginatedFlights.length} of{" "}
+                        {filteredFlights.length} flights
+                      </p>
+                    </div>
+
+                    {/* Table - Desktop */}
+                    <div className="hidden rounded-lg border border-[#333] bg-[#222] lg:block">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-[#333] hover:bg-transparent">
+                            <TableHead className="text-gray-400">
+                              Drone ID
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Sensor
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Status
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Duration
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Battery
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Distance
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Dispatched
+                            </TableHead>
+                            <TableHead className="text-gray-400">
+                              Actions
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {paginatedFlights.map((flight) => (
+                            <TableRow
+                              key={flight.id}
+                              className="border-[#333] hover:bg-[#2a2a2a]"
+                            >
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium text-white">
+                                    {flight.droneId}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {flight.drone?.droneOSName || "Unknown"}
+                                  </p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-gray-300">
+                                {flight.sensorId}
+                              </TableCell>
+                              <TableCell>
+                                {getFlightStatusBadge(flight.status)}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-1 text-gray-300">
+                                  <Clock className="h-3 w-3" />
+                                  {formatDuration(flight.flightDuration)}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-1 text-gray-300">
+                                  <Zap className="h-3 w-3" />
+                                  {flight.batteryUsed
+                                    ? `${flight.batteryUsed}%`
+                                    : "-"}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-1 text-gray-300">
+                                  <Wind className="h-3 w-3" />
+                                  {flight.distanceCovered
+                                    ? `${(
+                                        flight.distanceCovered / 1000
+                                      ).toFixed(2)}km`
+                                    : "-"}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-sm text-gray-400">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {formatDate(flight.dispatchedAt)}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  onClick={() => handleViewFlight(flight)}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-blue-400 hover:bg-blue-600/20 hover:text-blue-300"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    {Math.ceil(filteredFlights.length / ITEMS_PER_PAGE) > 1 && (
+                      <div className="flex items-center justify-between">
+                        <Button
+                          onClick={() =>
+                            setFlightCurrentPage(
+                              Math.max(flightCurrentPage - 1, 1)
+                            )
+                          }
+                          disabled={flightCurrentPage === 1}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Previous
+                        </Button>
+                        <span className="text-sm text-gray-400">
+                          Page {flightCurrentPage} of{" "}
+                          {Math.ceil(filteredFlights.length / ITEMS_PER_PAGE)}
+                        </span>
+                        <Button
+                          onClick={() =>
+                            setFlightCurrentPage(
+                              Math.min(
+                                flightCurrentPage + 1,
+                                Math.ceil(
+                                  filteredFlights.length / ITEMS_PER_PAGE
+                                )
+                              )
+                            )
+                          }
+                          disabled={
+                            flightCurrentPage ===
+                            Math.ceil(filteredFlights.length / ITEMS_PER_PAGE)
+                          }
+                          variant="outline"
+                          size="sm"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
-              </>
-            )}
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
       </div>
 
-      {/* View Alert Modal */}
-      <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
-        <DialogContent className="border-[#333] bg-[#111] text-white sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-blue-400" />
-              Alert Details
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Complete information about this alert
-            </DialogDescription>
-          </DialogHeader>
-
-          {viewLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
-            </div>
-          ) : selectedAlert ? (
-            <div className="space-y-4">
-              {/* Alert Status & Type */}
-              <div className="flex gap-2">
-                {getTypeBadge(selectedAlert.type)}
-                {getStatusBadge(selectedAlert.status)}
+      {/* View Modal - Alerts */}
+      {selectedAlert && (
+        <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
+          <DialogContent className="border-[#333] bg-[#222] text-white">
+            <DialogHeader>
+              <DialogTitle>Alert Details</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                {selectedAlert.id}
+              </DialogDescription>
+            </DialogHeader>
+            {viewLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-[#8B0000]" />
               </div>
-
-              {/* Alert Message */}
-              <div>
-                <p className="text-sm font-semibold text-gray-400">Message</p>
-                <p className="text-base text-white">{selectedAlert.message}</p>
-              </div>
-
-              {/* Sensor Details */}
-              <div className="rounded-md border border-[#333] bg-[#181818] p-3">
-                <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                  <Crosshair className="h-3 w-3" />
-                  Sensor Details
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-gray-500">Name:</span>{" "}
-                    <span className="text-gray-200">
-                      {selectedAlert.sensor?.name || "Unknown"}
-                    </span>
+                    <p className="text-sm text-gray-400">Type</p>
+                    <p className="text-white">
+                      {getAlertTypeBadge(selectedAlert.type)}
+                    </p>
                   </div>
                   <div>
-                    <span className="text-gray-500">Sensor ID:</span>{" "}
-                    <span className="font-mono text-blue-400">
-                      {selectedAlert.sensorId}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Area:</span>{" "}
-                    <span className="text-gray-200">
-                      {selectedAlert.sensor?.area?.name || "Unassigned"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Area ID:</span>{" "}
-                    <span className="font-mono text-gray-400">
-                      {selectedAlert.sensor?.area?.areaId || "N/A"}
-                    </span>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-gray-500">Location:</span>{" "}
-                    <span className="font-mono text-gray-400">
-                      {typeof selectedAlert.sensor?.latitude === "number" &&
-                      typeof selectedAlert.sensor?.longitude === "number"
-                        ? `${selectedAlert.sensor.latitude.toFixed(
-                            6
-                          )}, ${selectedAlert.sensor.longitude.toFixed(6)}`
-                        : "N/A"}
-                    </span>
+                    <p className="text-sm text-gray-400">Status</p>
+                    <p className="text-white">
+                      {getAlertStatusBadge(selectedAlert.status)}
+                    </p>
                   </div>
                 </div>
-              </div>
-
-              {/* Timestamps */}
-              <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <span className="text-gray-500">Created:</span>{" "}
-                  <span className="text-gray-200">
+                  <p className="text-sm text-gray-400">Sensor</p>
+                  <p className="text-white">
+                    {selectedAlert.sensor?.name || "Unknown"}{" "}
+                    <span className="text-gray-500">
+                      ({selectedAlert.sensorId})
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Area</p>
+                  <p className="text-white">
+                    {selectedAlert.sensor?.area?.name || "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Message</p>
+                  <p className="text-white">{selectedAlert.message}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Created</p>
+                  <p className="text-white">
                     {formatDate(selectedAlert.createdAt)}
-                  </span>
+                  </p>
                 </div>
-                {selectedAlert.decidedAt && (
-                  <div>
-                    <span className="text-gray-500">Decided:</span>{" "}
-                    <span className="text-gray-200">
-                      {formatDate(selectedAlert.decidedAt)}
-                    </span>
-                  </div>
-                )}
               </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
 
-              {/* Decision */}
-              {selectedAlert.decision && (
+      {/* View Modal - Flights */}
+      {selectedFlight && (
+        <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
+          <DialogContent className="border-[#333] bg-[#222] text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Flight Details</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                {selectedFlight.droneId}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-sm text-gray-500">Decision:</span>{" "}
-                  <span className="rounded bg-[#333] px-2 py-1 text-sm text-gray-300">
-                    {selectedAlert.decision.replace(/_/g, " ")}
-                  </span>
+                  <p className="text-sm text-gray-400">Drone</p>
+                  <p className="text-white">{selectedFlight.droneId}</p>
+                  <p className="text-xs text-gray-500">
+                    {selectedFlight.drone?.droneOSName}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Status</p>
+                  <p className="text-white">
+                    {getFlightStatusBadge(selectedFlight.status)}
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-400">Sensor</p>
+                  <p className="text-white">{selectedFlight.sensorId}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Flight Duration</p>
+                  <p className="text-white">
+                    {formatDuration(selectedFlight.flightDuration)}
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <p className="text-sm text-gray-400">Battery Used</p>
+                  <p className="text-white">
+                    {selectedFlight.batteryUsed
+                      ? `${selectedFlight.batteryUsed}%`
+                      : "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Distance Covered</p>
+                  <p className="text-white">
+                    {selectedFlight.distanceCovered
+                      ? `${(selectedFlight.distanceCovered / 1000).toFixed(
+                          2
+                        )}km`
+                      : "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Max Altitude</p>
+                  <p className="text-white">
+                    {selectedFlight.maxAltitude
+                      ? `${selectedFlight.maxAltitude}m`
+                      : "-"}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Dispatched At</p>
+                <p className="text-white">
+                  {formatDate(selectedFlight.dispatchedAt)}
+                </p>
+              </div>
+              {selectedFlight.completedAt && (
+                <div>
+                  <p className="text-sm text-gray-400">Completed At</p>
+                  <p className="text-white">
+                    {formatDate(selectedFlight.completedAt)}
+                  </p>
                 </div>
               )}
-
-              {/* Alert ID */}
-              <div className="rounded bg-[#222] p-2 text-xs">
-                <span className="text-gray-500">Alert ID:</span>{" "}
-                <span className="font-mono text-gray-400">
-                  {selectedAlert.id}
-                </span>
-              </div>
+              {selectedFlight.notes && (
+                <div>
+                  <p className="text-sm text-gray-400">Notes</p>
+                  <p className="text-white">{selectedFlight.notes}</p>
+                </div>
+              )}
             </div>
-          ) : null}
-
-          <DialogFooter>
-            <Button
-              onClick={() => setViewModalOpen(false)}
-              className="bg-[#333] text-white hover:bg-[#444]"
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Delete Confirmation Modal */}
       <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
-        <DialogContent className="border-[#333] bg-[#111] text-white sm:max-w-md">
+        <DialogContent className="border-[#333] bg-[#222] text-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-400">
-              <Trash2 className="h-5 w-5" />
-              Delete Alert
-            </DialogTitle>
+            <DialogTitle>Delete Alert</DialogTitle>
             <DialogDescription className="text-gray-400">
               Are you sure you want to delete this alert? This action cannot be
               undone.
             </DialogDescription>
           </DialogHeader>
-
-          {alertToDelete && (
-            <div className="rounded-md border border-red-600/20 bg-red-600/10 p-3">
-              <p className="text-sm text-gray-300">
-                <span className="font-semibold">Sensor:</span>{" "}
-                {alertToDelete.sensor?.name || alertToDelete.sensorId}
-              </p>
-              <p className="text-sm text-gray-300">
-                <span className="font-semibold">Message:</span>{" "}
-                {alertToDelete.message}
-              </p>
-              <p className="text-xs text-gray-400">
-                {formatDate(alertToDelete.createdAt)}
-              </p>
-            </div>
-          )}
-
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button
               onClick={() => setDeleteModalOpen(false)}
-              disabled={deleteLoading}
               variant="outline"
-              className="border-[#444] bg-transparent text-gray-300 hover:bg-[#333]"
+              disabled={deleteLoading}
             >
               Cancel
             </Button>
             <Button
               onClick={handleDeleteAlert}
               disabled={deleteLoading}
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700"
             >
-              {deleteLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Alert
-                </>
+              {deleteLoading && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
