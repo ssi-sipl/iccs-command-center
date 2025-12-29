@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { io, Socket } from "socket.io-client";
+import { io, type Socket } from "socket.io-client";
 import { useToast } from "@/hooks/use-toast";
 import {
   sendDroneForAlert,
@@ -26,7 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos";
+import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos.ts";
+import { getAllAlarms, type Alarm } from "@/lib/api/alarms.ts";
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -42,33 +43,95 @@ interface AlertResolvedPayload {
 }
 
 export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
-  const [droneStatus] = useState<"connected" | "disconnected">("connected");
   const { toast } = useToast();
 
+  const [alarmsList, setAlarmsList] = useState<Alarm[]>([]);
+  const [alarmsLoading, setAlarmsLoading] = useState(false);
+  const [alarmsError, setAlarmsError] = useState<string | null>(null);
+
+  const [dronesList, setDronesList] = useState<DroneOS[]>([]);
+  const [dronesLoading, setDronesLoading] = useState(false);
+  const [dronesError, setDronesError] = useState<string | null>(null);
+
+  // Existing code for alerts
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [alertsLoading, setAlertsLoading] = useState(false);
-  const [alertsError, setAlertsError] = useState<string | null>(null);
+  const [alertsLoading2, setAlertsLoading2] = useState(false);
+  const [alertsError2, setAlertsError2] = useState<string | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
 
-  // modal state
+  // Modal state
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // drones for selected alert
+  // Drones for selected alert
   const [drones, setDrones] = useState<DroneOS[]>([]);
-  const [dronesLoading, setDronesLoading] = useState(false);
-  const [dronesError, setDronesError] = useState<string | null>(null);
+  const [dronesLoading2, setDronesLoading2] = useState(false);
+  const [dronesError2, setDronesError2] = useState<string | null>(null);
   const [selectedDroneId, setSelectedDroneId] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-  // 1) Initial fetch of active alerts
+  useEffect(() => {
+    const fetchAlarms = async () => {
+      setAlarmsLoading(true);
+      setAlarmsError(null);
+
+      try {
+        const res = await getAllAlarms();
+        if (res.success && res.data) {
+          setAlarmsList(res.data);
+        } else {
+          setAlarmsList([]);
+          setAlarmsError(res.error || "Failed to fetch alarms");
+        }
+      } catch (err: any) {
+        console.error("Error fetching alarms:", err);
+        setAlarmsError(
+          err instanceof Error ? err.message : "Failed to fetch alarms"
+        );
+        setAlarmsList([]);
+      } finally {
+        setAlarmsLoading(false);
+      }
+    };
+
+    fetchAlarms();
+  }, []);
+
+  useEffect(() => {
+    const fetchDrones = async () => {
+      setDronesLoading(true);
+      setDronesError(null);
+
+      try {
+        const res = await getAllDroneOS();
+        if (res.success && res.data) {
+          setDronesList(res.data);
+        } else {
+          setDronesList([]);
+          setDronesError(res.error || "Failed to fetch drones");
+        }
+      } catch (err: any) {
+        console.error("Error fetching drones:", err);
+        setDronesError(
+          err instanceof Error ? err.message : "Failed to fetch drones"
+        );
+        setDronesList([]);
+      } finally {
+        setDronesLoading(false);
+      }
+    };
+
+    fetchDrones();
+  }, []);
+
+  // Initial fetch of active alerts
   useEffect(() => {
     const fetchActiveAlerts = async () => {
-      setAlertsLoading(true);
-      setAlertsError(null);
+      setAlertsLoading2(true);
+      setAlertsError2(null);
 
       try {
         const res = await fetch(`${API_BASE_URL}/api/alerts/active`, {
@@ -89,23 +152,23 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
           setAlerts(json.data);
         } else {
           setAlerts([]);
-          if (json.error) setAlertsError(json.error);
+          if (json.error) setAlertsError2(json.error);
         }
       } catch (err: any) {
         console.error("Error fetching active alerts:", err);
-        setAlertsError(
+        setAlertsError2(
           err instanceof Error ? err.message : "Failed to fetch active alerts"
         );
         setAlerts([]);
       } finally {
-        setAlertsLoading(false);
+        setAlertsLoading2(false);
       }
     };
 
     fetchActiveAlerts();
   }, [API_BASE_URL]);
 
-  // 2) Socket.IO realtime updates
+  // Socket.IO realtime updates
   useEffect(() => {
     const socket: Socket = io(API_BASE_URL, {
       transports: ["websocket", "polling"],
@@ -148,51 +211,43 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API_BASE_URL]);
 
-  // 3) When modal opens / selectedAlert changes, fetch drones
+  // When modal opens / selectedAlert changes, fetch drones for alert modal
   useEffect(() => {
-    const fetchDrones = async () => {
+    const fetchDronesForAlert = async () => {
       if (!selectedAlert) {
         setDrones([]);
         setSelectedDroneId("");
         return;
       }
 
-      // You *want* "drones in same area", but DroneOS currently has no area info.
-      // For now: fetch ALL drones and show them.
-      // Later: add areaId or mapping and filter here.
-
-      setDronesLoading(true);
-      setDronesError(null);
+      setDronesLoading2(true);
+      setDronesError2(null);
       setSelectedDroneId("");
 
       try {
         const res = await getAllDroneOS();
         if (res.success && res.data) {
-          // TODO: once DroneOS has areaId, filter by selectedAlert.sensor?.area?.id
-          // const areaId = selectedAlert.sensor?.area?.id;
-          // const filtered = res.data.filter(d => d.areaId === areaId);
-          // setDrones(filtered);
           setDrones(res.data);
         } else {
           setDrones([]);
-          setDronesError(res.error || "Failed to fetch drones");
+          setDronesError2(res.error || "Failed to fetch drones");
         }
       } catch (err: any) {
         console.error("Error fetching drones:", err);
         setDrones([]);
-        setDronesError(
+        setDronesError2(
           err instanceof Error ? err.message : "Failed to fetch drones"
         );
       } finally {
-        setDronesLoading(false);
+        setDronesLoading2(false);
       }
     };
 
     if (isModalOpen && selectedAlert) {
-      fetchDrones();
+      fetchDronesForAlert();
     } else {
       setDrones([]);
-      setDronesError(null);
+      setDronesError2(null);
       setSelectedDroneId("");
     }
   }, [isModalOpen, selectedAlert]);
@@ -207,7 +262,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     setIsModalOpen(false);
     setSelectedAlert(null);
     setDrones([]);
-    setDronesError(null);
+    setDronesError2(null);
     setSelectedDroneId("");
   };
 
@@ -299,44 +354,97 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
           isOpen ? "translate-x-0" : "-translate-x-full"
         } w-72 md:w-80`}
       >
-        {/* Alarm Section */}
         <section className="mb-6">
           <h2 className="mb-3 text-sm font-semibold tracking-wide text-white">
             ALARM
           </h2>
-          <Badge className="bg-red-600 px-4 py-1 text-sm font-medium text-white hover:bg-red-700">
-            Alarm-1
-          </Badge>
+
+          {alarmsLoading && (
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <Loader2 className="h-3 w-3 animate-spin text-[#4A9FD4]" />
+              <span>Loading alarms...</span>
+            </div>
+          )}
+
+          {!alarmsLoading && alarmsError && (
+            <p className="text-xs text-red-500">{alarmsError}</p>
+          )}
+
+          {!alarmsLoading && !alarmsError && alarmsList.length === 0 && (
+            <p className="text-xs text-gray-500">No alarms configured</p>
+          )}
+
+          {!alarmsLoading && !alarmsError && alarmsList.length > 0 && (
+            <div className="space-y-2 max-h-[120px] overflow-y-auto">
+              {alarmsList.slice(0, 3).map((alarm) => (
+                <Badge
+                  key={alarm.id}
+                  className="block w-full justify-start truncate bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
+                  title={alarm.name}
+                >
+                  {alarm.name}
+                </Badge>
+              ))}
+              {alarmsList.length > 3 && (
+                <p className="text-[10px] text-gray-500 px-1">
+                  +{alarmsList.length - 3} more
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="mt-4 border-b border-[#333]" />
         </section>
 
-        {/* Drone Section */}
         <section className="mb-6">
           <h2 className="mb-3 text-sm font-semibold tracking-wide text-white">
             DRONE
           </h2>
-          <div className="rounded-lg border border-[#333] bg-[#222] p-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[#333]">
-                  <Wifi className="h-5 w-5 text-gray-400" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-medium text-white">Drone-1</p>
-                  <p className="text-xs text-gray-500">Tap for details</p>
-                </div>
-              </div>
-              <Badge
-                className={`shrink-0 ${
-                  droneStatus === "connected"
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "bg-red-600 hover:bg-red-700"
-                } text-xs text-white`}
-              >
-                Connected
-              </Badge>
+
+          {dronesLoading && (
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <Loader2 className="h-3 w-3 animate-spin text-[#4A9FD4]" />
+              <span>Loading drones...</span>
             </div>
-          </div>
+          )}
+
+          {!dronesLoading && dronesError && (
+            <p className="text-xs text-red-500">{dronesError}</p>
+          )}
+
+          {!dronesLoading && !dronesError && dronesList.length === 0 && (
+            <p className="text-xs text-gray-500">No drones configured</p>
+          )}
+
+          {!dronesLoading && !dronesError && dronesList.length > 0 && (
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {dronesList.map((drone) => (
+                <div
+                  key={drone.id}
+                  className="rounded-lg border border-[#333] bg-[#222] p-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[#333]">
+                        <Wifi className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-white truncate">
+                          {drone.droneOSName}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {drone.droneType}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge className="shrink-0 bg-green-600 hover:bg-green-700 text-xs text-white">
+                      Active
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           <Button
             className="mt-4 w-full border border-[#444] bg-transparent text-white hover:bg-[#333]"
@@ -362,24 +470,24 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
             </span>
           </div>
 
-          {alertsLoading && (
+          {alertsLoading2 && (
             <div className="flex items-center gap-2 text-sm text-gray-400">
               <Loader2 className="h-4 w-4 animate-spin text-[#4A9FD4]" />
               <span>Loading active alerts...</span>
             </div>
           )}
 
-          {!alertsLoading && alertsError && (
+          {!alertsLoading2 && alertsError2 && (
             <p className="text-sm text-red-500">
-              Failed to load alerts: {alertsError}
+              Failed to load alerts: {alertsError2}
             </p>
           )}
 
-          {!alertsLoading && !alertsError && alerts.length === 0 && (
+          {!alertsLoading2 && !alertsError2 && alerts.length === 0 && (
             <p className="text-sm text-gray-500">No Active Alerts Found...</p>
           )}
 
-          {!alertsLoading && !alertsError && alerts.length > 0 && (
+          {!alertsLoading2 && !alertsError2 && alerts.length > 0 && (
             <div className="space-y-3">
               {alerts.map((alert) => (
                 <button
@@ -498,24 +606,24 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                 Select Drone
               </p>
 
-              {dronesLoading && (
+              {dronesLoading2 && (
                 <div className="flex items-center gap-2 text-xs text-gray-400">
                   <Loader2 className="h-3 w-3 animate-spin text-[#4A9FD4]" />
                   <span>Loading drones...</span>
                 </div>
               )}
 
-              {!dronesLoading && dronesError && (
-                <p className="text-xs text-red-500">{dronesError}</p>
+              {!dronesLoading2 && dronesError2 && (
+                <p className="text-xs text-red-500">{dronesError2}</p>
               )}
 
-              {!dronesLoading && !dronesError && drones.length === 0 && (
+              {!dronesLoading2 && !dronesError2 && drones.length === 0 && (
                 <p className="text-xs text-gray-500">
                   No drones configured yet.
                 </p>
               )}
 
-              {!dronesLoading && !dronesError && drones.length > 0 && (
+              {!dronesLoading2 && !dronesError2 && drones.length > 0 && (
                 <Select
                   value={selectedDroneId}
                   onValueChange={setSelectedDroneId}

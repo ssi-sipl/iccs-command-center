@@ -14,14 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   getActiveAlerts,
   neutraliseAlert,
@@ -31,7 +23,7 @@ import {
 import { getAllSensors, type Sensor } from "@/lib/api/sensors";
 import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos";
 import { useToast } from "@/hooks/use-toast";
-import { getActiveMap, OfflineMap } from "@/lib/api/maps";
+import { getActiveMap, type OfflineMap } from "@/lib/api/maps";
 import { openRtspBySensor } from "@/lib/api/rtsp";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -51,6 +43,20 @@ type ReactLeafletModule = typeof import("react-leaflet");
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+const ZOOM_SCALE_CONFIG = {
+  minZoom: 10, // Base marker size at min zoom
+  maxZoom: 40, // Marker size at max zoom
+  minSize: 18, // Minimum marker size in pixels
+  maxSize: 48, // Maximum marker size in pixels
+};
+
+function calculateMarkerSize(zoom: number): number {
+  const { minZoom, maxZoom, minSize, maxSize } = ZOOM_SCALE_CONFIG;
+  const normalizedZoom = Math.max(minZoom, Math.min(maxZoom, zoom));
+  const progress = (normalizedZoom - minZoom) / (maxZoom - minZoom);
+  return Math.round(minSize + (maxSize - minSize) * progress);
+}
+
 export function MapView() {
   const { toast } = useToast();
 
@@ -59,6 +65,8 @@ export function MapView() {
   );
   const [mapConfig, setMapConfig] = useState<OfflineMap | null>(null);
   const [leafletMap, setLeafletMap] = useState<LeafletMap | null>(null);
+
+  const [currentZoom, setCurrentZoom] = useState(18);
 
   const [loadingLib, setLoadingLib] = useState(true);
   const [loadingMapConfig, setLoadingMapConfig] = useState(true);
@@ -124,6 +132,7 @@ export function MapView() {
         const res = await getActiveMap();
         if (res.success && res.data) {
           setMapConfig(res.data);
+          setCurrentZoom(res.data.minZoom);
         } else {
           setError(res.error || "No active offline map configured");
         }
@@ -137,6 +146,23 @@ export function MapView() {
 
     fetchActiveMap();
   }, []);
+
+  useEffect(() => {
+    if (!leafletMap) return;
+
+    const handleZoom = () => {
+      const newZoom = leafletMap.getZoom();
+      setCurrentZoom(newZoom);
+      // Force marker re-render to update sizes
+      setMarkerUpdateKey((k) => k + 1);
+    };
+
+    leafletMap.on("zoom", handleZoom);
+
+    return () => {
+      leafletMap.off("zoom", handleZoom);
+    };
+  }, [leafletMap]);
 
   // ============================================
   // Fetch sensors
@@ -301,7 +327,7 @@ export function MapView() {
   // ============================================
   function getSensorBaseColor(sensorType: string): string {
     const t = sensorType.toLowerCase();
-    if (t.includes("camera")) return "#3b82f6"; // blue
+    if (t.includes("camera")) return "#26f51b"; // blue
     if (t.includes("thermal")) return "#f97316"; // orange
     if (t.includes("infrared") || t.includes("pir")) return "#a855f7"; // purple
     if (t.includes("motion")) return "#22c55e"; // green
@@ -315,6 +341,10 @@ export function MapView() {
     }
 
     const L = LeafletLib;
+
+    const markerSize = calculateMarkerSize(currentZoom);
+    const fontSize = Math.max(9, Math.round(markerSize * 0.45)); // Scale font size proportionally
+    const borderWidth = markerSize > 30 ? 2 : 1; // Thicker border for larger markers
 
     const baseColor = getSensorBaseColor(sensor.sensorType);
     const bg = hasActiveAlert ? "#b91c1c" : baseColor; // 🔴 red if alert
@@ -330,18 +360,19 @@ export function MapView() {
     const html = `
     <div
       style="
-        width: 22px;
-        height: 22px;
+        width: ${markerSize}px;
+        height: ${markerSize}px;
         border-radius: 9999px;
         background: ${bg};
-        border: 2px solid ${border};
+        border: ${borderWidth}px solid ${border};
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 11px;
+        font-size: ${fontSize}px;
         font-weight: 600;
-        box-shadow: 0 0 6px rgba(0,0,0,0.6);
+        box-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);
+        transition: all 0.15s ease-out;
       "
     >
       ${label}
@@ -351,14 +382,11 @@ export function MapView() {
     return L.divIcon({
       html,
       className: "",
-      iconSize: [22, 22],
-      iconAnchor: [11, 11],
+      iconSize: [markerSize, markerSize],
+      iconAnchor: [markerSize / 2, markerSize / 2],
     });
   }
 
-  // ============================================
-  // Modal open/close from marker click
-  // ============================================
   function openSensorModal(sensor: Sensor) {
     const alert = alertBySensorDbId[sensor.id];
     setSelectedSensor(sensor);
@@ -375,9 +403,6 @@ export function MapView() {
     setActionLoading(false);
   }
 
-  // ============================================
-  // Modal actions: send drone / neutralise
-  // ============================================
   const handleSendDrone = async () => {
     if (!selectedSensor) return;
     if (!selectedDroneId) {
@@ -460,9 +485,6 @@ export function MapView() {
     }
   };
 
-  // ============================================
-  // RTSP handlers (calls lib/api/rtsp)
-  // ============================================
   const handleOpenVideoFeed = async () => {
     if (!selectedSensor) return;
 
@@ -480,7 +502,6 @@ export function MapView() {
       const res = await openRtspBySensor(selectedSensor.id);
 
       if (res && res.success) {
-        // friendly success with available info
         const extra = res.data
           ? ` ${res.data.pid ? `(pid ${res.data.pid})` : ""}`
           : "";
@@ -490,7 +511,6 @@ export function MapView() {
             res.message || `Launched video on server.${extra}`.trim(),
         });
       } else {
-        // server responded but unsuccessful
         const msg =
           (res && (res.error || (res.details && String(res.details)))) ||
           "Server could not launch the video feed.";
@@ -502,7 +522,6 @@ export function MapView() {
       }
     } catch (err) {
       console.error("Error opening RTSP:", err);
-      // network or unexpected error
       toast({
         title: "Network / Server error",
         description:
@@ -575,6 +594,10 @@ export function MapView() {
           <span className="text-white">
             {socketConnected ? "Live" : "Offline"}
           </span>
+        </div>
+
+        <div className="absolute top-4 left-4 z-[1000] rounded-md bg-black/70 px-3 py-1.5 text-xs text-gray-300 backdrop-blur-sm">
+          Zoom: {currentZoom.toFixed(1)}x
         </div>
 
         <MapContainer

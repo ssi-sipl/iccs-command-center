@@ -898,7 +898,7 @@ export default function ReportPage() {
                             <TableHead className="text-gray-400">
                               Status
                             </TableHead>
-                            <TableHead className="text-gray-400">
+                            {/* <TableHead className="text-gray-400">
                               Duration
                             </TableHead>
                             <TableHead className="text-gray-400">
@@ -906,13 +906,13 @@ export default function ReportPage() {
                             </TableHead>
                             <TableHead className="text-gray-400">
                               Distance
-                            </TableHead>
+                            </TableHead> */}
                             <TableHead className="text-gray-400">
                               Dispatched
                             </TableHead>
-                            <TableHead className="text-gray-400">
+                            {/* <TableHead className="text-gray-400">
                               Actions
-                            </TableHead>
+                            </TableHead> */}
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -937,21 +937,21 @@ export default function ReportPage() {
                               <TableCell>
                                 {getFlightStatusBadge(flight.status)}
                               </TableCell>
-                              <TableCell>
+                              {/* <TableCell>
                                 <div className="flex items-center gap-1 text-gray-300">
                                   <Clock className="h-3 w-3" />
                                   {formatDuration(flight.flightDuration)}
                                 </div>
-                              </TableCell>
-                              <TableCell>
+                              </TableCell> */}
+                              {/* <TableCell>
                                 <div className="flex items-center gap-1 text-gray-300">
                                   <Zap className="h-3 w-3" />
                                   {flight.batteryUsed
                                     ? `${flight.batteryUsed}%`
                                     : "-"}
                                 </div>
-                              </TableCell>
-                              <TableCell>
+                              </TableCell> */}
+                              {/* <TableCell>
                                 <div className="flex items-center gap-1 text-gray-300">
                                   <Wind className="h-3 w-3" />
                                   {flight.distanceCovered
@@ -960,14 +960,14 @@ export default function ReportPage() {
                                       ).toFixed(2)}km`
                                     : "-"}
                                 </div>
-                              </TableCell>
+                              </TableCell> */}
                               <TableCell className="text-sm text-gray-400">
                                 <div className="flex items-center gap-1">
                                   <Calendar className="h-3 w-3" />
                                   {formatDate(flight.dispatchedAt)}
                                 </div>
                               </TableCell>
-                              <TableCell>
+                              {/* <TableCell>
                                 <Button
                                   onClick={() => handleViewFlight(flight)}
                                   variant="ghost"
@@ -976,7 +976,7 @@ export default function ReportPage() {
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                              </TableCell>
+                              </TableCell> */}
                             </TableRow>
                           ))}
                         </TableBody>
