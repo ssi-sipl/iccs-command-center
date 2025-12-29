@@ -21,6 +21,9 @@ import {
   Navigation,
   Loader2,
   Calendar,
+  MapPin,
+  Video,
+  ExternalLink,
 } from "lucide-react";
 import { getDroneOSById, type DroneOS } from "@/lib/api/droneos";
 import { useToast } from "@/hooks/use-toast";
@@ -43,7 +46,7 @@ export default function ViewDronePage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await getDroneOSById(params.id as string);
+      const response = await getDroneOSById(params.id as string, true); // Include area
       if (response.success && response.data) {
         setDrone(response.data);
       } else {
@@ -179,16 +182,66 @@ export default function ViewDronePage() {
                     </h1>
                     {getBatteryBadge(drone.minBatteryLevel)}
                   </div>
-                  <p className="text-sm text-gray-400">{drone.droneType}</p>
+                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                    <span>{drone.droneType}</span>
+                    {/* NEW: Drone ID Badge */}
+                    {drone.droneId && (
+                      <>
+                        <span>•</span>
+                        <Badge
+                          variant="outline"
+                          className="border-[#444] text-gray-300"
+                        >
+                          {drone.droneId}
+                        </Badge>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-              <Link href={`/drones/${drone.id}/edit`}>
-                <Button className="gap-2 bg-[#8B0000] text-white hover:bg-[#6B0000]">
-                  <Pencil className="h-4 w-4" />
-                  Edit Drone
-                </Button>
-              </Link>
+              <div className="flex gap-2">
+                {/* NEW: Video Stream Button */}
+                {drone.videoLink && (
+                  <a
+                    href={drone.videoLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      variant="outline"
+                      className="gap-2 border-[#444] bg-transparent text-white hover:bg-[#333]"
+                    >
+                      <Video className="h-4 w-4" />
+                      View Stream
+                      <ExternalLink className="h-3 w-3" />
+                    </Button>
+                  </a>
+                )}
+                <Link href={`/drones/${drone.id}/edit`}>
+                  <Button className="gap-2 bg-[#8B0000] text-white hover:bg-[#6B0000]">
+                    <Pencil className="h-4 w-4" />
+                    Edit Drone
+                  </Button>
+                </Link>
+              </div>
             </div>
+
+            {/* NEW: Area Badge (if assigned) */}
+            {drone.area && (
+              <div className="mb-6">
+                <Card className="border-blue-600/30 bg-blue-600/10">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <MapPin className="h-5 w-5 text-blue-400" />
+                    <div>
+                      <p className="text-sm text-gray-400">Assigned Area</p>
+                      <p className="font-semibold text-white">
+                        {drone.area.name} ({drone.area.areaId})
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {/* Stats Cards */}
             <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -257,14 +310,52 @@ export default function ViewDronePage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* NEW: Drone ID */}
+                  <div className="flex justify-between border-b border-[#333] pb-3">
+                    <span className="text-gray-400">Drone ID</span>
+                    <span className="font-mono text-white">
+                      {drone.droneId}
+                    </span>
+                  </div>
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">OS Name</span>
                     <span className="text-white">{drone.droneOSName}</span>
                   </div>
+                  {/* <div className="flex justify-between border-b border-[#333] pb-3">
+                    <span className="text-gray-400">Area</span>
+                    <span className="text-white">
+                      {drone?.area?.name || "None"}
+                    </span>
+                  </div> */}
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Drone Type</span>
                     <span className="text-white">{drone.droneType}</span>
                   </div>
+                  {/* NEW: Video Link */}
+                  {drone.videoLink && (
+                    <div className="flex justify-between border-b border-[#333] pb-3">
+                      <span className="text-gray-400">Video Stream</span>
+                      <a
+                        href={drone.videoLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-blue-400 hover:text-blue-300"
+                      >
+                        <Video className="h-4 w-4" />
+                        <span className="text-sm">View Stream</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                  )}
+                  {/* NEW: Assigned Area */}
+                  {drone.area && (
+                    <div className="flex justify-between border-b border-[#333] pb-3">
+                      <span className="text-gray-400">Assigned Area</span>
+                      <span className="text-white">
+                        {drone.area.name} ({drone.area.areaId})
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between border-b border-[#333] pb-3">
                     <span className="text-gray-400">Target Altitude</span>
                     <span className="font-mono text-white">
