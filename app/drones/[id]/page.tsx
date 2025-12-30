@@ -410,6 +410,14 @@ export default function ViewDronePage() {
                     <span className="text-gray-400">GPS Lost Action</span>
                     <span className="text-white">{drone.gpsLost}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Latitude</span>
+                    <span className="text-white">{drone.latitude}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Longitude</span>
+                    <span className="text-white">{drone.longitude}</span>
+                  </div>
                 </CardContent>
               </Card>
 

@@ -21,6 +21,8 @@ export interface DroneOS {
   batteryFailSafe: string;
   gpsName: string;
   maxAltitude: number;
+  latitude?: number | null; // NEW: Home Latitude
+  longitude?: number | null; // NEW: Home Longitude
   areaId?: string | null; // NEW: Area relation
   area?: {
     // NEW: Area details when included
@@ -172,6 +174,8 @@ export async function createDroneOS(droneData: {
   batteryFailSafe: string;
   gpsName: string;
   maxAltitude: number;
+  latitude: number; // OPTIONAL: Home Latitude
+  longitude: number; // OPTIONAL: Home Longitude
   areaId?: string; // OPTIONAL: Area ID
 }): Promise<ApiResponse<DroneOS>> {
   try {
@@ -220,6 +224,8 @@ export async function updateDroneOS(
     batteryFailSafe: string;
     gpsName: string;
     maxAltitude: number;
+    latitude: number | null;
+    longitude: number | null;
     areaId: string | null;
   }>
 ): Promise<ApiResponse<DroneOS>> {

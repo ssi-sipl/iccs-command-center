@@ -59,6 +59,8 @@ export default function EditDronePage() {
     batteryFailSafe: "",
     gpsName: "",
     maxAltitude: "",
+    latitude: "", // NEW
+    longitude: "", // NEW
   });
 
   const [validationErrors, setValidationErrors] = useState({
@@ -68,6 +70,8 @@ export default function EditDronePage() {
     minHDOP: "",
     minSatCount: "",
     minBatteryLevel: "",
+    latitude: "", // NEW
+    longitude: "", // NEW
   });
 
   useEffect(() => {
@@ -117,6 +121,8 @@ export default function EditDronePage() {
           batteryFailSafe: droneData.batteryFailSafe,
           gpsName: droneData.gpsName,
           maxAltitude: droneData.maxAltitude.toString(),
+          latitude: droneData.latitude?.toString() || "", // NEW
+          longitude: droneData.longitude?.toString() || "", // NEW
         });
       } else {
         setError(response.error || "Failed to fetch drone details");
@@ -146,6 +152,8 @@ export default function EditDronePage() {
       minHDOP: "",
       minSatCount: "",
       minBatteryLevel: "",
+      latitude: "",
+      longitude: "",
     };
 
     let isValid = true;
@@ -222,6 +230,8 @@ export default function EditDronePage() {
         batteryFailSafe: formData.batteryFailSafe,
         gpsName: formData.gpsName,
         maxAltitude: parseFloat(formData.maxAltitude),
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
       });
 
       if (response.success) {
@@ -401,6 +411,50 @@ export default function EditDronePage() {
                       {validationErrors.droneType && (
                         <p className="text-xs text-red-500">
                           {validationErrors.droneType}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Latitude */}
+                    <div className="space-y-2">
+                      <Label htmlFor="latitude" className="text-gray-300">
+                        Latitude<span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="latitude"
+                        placeholder="e.g., 12.9716"
+                        value={formData.latitude}
+                        onChange={(e) =>
+                          handleChange("latitude", e.target.value)
+                        }
+                        required
+                        className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                      />
+                      {validationErrors.latitude && (
+                        <p className="text-xs text-red-500">
+                          {validationErrors.latitude}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Longitude */}
+                    <div className="space-y-2">
+                      <Label htmlFor="longitude" className="text-gray-300">
+                        Longitude<span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="longitude"
+                        placeholder="e.g., 77.5946"
+                        value={formData.longitude}
+                        onChange={(e) =>
+                          handleChange("longitude", e.target.value)
+                        }
+                        required
+                        className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                      />
+                      {validationErrors.longitude && (
+                        <p className="text-xs text-red-500">
+                          {validationErrors.longitude}
                         </p>
                       )}
                     </div>

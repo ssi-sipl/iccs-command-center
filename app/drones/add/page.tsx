@@ -22,6 +22,7 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { createDroneOS } from "@/lib/api/droneos";
 import { getAllAreas } from "@/lib/api/areas";
 import { useToast } from "@/hooks/use-toast";
+import { latLng } from "leaflet";
 
 // Action options
 const gpsLostActions = ["RTL", "Land", "Hover", "Continue"];
@@ -55,6 +56,8 @@ export default function AddDronePage() {
     batteryFailSafe: "",
     gpsName: "",
     maxAltitude: "",
+    latitude: "", // NEW: Home Latitude
+    longitude: "", // NEW: Home Longitude
   });
 
   const [validationErrors, setValidationErrors] = useState({
@@ -67,6 +70,8 @@ export default function AddDronePage() {
     gpsLost: "",
     telemetryLost: "",
     batteryFailSafe: "",
+    latitude: "", // NEW
+    longitude: "", // NEW
   });
 
   // Fetch areas on mount
@@ -98,6 +103,8 @@ export default function AddDronePage() {
       gpsLost: "",
       telemetryLost: "",
       batteryFailSafe: "",
+      latitude: "",
+      longitude: "",
     };
 
     let isValid = true;
@@ -204,6 +211,8 @@ export default function AddDronePage() {
         batteryFailSafe: formData.batteryFailSafe,
         gpsName: formData.gpsName.trim(),
         maxAltitude: parseFloat(formData.maxAltitude),
+        latitude: parseFloat(formData.latitude), // NEW
+        longitude: parseFloat(formData.longitude), // NEW
       });
 
       if (response.success) {
@@ -339,6 +348,50 @@ export default function AddDronePage() {
                       )}
                     </div>
 
+                    {/* Latitude */}
+                    <div className="space-y-2">
+                      <Label htmlFor="latitude" className="text-gray-300">
+                        Latitude<span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="latitude"
+                        placeholder="e.g., 12.9716"
+                        value={formData.latitude}
+                        onChange={(e) =>
+                          handleChange("latitude", e.target.value)
+                        }
+                        required
+                        className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                      />
+                      {validationErrors.latitude && (
+                        <p className="text-xs text-red-500">
+                          {validationErrors.latitude}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Longitude */}
+                    <div className="space-y-2">
+                      <Label htmlFor="longitude" className="text-gray-300">
+                        Longitude<span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="longitude"
+                        placeholder="e.g., 77.5946"
+                        value={formData.longitude}
+                        onChange={(e) =>
+                          handleChange("longitude", e.target.value)
+                        }
+                        required
+                        className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                      />
+                      {validationErrors.longitude && (
+                        <p className="text-xs text-red-500">
+                          {validationErrors.longitude}
+                        </p>
+                      )}
+                    </div>
+
                     {/* Video Link - NEW OPTIONAL FIELD */}
                     <div className="space-y-2">
                       <Label htmlFor="videoLink" className="text-gray-300">
@@ -389,9 +442,9 @@ export default function AddDronePage() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-xs text-gray-500">
+                      {/* <p className="text-xs text-gray-500">
                         Optional: Assign drone to a specific area
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                 </div>

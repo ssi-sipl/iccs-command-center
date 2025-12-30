@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import type { Map as LeafletMap, DivIcon } from "leaflet";
+import { useEffect, useMemo, useState, useRef, lazy, Suspense } from "react";
 import "leaflet/dist/leaflet.css";
 import io, { type Socket } from "socket.io-client";
 import { Loader2 } from "lucide-react";
@@ -27,29 +26,19 @@ import { getActiveMap, type OfflineMap } from "@/lib/api/maps";
 import { openRtspBySensor } from "@/lib/api/rtsp";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
 const REACH_RADIUS_METERS = 6;
-
-let reactLeaflet: typeof import("react-leaflet") | null = null;
-let LeafletLib: typeof import("leaflet") | null = null;
-
-// Only run in the browser
-if (typeof window !== "undefined") {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  reactLeaflet = require("react-leaflet");
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  LeafletLib = require("leaflet");
-}
-
-type ReactLeafletModule = typeof import("react-leaflet");
+const DRONE_LOCATION_TIMEOUT_MS = 30000;
+const STALE_DATA_THRESHOLD_MS = 60000; // Mark as stale if no update for 1 minute
+const CRITICAL_LOSS_THRESHOLD_MS = 120000; // Alert after 2 minutes of lost connection
+const DRONE_STATUS_REFRESH_MS = 5000; // Update status every 5 seconds
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const ZOOM_SCALE_CONFIG = {
-  minZoom: 10, // Base marker size at min zoom
-  maxZoom: 40, // Marker size at max zoom
-  minSize: 18, // Minimum marker size in pixels
-  maxSize: 48, // Maximum marker size in pixels
+  minZoom: 10,
+  maxZoom: 40,
+  minSize: 18,
+  maxSize: 48,
 };
 
 function calculateMarkerSize(zoom: number): number {
@@ -60,41 +49,48 @@ function calculateMarkerSize(zoom: number): number {
 }
 
 type DronePosition = {
-  id: string; // DB id
-  droneId: string; // logical id
+  id: string;
+  droneId: string;
   lat: number;
   lng: number;
   alt?: number | null;
   ts: number;
 };
 
+type DroneStatus = {
+  id: string;
+  droneId: string;
+  isLive: boolean;
+  lastUpdateTime: number;
+  connectionLossTime?: number; // Track when connection was lost
+  isStale: boolean; // Data older than threshold
+  hasAlert: boolean; // Critical connection loss flagged
+};
+
 type ActiveMission = {
-  droneId: string; // logical droneId (drone2)
+  droneId: string;
   sensorId: string;
   targetLat: number;
   targetLng: number;
 };
 
+const MapRenderer = lazy(() => import("./map-renderer"));
+
 export function MapView() {
   const { toast } = useToast();
 
-  const [reactLeaflet, setReactLeaflet] = useState<ReactLeafletModule | null>(
-    null
-  );
   const [mapConfig, setMapConfig] = useState<OfflineMap | null>(null);
-  const [leafletMap, setLeafletMap] = useState<LeafletMap | null>(null);
-
   const [currentZoom, setCurrentZoom] = useState(18);
-
   const [dronePositions, setDronePositions] = useState<
     Record<string, DronePosition>
   >({});
-
+  const [droneStatus, setDroneStatus] = useState<Record<string, DroneStatus>>(
+    {}
+  );
   const [activeMissions, setActiveMissions] = useState<
     Record<string, ActiveMission>
   >({});
 
-  const [loadingLib, setLoadingLib] = useState(true);
   const [loadingMapConfig, setLoadingMapConfig] = useState(true);
   const [loadingSensors, setLoadingSensors] = useState(true);
   const [loadingAlerts, setLoadingAlerts] = useState(true);
@@ -109,44 +105,16 @@ export function MapView() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
 
-  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedSensor, setSelectedSensor] = useState<Sensor | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [selectedDroneId, setSelectedDroneId] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Force re-render counter to update marker icons
   const [markerUpdateKey, setMarkerUpdateKey] = useState(0);
 
-  // ============================================
-  // Dynamic import react-leaflet (client only)
-  // ============================================
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadReactLeaflet() {
-      try {
-        const mod = await import("react-leaflet");
-        if (!cancelled) setReactLeaflet(mod);
-      } catch (err) {
-        console.error("Failed to load react-leaflet:", err);
-        if (!cancelled) setError("Failed to load map library");
-      } finally {
-        if (!cancelled) setLoadingLib(false);
-      }
-    }
-
-    if (typeof window !== "undefined") {
-      loadReactLeaflet();
-    } else {
-      setLoadingLib(false);
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const timeoutRefsRef = useRef<Record<string, NodeJS.Timeout>>({});
+  const statusUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // ============================================
   // Fetch active map config
@@ -172,23 +140,6 @@ export function MapView() {
 
     fetchActiveMap();
   }, []);
-
-  useEffect(() => {
-    if (!leafletMap) return;
-
-    const handleZoom = () => {
-      const newZoom = leafletMap.getZoom();
-      setCurrentZoom(newZoom);
-      // Force marker re-render to update sizes
-      setMarkerUpdateKey((k) => k + 1);
-    };
-
-    leafletMap.on("zoom", handleZoom);
-
-    return () => {
-      leafletMap.off("zoom", handleZoom);
-    };
-  }, [leafletMap]);
 
   // ============================================
   // Fetch sensors
@@ -230,9 +181,43 @@ export function MapView() {
       setLoadingDrones(true);
       try {
         const res = await getAllDroneOS();
-        if (res.success && res.data) setDrones(res.data);
+        if (res.success && res.data) {
+          setDrones(res.data);
+          const initialStatus: Record<string, DroneStatus> = {};
+          const initialPositions: Record<string, DronePosition> = {};
+
+          res.data.forEach((drone) => {
+            initialStatus[drone.id] = {
+              id: drone.id,
+              droneId: drone.droneId,
+              isLive: false,
+              lastUpdateTime: 0,
+              isStale: false,
+              hasAlert: false,
+            };
+
+            if (drone.latitude != null && drone.longitude != null) {
+              initialPositions[drone.id] = {
+                id: drone.id,
+                droneId: drone.droneId,
+                lat: drone.latitude,
+                lng: drone.longitude,
+                alt: null,
+                ts: Date.now(),
+              };
+            }
+          });
+
+          setDroneStatus(initialStatus);
+          setDronePositions(initialPositions);
+        }
       } catch (err) {
-        console.error("Error loading drones:", err);
+        console.error("[MapView] Error loading drones:", err);
+        toast({
+          title: "Error",
+          description: "Failed to load drones",
+          variant: "destructive",
+        });
       } finally {
         setLoadingDrones(false);
       }
@@ -240,6 +225,35 @@ export function MapView() {
 
     loadDrones();
   }, [toast]);
+
+  // ============================================
+  // Set drone location timeout
+  // ============================================
+  const setDroneLocationTimeout = (droneId: string) => {
+    if (timeoutRefsRef.current[droneId]) {
+      clearTimeout(timeoutRefsRef.current[droneId]);
+    }
+
+    timeoutRefsRef.current[droneId] = setTimeout(() => {
+      console.log(`[MapView] Drone ${droneId} location update timeout`);
+
+      setDroneStatus((prev) => {
+        const updated = { ...prev };
+        const drone = updated[droneId];
+        const connectionLossTime = drone.connectionLossTime || Date.now();
+
+        return {
+          ...prev,
+          [droneId]: {
+            ...prev[droneId],
+            isLive: false,
+            connectionLossTime,
+          },
+        };
+      });
+      setMarkerUpdateKey((k) => k + 1);
+    }, DRONE_LOCATION_TIMEOUT_MS);
+  };
 
   // ============================================
   // Fetch active alerts + WebSocket subscription
@@ -274,14 +288,34 @@ export function MapView() {
 
     // Setup socket
     const s = io(API_BASE_URL, {
-      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5,
     });
 
     s.on("drone_position", (pos: DronePosition) => {
+      console.log("[MapView] Received drone position:", pos);
+
       setDronePositions((prev) => ({
         ...prev,
-        [pos.droneId]: pos,
+        [pos.id]: pos,
       }));
+
+      setDroneStatus((prev) => ({
+        ...prev,
+        [pos.id]: {
+          ...prev[pos.id],
+          isLive: true,
+          lastUpdateTime: Date.now(),
+          connectionLossTime: undefined,
+          isStale: false,
+          hasAlert: false,
+        },
+      }));
+
+      setDroneLocationTimeout(pos.id);
+      setMarkerUpdateKey((k) => k + 1);
     });
 
     s.on("connect", () => {
@@ -292,7 +326,23 @@ export function MapView() {
     s.on("disconnect", () => {
       console.log("[MapView] Socket disconnected");
       setSocketConnected(false);
-      setDronePositions({});
+
+      setDroneStatus((prev) => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach((droneId) => {
+          updated[droneId] = {
+            ...updated[droneId],
+            isLive: false,
+            connectionLossTime: Date.now(),
+            isStale: true,
+            hasAlert: true,
+          };
+        });
+        return updated;
+      });
+      Object.values(timeoutRefsRef.current).forEach(clearTimeout);
+      timeoutRefsRef.current = {};
+      setMarkerUpdateKey((k) => k + 1);
     });
 
     s.on("alert_active", (alert: Alert) => {
@@ -338,15 +388,60 @@ export function MapView() {
 
     setSocket(s);
 
+    statusUpdateIntervalRef.current = setInterval(
+      updateAllDroneStatuses,
+      DRONE_STATUS_REFRESH_MS
+    );
+
     return () => {
       s.disconnect();
+      if (statusUpdateIntervalRef.current) {
+        clearInterval(statusUpdateIntervalRef.current);
+      }
+      Object.values(timeoutRefsRef.current).forEach(clearTimeout);
+      timeoutRefsRef.current = {};
     };
-  }, [toast]);
+  }, []);
+
+  // ============================================
+  // ============================================
+  const updateAllDroneStatuses = () => {
+    setDroneStatus((prev) => {
+      const now = Date.now();
+      let hasChanges = false;
+      const updated = { ...prev };
+
+      Object.keys(updated).forEach((droneId) => {
+        const drone = updated[droneId];
+        if (!drone.isLive && drone.connectionLossTime) {
+          const timeLosses = now - drone.connectionLossTime;
+          const wasStale = drone.isStale;
+          const hadAlert = drone.hasAlert;
+
+          const newIsStale = timeLosses > STALE_DATA_THRESHOLD_MS;
+          const newHasAlert = timeLosses > CRITICAL_LOSS_THRESHOLD_MS;
+
+          if (wasStale !== newIsStale || hadAlert !== newHasAlert) {
+            updated[droneId] = {
+              ...drone,
+              isStale: newIsStale,
+              hasAlert: newHasAlert,
+            };
+            hasChanges = true;
+          }
+        }
+      });
+
+      return hasChanges ? updated : prev;
+    });
+    setMarkerUpdateKey((k) => k + 1);
+  };
 
   useEffect(() => {
     console.log("🛰 Drone Positions:", dronePositions);
+    console.log("📊 Drone Status:", droneStatus);
     console.log("🎯 Active Missions:", activeMissions);
-  }, [dronePositions, activeMissions]);
+  }, [dronePositions, droneStatus, activeMissions]);
 
   // ============================================
   // Derived: map alert by sensorDbId
@@ -360,118 +455,6 @@ export function MapView() {
     }
     return map;
   }, [activeAlerts]);
-
-  function offsetLatLng(
-    lat: number,
-    lng: number,
-    metersNorth: number,
-    metersEast: number
-  ): [number, number] {
-    const dLat = metersNorth / 111111; // meters per degree latitude
-    const dLng = metersEast / (111111 * Math.cos((lat * Math.PI) / 180));
-    return [lat + dLat, lng + dLng];
-  }
-
-  // ============================================
-  // Sensor marker styling
-  // ============================================
-  function getSensorBaseColor(sensorType: string): string {
-    const t = sensorType.toLowerCase();
-    if (t.includes("camera")) return "#26f51b"; // blue
-    if (t.includes("thermal")) return "#f97316"; // orange
-    if (t.includes("infrared") || t.includes("pir")) return "#a855f7"; // purple
-    if (t.includes("motion")) return "#22c55e"; // green
-    return "#9ca3af"; // gray
-  }
-
-  function getSensorIcon(sensor: Sensor, hasActiveAlert: boolean): DivIcon {
-    if (!LeafletLib) {
-      // @ts-ignore
-      return {} as DivIcon;
-    }
-
-    const L = LeafletLib;
-
-    const markerSize = calculateMarkerSize(currentZoom);
-    const fontSize = Math.max(9, Math.round(markerSize * 0.45)); // Scale font size proportionally
-    const borderWidth = markerSize > 30 ? 2 : 1; // Thicker border for larger markers
-
-    const baseColor = getSensorBaseColor(sensor.sensorType);
-    const bg = hasActiveAlert ? "#b91c1c" : baseColor; // 🔴 red if alert
-    const border = hasActiveAlert ? "#fecaca" : "#0f172a";
-
-    const t = sensor.sensorType.toLowerCase();
-    let label = "S";
-    if (t.includes("camera")) label = "C";
-    else if (t.includes("thermal")) label = "T";
-    else if (t.includes("infrared") || t.includes("pir")) label = "P";
-    else if (t.includes("motion")) label = "M";
-
-    const html = `
-    <div
-      style="
-        width: ${markerSize}px;
-        height: ${markerSize}px;
-        border-radius: 9999px;
-        background: ${bg};
-        border: ${borderWidth}px solid ${border};
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: ${fontSize}px;
-        font-weight: 600;
-        box-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);
-        transition: all 0.15s ease-out;
-      "
-    >
-      ${label}
-    </div>
-  `;
-
-    return L.divIcon({
-      html,
-      className: "",
-      iconSize: [markerSize, markerSize],
-      iconAnchor: [markerSize / 2, markerSize / 2],
-    });
-  }
-
-  function getDroneIcon(): DivIcon {
-    if (!LeafletLib) {
-      // @ts-ignore
-      return {} as DivIcon;
-    }
-
-    const L = LeafletLib;
-    const size = 26;
-
-    const html = `
-    <div style="
-      width:${size}px;
-      height:${size}px;
-      border-radius:9999px;
-      background:#2563EB;
-      border:2px solid #93C5FD;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:white;
-      font-size:14px;
-      font-weight:700;
-      box-shadow:0 0 10px rgba(37,99,235,0.9);
-    ">
-      ✈
-    </div>
-  `;
-
-    return L.divIcon({
-      html,
-      className: "",
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2],
-    });
-  }
 
   function openSensorModal(sensor: Sensor) {
     const alert = alertBySensorDbId[sensor.id];
@@ -522,13 +505,6 @@ export function MapView() {
               targetLng: selectedSensor.longitude,
             },
           }));
-
-          const dronePos = dronePositions[selectedDroneId];
-          if (dronePos && leafletMap) {
-            leafletMap.flyTo([dronePos.lat, dronePos.lng], currentZoom, {
-              animate: true,
-            });
-          }
         } else {
           toast({
             title: "Error",
@@ -590,25 +566,6 @@ export function MapView() {
     }
   };
 
-  function haversineMeters(
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ) {
-    const R = 6371000; // meters
-    const toRad = (d: number) => (d * Math.PI) / 180;
-
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-
-    return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
   const handleOpenVideoFeed = async () => {
     if (!selectedSensor) return;
 
@@ -657,9 +614,6 @@ export function MapView() {
     }
   };
 
-  // ============================================
-  // Center calculation from map bounds
-  // ============================================
   const center: [number, number] | null =
     mapConfig != null
       ? [
@@ -668,8 +622,7 @@ export function MapView() {
         ]
       : null;
 
-  const isLoading =
-    loadingLib || loadingMapConfig || loadingSensors || loadingAlerts;
+  const isLoading = loadingMapConfig || loadingSensors || loadingAlerts;
 
   // ============================================
   // Early states
@@ -690,7 +643,7 @@ export function MapView() {
     );
   }
 
-  if (!reactLeaflet || !mapConfig || !center) {
+  if (!mapConfig || !center) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-[#111] px-4 text-center">
         <p className="text-sm text-gray-400">
@@ -702,163 +655,30 @@ export function MapView() {
     );
   }
 
-  const { MapContainer, TileLayer, Marker, Tooltip, Polyline } = reactLeaflet;
-  const L = LeafletLib;
-
   return (
     <>
-      <div className="relative h-full w-full">
-        {/* Socket status indicator */}
-        <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2 rounded-md bg-black/70 px-3 py-1.5 text-xs backdrop-blur-sm">
-          <div
-            className={`h-2 w-2 rounded-full ${
-              socketConnected ? "bg-green-500" : "bg-gray-500"
-            }`}
-          />
-          <span className="text-white">
-            {socketConnected ? "Live" : "Offline"}
-          </span>
-        </div>
-
-        <div className="absolute top-4 left-4 z-[1000] rounded-md bg-black/70 px-3 py-1.5 text-xs text-gray-300 backdrop-blur-sm">
-          Zoom: {currentZoom.toFixed(1)}x
-        </div>
-
-        <MapContainer
-          center={center}
-          zoom={mapConfig.minZoom}
-          minZoom={mapConfig.minZoom}
-          maxZoom={mapConfig.maxZoom}
-          className="h-full w-full bg-black"
-          zoomControl={false}
-          whenCreated={(mapInstance) => {
-            setLeafletMap(mapInstance);
-          }}
-        >
-          <TileLayer
-            url={`${mapConfig.tileRoot}/{z}/{x}/{y}.jpg`}
-            attribution=""
-          />
-
-          {/* Sensor markers - key prop forces re-render when alerts change */}
-          {sensors.map((sensor) => {
-            const alert = alertBySensorDbId[sensor.id];
-            const hasActiveAlert = !!alert && alert.status === "ACTIVE";
-
-            return (
-              <Marker
-                key={`${sensor.id}-${markerUpdateKey}`}
-                position={[sensor.latitude, sensor.longitude]}
-                icon={getSensorIcon(sensor, hasActiveAlert)}
-                eventHandlers={{
-                  click: () => openSensorModal(sensor),
-                }}
-              >
-                <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
-                  <div className="space-y-1 text-xs">
-                    <div className="font-semibold text-black">
-                      {sensor.name}
-                    </div>
-                    <div className="text-black-200">{sensor.sensorType}</div>
-                    <div className="text-[10px] text-black-300">
-                      Lat: {sensor.latitude.toFixed(5)}, Lon:{" "}
-                      {sensor.longitude.toFixed(5)}
-                    </div>
-                    {hasActiveAlert && (
-                      <div className="text-[10px] font-semibold text-red-500">
-                        🚨 ACTIVE ALERT
-                      </div>
-                    )}
-                  </div>
-                </Tooltip>
-              </Marker>
-            );
-          })}
-          {/* Drone markers */}
-          {/* Drone markers */}
-          {Object.values(dronePositions).map((drone) => {
-            let pos: [number, number] = [drone.lat, drone.lng];
-
-            // If close to any sensor, offset slightly so it doesn't overlap
-            for (const sensor of sensors) {
-              const d = haversineMeters(
-                sensor.latitude,
-                sensor.longitude,
-                drone.lat,
-                drone.lng
-              );
-              if (d <= REACH_RADIUS_METERS) {
-                // offset ~2 meters north-east
-                pos = offsetLatLng(drone.lat, drone.lng, 2, 2);
-                break;
-              }
-            }
-
-            return (
-              <Marker
-                key={`drone-${drone.id}`}
-                position={pos}
-                icon={getDroneIcon()}
-              >
-                <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
-                  <div className="space-y-1 text-xs">
-                    <div className="font-semibold text-black">
-                      ✈ {drone.droneId}
-                    </div>
-                    <div className="text-[10px] text-black-300">
-                      Lat: {drone.lat.toFixed(5)}, Lon: {drone.lng.toFixed(5)}
-                    </div>
-                    {drone.alt != null && (
-                      <div className="text-[10px] text-black-300">
-                        Alt: {drone.alt} m
-                      </div>
-                    )}
-                  </div>
-                </Tooltip>
-              </Marker>
-            );
-          })}
-
-          {Object.values(activeMissions).map((mission) => {
-            const drone = dronePositions[mission.droneId];
-            if (!drone) return null;
-
-            const distance = haversineMeters(
-              drone.lat,
-              drone.lng,
-              mission.targetLat,
-              mission.targetLng
-            );
-
-            // Auto-complete mission
-            // if (distance <= REACH_RADIUS_METERS) {
-            //   setTimeout(() => {
-            //     setActiveMissions((prev) => {
-            //       const copy = { ...prev };
-            //       delete copy[mission.droneId];
-            //       return copy;
-            //     });
-            //   }, 0);
-            //   return null;
-            // }
-
-            return (
-              <Polyline
-                key={`mission-${mission.droneId}`}
-                positions={[
-                  [drone.lat, drone.lng],
-                  [mission.targetLat, mission.targetLng],
-                ]}
-                pathOptions={{
-                  color: "red",
-                  weight: 3,
-                  dashArray: "6 8",
-                }}
-              />
-            );
-          })}
-        </MapContainer>
-      </div>
+      <Suspense
+        fallback={
+          <div className="flex h-full w-full items-center justify-center bg-[#111]">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+          </div>
+        }
+      >
+        <MapRenderer
+          mapConfig={mapConfig}
+          sensors={sensors}
+          drones={drones}
+          alertBySensorDbId={alertBySensorDbId}
+          dronePositions={dronePositions}
+          droneStatus={droneStatus}
+          activeMissions={activeMissions}
+          currentZoom={currentZoom}
+          socketConnected={socketConnected}
+          markerUpdateKey={markerUpdateKey}
+          onZoomChange={setCurrentZoom}
+          onSensorClick={openSensorModal}
+        />
+      </Suspense>
 
       {/* Modal for sensor / alert actions */}
       <Dialog open={modalOpen} onOpenChange={(open) => !open && closeModal()}>
@@ -957,7 +777,6 @@ export function MapView() {
           )}
 
           <DialogFooter className="mt-2 flex flex-col gap-2 sm:flex-row sm:justify-end">
-            {/* Neutralise only if alert present */}
             {selectedAlert && (
               <Button
                 type="button"
@@ -970,7 +789,6 @@ export function MapView() {
               </Button>
             )}
 
-            {/* Video Feed button (single action) */}
             <Button
               type="button"
               variant="ghost"
@@ -981,14 +799,6 @@ export function MapView() {
                 !selectedSensor ||
                 !("rtspUrl" in (selectedSensor || {})) ||
                 !selectedSensor?.rtspUrl
-              }
-              title={
-                !selectedSensor
-                  ? "Select a sensor"
-                  : !("rtspUrl" in (selectedSensor || {})) ||
-                    !selectedSensor?.rtspUrl
-                  ? "No RTSP URL configured for this sensor"
-                  : "Open the video feed (server will launch the player)"
               }
             >
               {actionLoading ? (
