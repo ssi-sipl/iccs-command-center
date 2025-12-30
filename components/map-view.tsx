@@ -28,6 +28,8 @@ import { openRtspBySensor } from "@/lib/api/rtsp";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+const REACH_RADIUS_METERS = 6;
+
 let reactLeaflet: typeof import("react-leaflet") | null = null;
 let LeafletLib: typeof import("leaflet") | null = null;
 
@@ -57,6 +59,22 @@ function calculateMarkerSize(zoom: number): number {
   return Math.round(minSize + (maxSize - minSize) * progress);
 }
 
+type DronePosition = {
+  id: string; // DB id
+  droneId: string; // logical id
+  lat: number;
+  lng: number;
+  alt?: number | null;
+  ts: number;
+};
+
+type ActiveMission = {
+  droneId: string; // logical droneId (drone2)
+  sensorId: string;
+  targetLat: number;
+  targetLng: number;
+};
+
 export function MapView() {
   const { toast } = useToast();
 
@@ -67,6 +85,14 @@ export function MapView() {
   const [leafletMap, setLeafletMap] = useState<LeafletMap | null>(null);
 
   const [currentZoom, setCurrentZoom] = useState(18);
+
+  const [dronePositions, setDronePositions] = useState<
+    Record<string, DronePosition>
+  >({});
+
+  const [activeMissions, setActiveMissions] = useState<
+    Record<string, ActiveMission>
+  >({});
 
   const [loadingLib, setLoadingLib] = useState(true);
   const [loadingMapConfig, setLoadingMapConfig] = useState(true);
@@ -251,6 +277,13 @@ export function MapView() {
       transports: ["websocket", "polling"],
     });
 
+    s.on("drone_position", (pos: DronePosition) => {
+      setDronePositions((prev) => ({
+        ...prev,
+        [pos.droneId]: pos,
+      }));
+    });
+
     s.on("connect", () => {
       console.log("[MapView] Socket connected", s.id);
       setSocketConnected(true);
@@ -259,6 +292,7 @@ export function MapView() {
     s.on("disconnect", () => {
       console.log("[MapView] Socket disconnected");
       setSocketConnected(false);
+      setDronePositions({});
     });
 
     s.on("alert_active", (alert: Alert) => {
@@ -309,6 +343,11 @@ export function MapView() {
     };
   }, [toast]);
 
+  useEffect(() => {
+    console.log("🛰 Drone Positions:", dronePositions);
+    console.log("🎯 Active Missions:", activeMissions);
+  }, [dronePositions, activeMissions]);
+
   // ============================================
   // Derived: map alert by sensorDbId
   // ============================================
@@ -321,6 +360,17 @@ export function MapView() {
     }
     return map;
   }, [activeAlerts]);
+
+  function offsetLatLng(
+    lat: number,
+    lng: number,
+    metersNorth: number,
+    metersEast: number
+  ): [number, number] {
+    const dLat = metersNorth / 111111; // meters per degree latitude
+    const dLng = metersEast / (111111 * Math.cos((lat * Math.PI) / 180));
+    return [lat + dLat, lng + dLng];
+  }
 
   // ============================================
   // Sensor marker styling
@@ -387,6 +437,42 @@ export function MapView() {
     });
   }
 
+  function getDroneIcon(): DivIcon {
+    if (!LeafletLib) {
+      // @ts-ignore
+      return {} as DivIcon;
+    }
+
+    const L = LeafletLib;
+    const size = 26;
+
+    const html = `
+    <div style="
+      width:${size}px;
+      height:${size}px;
+      border-radius:9999px;
+      background:#2563EB;
+      border:2px solid #93C5FD;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-size:14px;
+      font-weight:700;
+      box-shadow:0 0 10px rgba(37,99,235,0.9);
+    ">
+      ✈
+    </div>
+  `;
+
+    return L.divIcon({
+      html,
+      className: "",
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
+  }
+
   function openSensorModal(sensor: Sensor) {
     const alert = alertBySensorDbId[sensor.id];
     setSelectedSensor(sensor);
@@ -424,6 +510,25 @@ export function MapView() {
             description: `Drone mission started for ${selectedSensor.name}`,
           });
           closeModal();
+          const drone = drones.find((d) => d.id === selectedDroneId);
+          if (!drone) return;
+
+          setActiveMissions((prev) => ({
+            ...prev,
+            [drone.droneId]: {
+              droneId: drone.droneId,
+              sensorId: selectedSensor.id,
+              targetLat: selectedSensor.latitude,
+              targetLng: selectedSensor.longitude,
+            },
+          }));
+
+          const dronePos = dronePositions[selectedDroneId];
+          if (dronePos && leafletMap) {
+            leafletMap.flyTo([dronePos.lat, dronePos.lng], currentZoom, {
+              animate: true,
+            });
+          }
         } else {
           toast({
             title: "Error",
@@ -484,6 +589,25 @@ export function MapView() {
       setActionLoading(false);
     }
   };
+
+  function haversineMeters(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) {
+    const R = 6371000; // meters
+    const toRad = (d: number) => (d * Math.PI) / 180;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+    return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
 
   const handleOpenVideoFeed = async () => {
     if (!selectedSensor) return;
@@ -578,7 +702,7 @@ export function MapView() {
     );
   }
 
-  const { MapContainer, TileLayer, Marker, Tooltip } = reactLeaflet;
+  const { MapContainer, TileLayer, Marker, Tooltip, Polyline } = reactLeaflet;
   const L = LeafletLib;
 
   return (
@@ -648,6 +772,89 @@ export function MapView() {
                   </div>
                 </Tooltip>
               </Marker>
+            );
+          })}
+          {/* Drone markers */}
+          {/* Drone markers */}
+          {Object.values(dronePositions).map((drone) => {
+            let pos: [number, number] = [drone.lat, drone.lng];
+
+            // If close to any sensor, offset slightly so it doesn't overlap
+            for (const sensor of sensors) {
+              const d = haversineMeters(
+                sensor.latitude,
+                sensor.longitude,
+                drone.lat,
+                drone.lng
+              );
+              if (d <= REACH_RADIUS_METERS) {
+                // offset ~2 meters north-east
+                pos = offsetLatLng(drone.lat, drone.lng, 2, 2);
+                break;
+              }
+            }
+
+            return (
+              <Marker
+                key={`drone-${drone.id}`}
+                position={pos}
+                icon={getDroneIcon()}
+              >
+                <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
+                  <div className="space-y-1 text-xs">
+                    <div className="font-semibold text-black">
+                      ✈ {drone.droneId}
+                    </div>
+                    <div className="text-[10px] text-black-300">
+                      Lat: {drone.lat.toFixed(5)}, Lon: {drone.lng.toFixed(5)}
+                    </div>
+                    {drone.alt != null && (
+                      <div className="text-[10px] text-black-300">
+                        Alt: {drone.alt} m
+                      </div>
+                    )}
+                  </div>
+                </Tooltip>
+              </Marker>
+            );
+          })}
+
+          {Object.values(activeMissions).map((mission) => {
+            const drone = dronePositions[mission.droneId];
+            if (!drone) return null;
+
+            const distance = haversineMeters(
+              drone.lat,
+              drone.lng,
+              mission.targetLat,
+              mission.targetLng
+            );
+
+            // Auto-complete mission
+            // if (distance <= REACH_RADIUS_METERS) {
+            //   setTimeout(() => {
+            //     setActiveMissions((prev) => {
+            //       const copy = { ...prev };
+            //       delete copy[mission.droneId];
+            //       return copy;
+            //     });
+            //   }, 0);
+            //   return null;
+            // }
+
+            return (
+              <Polyline
+                key={`mission-${mission.droneId}`}
+                positions={[
+                  [drone.lat, drone.lng],
+                  [mission.targetLat, mission.targetLng],
+                ]}
+                pathOptions={{
+                  color: "red",
+                  weight: 3,
+                  dashArray: "6 8",
+                }}
+              />
             );
           })}
         </MapContainer>
