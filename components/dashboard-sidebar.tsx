@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos.ts";
 import { getAllAlarms, type Alarm } from "@/lib/api/alarms.ts";
+import { openRtspBySensor } from "@/lib/api/rtsp";
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -266,6 +267,54 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     setSelectedDroneId("");
   };
 
+  const handleOpenVideoFeed = async () => {
+    if (!selectedAlert || !selectedAlert.sensor) return;
+
+    if (!("rtspUrl" in selectedAlert.sensor) || !selectedAlert.sensor.rtspUrl) {
+      toast({
+        title: "No RTSP configured",
+        description: "This sensor has no RTSP URL configured in the backend.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      const res = await openRtspBySensor(selectedAlert?.sensor?.id);
+
+      if (res && res.success) {
+        const extra = res.data
+          ? ` ${res.data.pid ? `(pid ${res.data.pid})` : ""}`
+          : "";
+        toast({
+          title: "Video Feed launched",
+          description:
+            res.message || `Launched video on server.${extra}`.trim(),
+        });
+      } else {
+        const msg =
+          (res && (res.error || (res.details && String(res.details)))) ||
+          "Server could not launch the video feed.";
+        toast({
+          title: "Failed to launch video",
+          description: msg,
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      console.error("Error opening RTSP:", err);
+      toast({
+        title: "Network / Server error",
+        description:
+          err instanceof Error ? err.message : "Unable to reach backend.",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleSendDrone = async () => {
     if (!selectedAlert) return;
 
@@ -354,7 +403,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
           isOpen ? "translate-x-0" : "-translate-x-full"
         } w-72 md:w-80`}
       >
-        <section className="mb-6">
+        {/* <section className="mb-6">
           <h2 className="mb-3 text-sm font-semibold tracking-wide text-white">
             ALARM
           </h2>
@@ -394,7 +443,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
           )}
 
           <div className="mt-4 border-b border-[#333]" />
-        </section>
+        </section> */}
 
         <section className="mb-6">
           <h2 className="mb-3 text-sm font-semibold tracking-wide text-white">
@@ -672,6 +721,21 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                   </>
                 ) : (
                   "Send Drone"
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="border-[#444] bg-transparent text-xs text-gray-200 hover:bg-[#333]"
+                onClick={handleOpenVideoFeed}
+              >
+                {actionLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Launching...
+                  </>
+                ) : (
+                  "Video Feed"
                 )}
               </Button>
               <Button
