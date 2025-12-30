@@ -24,6 +24,7 @@ import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos";
 import { useToast } from "@/hooks/use-toast";
 import { getActiveMap, type OfflineMap } from "@/lib/api/maps";
 import { openRtspBySensor } from "@/lib/api/rtsp";
+import { sendDrone } from "@/lib/api/droneCommand";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const REACH_RADIUS_METERS = 6;
@@ -314,7 +315,7 @@ export function MapView() {
         },
       }));
 
-      setDroneLocationTimeout(pos.id);
+      // setDroneLocationTimeout(pos.id);
       setMarkerUpdateKey((k) => k + 1);
     });
 
@@ -474,6 +475,7 @@ export function MapView() {
 
   const handleSendDrone = async () => {
     if (!selectedSensor) return;
+
     if (!selectedDroneId) {
       toast({
         title: "Select a drone",
@@ -483,52 +485,64 @@ export function MapView() {
       return;
     }
 
-    if (selectedAlert && selectedAlert.status === "ACTIVE") {
-      try {
-        setActionLoading(true);
-        const res = await sendDroneForAlert(selectedAlert.id, selectedDroneId);
-        if (res.success) {
-          toast({
-            title: "Drone dispatched",
-            description: `Drone mission started for ${selectedSensor.name}`,
-          });
-          closeModal();
-          const drone = drones.find((d) => d.id === selectedDroneId);
-          if (!drone) return;
+    const { latitude, longitude } = selectedSensor;
 
-          setActiveMissions((prev) => ({
-            ...prev,
-            [drone.droneId]: {
-              droneId: drone.droneId,
-              sensorId: selectedSensor.id,
-              targetLat: selectedSensor.latitude,
-              targetLng: selectedSensor.longitude,
-            },
-          }));
-        } else {
-          toast({
-            title: "Error",
-            description: res.error || "Failed to send drone",
-            variant: "destructive",
-          });
-        }
-      } catch (err) {
-        console.error("Error sending drone for alert:", err);
-        toast({
-          title: "Error",
-          description: "Failed to send drone",
-          variant: "destructive",
-        });
-      } finally {
-        setActionLoading(false);
-      }
-    } else {
+    if (typeof latitude !== "number" || typeof longitude !== "number") {
       toast({
-        title: "Manual dispatch (stub)",
-        description:
-          "UI action is working, wire this to a manual mission endpoint on the backend.",
+        title: "Invalid target location",
+        description: "Sensor coordinates are missing or invalid.",
+        variant: "destructive",
       });
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      const res = await sendDrone({
+        droneDbId: selectedDroneId,
+        sensorId: selectedSensor.id,
+        alertId: selectedAlert?.id, // optional (OK)
+        targetLatitude: latitude,
+        targetLongitude: longitude,
+      });
+
+      if (!res.success) {
+        throw new Error(res.error || "Failed to send drone");
+      }
+
+      toast({
+        title: "Drone dispatched",
+        description: selectedAlert
+          ? `Drone sent for alert (Flight ID: ${res.flightId})`
+          : `Drone sent for manual mission (Flight ID: ${res.flightId})`,
+      });
+
+      // Track mission locally for UI animation
+      const drone = drones.find((d) => d.id === selectedDroneId);
+      if (drone) {
+        setActiveMissions((prev) => ({
+          ...prev,
+          [drone.droneId]: {
+            droneId: drone.droneId,
+            sensorId: selectedSensor.id,
+            targetLat: latitude,
+            targetLng: longitude,
+          },
+        }));
+      }
+
       closeModal();
+    } catch (err) {
+      console.error("Error sending drone:", err);
+      toast({
+        title: "Error",
+        description:
+          err instanceof Error ? err.message : "Failed to send drone",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(false);
     }
   };
 

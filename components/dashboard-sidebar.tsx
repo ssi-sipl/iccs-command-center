@@ -26,9 +26,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos.ts";
-import { getAllAlarms, type Alarm } from "@/lib/api/alarms.ts";
+import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos";
+import { getAllAlarms, type Alarm } from "@/lib/api/alarms";
 import { openRtspBySensor } from "@/lib/api/rtsp";
+import { sendDrone } from "@/lib/api/droneCommand";
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -327,22 +328,44 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
       return;
     }
 
-    setActionLoading(true);
-    try {
-      const res = await sendDroneForAlert(selectedAlert.id, selectedDroneId);
+    // Sensor location is REQUIRED for your backend
+    const lat = selectedAlert.sensor?.latitude;
+    const lng = selectedAlert.sensor?.longitude;
 
-      if (!res.success || !res.data) {
+    if (typeof lat !== "number" || typeof lng !== "number") {
+      toast({
+        title: "Invalid sensor location",
+        description: "Sensor coordinates are missing or invalid.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setActionLoading(true);
+
+    try {
+      const res = await sendDrone({
+        droneDbId: selectedDroneId,
+        alertId: selectedAlert.id,
+        sensorId: selectedAlert.sensorId,
+        targetLatitude: lat,
+        targetLongitude: lng,
+      });
+
+      if (!res.success) {
         throw new Error(res.error || "Failed to send drone");
       }
 
       toast({
         title: "Drone dispatched",
-        description: `Drone "${res.data.drone.name}" sent for alert.`,
+        description: `Drone sent successfully (Flight ID: ${res.flightId})`,
       });
 
+      // Remove alert from UI (server will also emit socket event)
       setAlerts((prev) => prev.filter((a) => a.id !== selectedAlert.id));
+
       closeAlertModal();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error sending drone:", err);
       toast({
         title: "Error",
