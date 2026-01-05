@@ -45,6 +45,7 @@ interface MapRendererProps {
   markerUpdateKey: number;
   onZoomChange: (zoom: number) => void;
   onSensorClick: (sensor: Sensor) => void;
+  onDroneMarkerClick?: (droneId: string) => void;
 }
 
 const REACH_RADIUS_METERS = 6;
@@ -98,83 +99,14 @@ function getSensorBaseColor(sensorType: string): string {
   return "#9ca3af";
 }
 
-function getSensorIcon(
-  sensor: Sensor,
-  hasActiveAlert: boolean,
-  zoom: number
-): DivIcon {
-  const leaflet = require("leaflet");
-
-  const markerSize = calculateMarkerSize(zoom);
-  const fontSize = Math.max(9, Math.round(markerSize * 0.45));
-  const borderWidth = markerSize > 30 ? 2 : 1;
-
-  const baseColor = getSensorBaseColor(sensor.sensorType);
-  const bg = hasActiveAlert ? "#b91c1c" : baseColor;
-  const border = hasActiveAlert ? "#fecaca" : "#0f172a";
-
-  const t = sensor.sensorType.toLowerCase();
-  let label = "S";
-  if (t.includes("camera")) label = "C";
-  else if (t.includes("thermal")) label = "T";
-  else if (t.includes("infrared") || t.includes("pir")) label = "P";
-  else if (t.includes("motion")) label = "M";
-
-  const html = `
-    <div style="
-      width: ${markerSize}px;
-      height: ${markerSize}px;
-      border-radius: 9999px;
-      background: ${bg};
-      border: ${borderWidth}px solid ${border};
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: ${fontSize}px;
-      font-weight: 600;
-      box-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);
-      transition: all 0.15s ease-out;
-    ">
-      ${label}
-    </div>
-  `;
-
-  return leaflet.divIcon({
-    html,
-    className: "",
-    iconSize: [markerSize, markerSize],
-    iconAnchor: [markerSize / 2, markerSize / 2],
-  });
-}
-
-function getDroneIcon(
-  isLive: boolean,
-  isStale = false,
-  hasAlert = false
-): DivIcon {
+function getDroneIcon(): DivIcon {
   const leaflet = require("leaflet");
   const size = 26;
 
-  let bgColor = "#8B5CF6"; // PURPLE (inactive)
-  let borderColor = "#D8B4FE";
-  let glowColor = "rgba(139,92,246,0.6)";
-  let symbol = "✈";
-
-  if (isLive) {
-    bgColor = "#10B981"; // GREEN (live)
-    borderColor = "#6EE7B7";
-    glowColor = "rgba(16,185,129,0.9)";
-  } else if (hasAlert) {
-    bgColor = "#EF4444"; // Red (critical loss)
-    borderColor = "#FCA5A5";
-    glowColor = "rgba(239,68,68,0.9)";
-    symbol = "⚠";
-  } else if (isStale) {
-    bgColor = "#F59E0B"; // Orange (stale data)
-    borderColor = "#FBBF24";
-    glowColor = "rgba(245,158,11,0.8)";
-  }
+  const bgColor = "#10B981"; // GREEN (always)
+  const borderColor = "#6EE7B7";
+  const glowColor = "rgba(16,185,129,0.9)";
+  const symbol = "✈";
 
   const html = `
     <div style="
@@ -190,8 +122,6 @@ function getDroneIcon(
       font-size:14px;
       font-weight:700;
       box-shadow:0 0 10px ${glowColor};
-      transition: all 0.3s ease-in-out;
-      ${hasAlert ? "animation: pulse 1s infinite;" : ""}
     ">
       ${symbol}
     </div>
@@ -247,7 +177,98 @@ function haversineMeters(
   return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export default function MapRenderer({
+// Function to detect if any drone is on a sensor
+function getDroneOnSensor(
+  sensor: Sensor,
+  dronePositions: Record<string, any>
+): string | null {
+  for (const [droneId, pos] of Object.entries(dronePositions)) {
+    if (!pos) continue;
+    const distance = haversineMeters(
+      sensor.latitude,
+      sensor.longitude,
+      pos.lat,
+      pos.lng
+    );
+    if (distance <= REACH_RADIUS_METERS) {
+      return droneId;
+    }
+  }
+  return null;
+}
+
+function getSensorIcon(
+  sensor: Sensor,
+  hasActiveAlert: boolean,
+  zoom: number,
+  droneOnSensor: boolean
+): DivIcon {
+  const leaflet = require("leaflet");
+
+  const markerSize = calculateMarkerSize(zoom);
+  const fontSize = Math.max(9, Math.round(markerSize * 0.45));
+  const borderWidth = markerSize > 30 ? 2 : 1;
+
+  const baseColor = getSensorBaseColor(sensor.sensorType);
+  const bg = hasActiveAlert ? "#b91c1c" : baseColor;
+  const border = hasActiveAlert ? "#fecaca" : "#0f172a";
+
+  const t = sensor.sensorType.toLowerCase();
+  let label = "S";
+  if (t.includes("camera")) label = "C";
+  else if (t.includes("thermal")) label = "T";
+  else if (t.includes("infrared") || t.includes("pir")) label = "P";
+  else if (t.includes("motion")) label = "M";
+
+  const pulseAnimation = droneOnSensor
+    ? `
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
+    }
+    @keyframes scale-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+  `
+    : "";
+
+  const html = `
+    <style>${pulseAnimation}</style>
+    <div style="
+      width: ${markerSize}px;
+      height: ${markerSize}px;
+      border-radius: 9999px;
+      background: ${bg};
+      border: ${borderWidth}px solid ${border};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: ${fontSize}px;
+      font-weight: 600;
+      ${
+        droneOnSensor
+          ? `box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);
+      animation: pulse-ring 2s infinite, scale-pulse 2s infinite;`
+          : `box-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);`
+      }
+      transition: all 0.15s ease-out;
+    ">
+      ${label}
+    </div>
+  `;
+
+  return leaflet.divIcon({
+    html,
+    className: "",
+    iconSize: [markerSize, markerSize],
+    iconAnchor: [markerSize / 2, markerSize / 2],
+  });
+}
+
+function MapRenderer({
   mapConfig,
   sensors,
   drones,
@@ -260,6 +281,7 @@ export default function MapRenderer({
   markerUpdateKey,
   onZoomChange,
   onSensorClick,
+  onDroneMarkerClick,
 }: MapRendererProps) {
   const leafletMapRef = useRef<LeafletMap | null>(null);
 
@@ -321,12 +343,19 @@ export default function MapRenderer({
         {sensors.map((sensor) => {
           const alert = alertBySensorDbId[sensor.id];
           const hasActiveAlert = !!alert && alert.status === "ACTIVE";
+          const droneOnSensor =
+            getDroneOnSensor(sensor, dronePositions) !== null;
 
           return (
             <Marker
               key={`${sensor.id}-${markerUpdateKey}`}
               position={[sensor.latitude, sensor.longitude]}
-              icon={getSensorIcon(sensor, hasActiveAlert, currentZoom)}
+              icon={getSensorIcon(
+                sensor,
+                hasActiveAlert,
+                currentZoom,
+                droneOnSensor
+              )}
               eventHandlers={{
                 click: () => onSensorClick(sensor),
               }}
@@ -339,6 +368,11 @@ export default function MapRenderer({
                     Lat: {sensor.latitude.toFixed(5)}, Lon:{" "}
                     {sensor.longitude.toFixed(5)}
                   </div>
+                  {droneOnSensor && (
+                    <div className="text-[10px] font-semibold text-blue-600">
+                      ✈ Drone on sensor
+                    </div>
+                  )}
                   {hasActiveAlert && (
                     <div className="text-[10px] font-semibold text-red-500">
                       🚨 ACTIVE ALERT
@@ -357,34 +391,24 @@ export default function MapRenderer({
 
           if (!pos) return null;
 
-          let markerPos: [number, number] = [pos.lat, pos.lng];
+          const markerPos: [number, number] = [pos.lat, pos.lng];
 
-          for (const sensor of sensors) {
-            const d = haversineMeters(
-              sensor.latitude,
-              sensor.longitude,
-              pos.lat,
-              pos.lng
-            );
-            if (d <= REACH_RADIUS_METERS) {
-              markerPos = offsetLatLng(pos.lat, pos.lng, 2, 2);
-              break;
-            }
-          }
-
-          const isLive = status?.isLive ?? false;
-          const isStale = status?.isStale ?? false;
-          const hasAlert = status?.hasAlert ?? false;
-
-          const timeSinceLoss = status?.connectionLossTime
-            ? Math.round((Date.now() - status.connectionLossTime) / 1000)
+          const telemetryAge = status
+            ? Math.round((Date.now() - status.lastUpdateTime) / 1000)
             : null;
+          const isOnline = telemetryAge !== null && telemetryAge < 10;
+          const statusDisplay = isOnline ? "Online" : "Offline";
+          const statusColor = isOnline ? "text-green-600" : "text-gray-500";
+          const statusEmoji = isOnline ? "🟢" : "⚪";
 
           return (
             <Marker
               key={`drone-${drone.id}-${markerUpdateKey}`}
               position={markerPos}
-              icon={getDroneIcon(isLive, isStale, hasAlert)}
+              icon={getDroneIcon()}
+              eventHandlers={{
+                click: () => onDroneMarkerClick?.(drone.id),
+              }}
             >
               <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
                 <div className="space-y-1 text-xs">
@@ -403,27 +427,11 @@ export default function MapRenderer({
                     </div>
                   )}
 
-                  <div
-                    className={`text-[10px] font-semibold ${
-                      isLive
-                        ? "text-green-600"
-                        : hasAlert
-                        ? "text-red-600"
-                        : isStale
-                        ? "text-yellow-600"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {isLive
-                      ? "🟢 Live"
-                      : hasAlert
-                      ? `🔴 Lost ${timeSinceLoss}s - STALE DATA`
-                      : isStale
-                      ? `🟡 No Update ${timeSinceLoss}s`
-                      : "Offline"}
+                  <div className={`text-[10px] font-semibold ${statusColor}`}>
+                    {statusEmoji} {statusDisplay}
                   </div>
 
-                  {!isLive && status?.lastUpdateTime && (
+                  {!isOnline && status?.lastUpdateTime && (
                     <div className="text-[10px] text-black-300">
                       Last:{" "}
                       {new Date(status.lastUpdateTime).toLocaleTimeString()}
@@ -462,3 +470,6 @@ export default function MapRenderer({
     </div>
   );
 }
+
+export { MapRenderer };
+export default MapRenderer;

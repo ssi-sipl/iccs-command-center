@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef, lazy, Suspense } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import "leaflet/dist/leaflet.css";
 import io, { type Socket } from "socket.io-client";
 import { Loader2 } from "lucide-react";
@@ -13,25 +13,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  getActiveAlerts,
-  neutraliseAlert,
-  sendDroneForAlert,
-  type Alert,
-} from "@/lib/api/alerts";
+import { getActiveAlerts, neutraliseAlert, type Alert } from "@/lib/api/alerts";
 import { getAllSensors, type Sensor } from "@/lib/api/sensors";
 import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos";
 import { useToast } from "@/hooks/use-toast";
 import { getActiveMap, type OfflineMap } from "@/lib/api/maps";
 import { openRtspBySensor } from "@/lib/api/rtsp";
 import { sendDrone } from "@/lib/api/droneCommand";
+import MapRenderer from "@/components/map-renderer";
+import {
+  TelemetryWindow,
+  type DroneTelemetry,
+} from "@/components/telemetry-window";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const REACH_RADIUS_METERS = 6;
 const DRONE_LOCATION_TIMEOUT_MS = 30000;
-const STALE_DATA_THRESHOLD_MS = 60000; // Mark as stale if no update for 1 minute
-const CRITICAL_LOSS_THRESHOLD_MS = 120000; // Alert after 2 minutes of lost connection
-const DRONE_STATUS_REFRESH_MS = 5000; // Update status every 5 seconds
+const STALE_DATA_THRESHOLD_MS = 60000;
+const CRITICAL_LOSS_THRESHOLD_MS = 120000;
+const DRONE_STATUS_REFRESH_MS = 5000;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -63,9 +63,9 @@ type DroneStatus = {
   droneId: string;
   isLive: boolean;
   lastUpdateTime: number;
-  connectionLossTime?: number; // Track when connection was lost
-  isStale: boolean; // Data older than threshold
-  hasAlert: boolean; // Critical connection loss flagged
+  connectionLossTime?: number;
+  isStale: boolean;
+  hasAlert: boolean;
 };
 
 type ActiveMission = {
@@ -74,8 +74,6 @@ type ActiveMission = {
   targetLat: number;
   targetLng: number;
 };
-
-const MapRenderer = lazy(() => import("./map-renderer"));
 
 export function MapView() {
   const { toast } = useToast();
@@ -114,12 +112,17 @@ export function MapView() {
 
   const [markerUpdateKey, setMarkerUpdateKey] = useState(0);
 
+  const [telemetryWindowOpen, setTelemetryWindowOpen] = useState(false);
+  const [selectedDroneTelemetry, setSelectedDroneTelemetry] =
+    useState<DroneTelemetry | null>(null);
+
+  const [droneTelemetryData, setDroneTelemetryData] = useState<
+    Record<string, DroneTelemetry>
+  >({});
+
   const timeoutRefsRef = useRef<Record<string, NodeJS.Timeout>>({});
   const statusUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ============================================
-  // Fetch active map config
-  // ============================================
   useEffect(() => {
     const fetchActiveMap = async () => {
       setLoadingMapConfig(true);
@@ -142,9 +145,6 @@ export function MapView() {
     fetchActiveMap();
   }, []);
 
-  // ============================================
-  // Fetch sensors
-  // ============================================
   useEffect(() => {
     const loadSensors = async () => {
       setLoadingSensors(true);
@@ -174,9 +174,6 @@ export function MapView() {
     loadSensors();
   }, [toast]);
 
-  // ============================================
-  // Fetch drones
-  // ============================================
   useEffect(() => {
     const loadDrones = async () => {
       setLoadingDrones(true);
@@ -227,9 +224,6 @@ export function MapView() {
     loadDrones();
   }, [toast]);
 
-  // ============================================
-  // Set drone location timeout
-  // ============================================
   const setDroneLocationTimeout = (droneId: string) => {
     if (timeoutRefsRef.current[droneId]) {
       clearTimeout(timeoutRefsRef.current[droneId]);
@@ -252,13 +246,9 @@ export function MapView() {
           },
         };
       });
-      setMarkerUpdateKey((k) => k + 1);
     }, DRONE_LOCATION_TIMEOUT_MS);
   };
 
-  // ============================================
-  // Fetch active alerts + WebSocket subscription
-  // ============================================
   useEffect(() => {
     const loadAlerts = async () => {
       setLoadingAlerts(true);
@@ -287,7 +277,6 @@ export function MapView() {
 
     loadAlerts();
 
-    // Setup socket
     const s = io(API_BASE_URL, {
       reconnection: true,
       reconnectionDelay: 1000,
@@ -314,9 +303,46 @@ export function MapView() {
           hasAlert: false,
         },
       }));
+    });
 
-      // setDroneLocationTimeout(pos.id);
-      setMarkerUpdateKey((k) => k + 1);
+    s.on("drone_telemetry", (telemetry: DroneTelemetry) => {
+      console.log("[MapView] Received drone telemetry:", telemetry);
+
+      setDronePositions((prev) => ({
+        ...prev,
+        [telemetry.droneDbId]: {
+          id: telemetry.droneDbId,
+          droneId: telemetry.droneId,
+          lat: telemetry.lat,
+          lng: telemetry.lng,
+          alt: telemetry.alt,
+          ts: telemetry.ts,
+        },
+      }));
+
+      setDroneStatus((prev) => ({
+        ...prev,
+        [telemetry.droneDbId]: {
+          ...prev[telemetry.droneDbId],
+          isLive: true,
+          lastUpdateTime: telemetry.ts,
+          connectionLossTime: undefined,
+          isStale: false,
+          hasAlert: false,
+        },
+      }));
+
+      setDroneTelemetryData((prev) => ({
+        ...prev,
+        [telemetry.droneDbId]: telemetry,
+      }));
+
+      if (
+        telemetryWindowOpen &&
+        selectedDroneTelemetry?.droneDbId === telemetry.droneDbId
+      ) {
+        setSelectedDroneTelemetry(telemetry);
+      }
     });
 
     s.on("connect", () => {
@@ -404,8 +430,6 @@ export function MapView() {
     };
   }, []);
 
-  // ============================================
-  // ============================================
   const updateAllDroneStatuses = () => {
     setDroneStatus((prev) => {
       const now = Date.now();
@@ -433,9 +457,12 @@ export function MapView() {
         }
       });
 
+      if (hasChanges) {
+        setMarkerUpdateKey((k) => k + 1);
+      }
+
       return hasChanges ? updated : prev;
     });
-    setMarkerUpdateKey((k) => k + 1);
   };
 
   useEffect(() => {
@@ -444,9 +471,6 @@ export function MapView() {
     console.log("🎯 Active Missions:", activeMissions);
   }, [dronePositions, droneStatus, activeMissions]);
 
-  // ============================================
-  // Derived: map alert by sensorDbId
-  // ============================================
   const alertBySensorDbId = useMemo(() => {
     const map: Record<string, Alert> = {};
     for (const alert of activeAlerts) {
@@ -471,6 +495,61 @@ export function MapView() {
     setSelectedAlert(null);
     setSelectedDroneId("");
     setActionLoading(false);
+  }
+
+  function openTelemetryWindow(droneDbId: string) {
+    const drone = drones.find((d) => d.id === droneDbId);
+    if (!drone) return;
+
+    const telemetry = droneTelemetryData[droneDbId];
+
+    if (telemetry) {
+      setSelectedDroneTelemetry(telemetry);
+    } else {
+      const pos = dronePositions[droneDbId];
+      if (!pos) return;
+
+      setSelectedDroneTelemetry({
+        droneDbId,
+        droneId: drone.droneId,
+        lat: pos.lat,
+        lng: pos.lng,
+        alt: pos.alt || null,
+        speed: null,
+        battery: null,
+        mode: null,
+        gpsFix: null,
+        satellites: null,
+        windSpeed: null,
+        targetDistance: null,
+        status: null,
+        command: null,
+        ts: pos.ts,
+      });
+    }
+
+    setTelemetryWindowOpen(true);
+  }
+
+  function closeTelemetryWindow() {
+    setTelemetryWindowOpen(false);
+    setSelectedDroneTelemetry(null);
+  }
+
+  async function handleDropPayload() {
+    if (!selectedDroneTelemetry) return;
+    toast({
+      title: "Payload dropped",
+      description: `Payload dropped for drone ${selectedDroneTelemetry.droneId}`,
+    });
+  }
+
+  async function handleRecall() {
+    if (!selectedDroneTelemetry) return;
+    toast({
+      title: "Recall initiated",
+      description: `Recall command sent to ${selectedDroneTelemetry.droneId}`,
+    });
   }
 
   const handleSendDrone = async () => {
@@ -502,7 +581,7 @@ export function MapView() {
       const res = await sendDrone({
         droneDbId: selectedDroneId,
         sensorId: selectedSensor.id,
-        alertId: selectedAlert?.id, // optional (OK)
+        alertId: selectedAlert?.id,
         targetLatitude: latitude,
         targetLongitude: longitude,
       });
@@ -518,7 +597,6 @@ export function MapView() {
           : `Drone sent for manual mission (Flight ID: ${res.flightId})`,
       });
 
-      // Track mission locally for UI animation
       const drone = drones.find((d) => d.id === selectedDroneId);
       if (drone) {
         setActiveMissions((prev) => ({
@@ -638,9 +716,6 @@ export function MapView() {
 
   const isLoading = loadingMapConfig || loadingSensors || loadingAlerts;
 
-  // ============================================
-  // Early states
-  // ============================================
   if (isLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-[#111]">
@@ -671,32 +746,24 @@ export function MapView() {
 
   return (
     <>
-      <Suspense
-        fallback={
-          <div className="flex h-full w-full items-center justify-center bg-[#111]">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-          </div>
-        }
-      >
-        <MapRenderer
-          mapConfig={mapConfig}
-          sensors={sensors}
-          drones={drones}
-          alertBySensorDbId={alertBySensorDbId}
-          dronePositions={dronePositions}
-          droneStatus={droneStatus}
-          activeMissions={activeMissions}
-          currentZoom={currentZoom}
-          socketConnected={socketConnected}
-          markerUpdateKey={markerUpdateKey}
-          onZoomChange={setCurrentZoom}
-          onSensorClick={openSensorModal}
-        />
-      </Suspense>
+      <MapRenderer
+        mapConfig={mapConfig}
+        sensors={sensors}
+        drones={drones}
+        alertBySensorDbId={alertBySensorDbId}
+        dronePositions={dronePositions}
+        droneStatus={droneStatus}
+        activeMissions={activeMissions}
+        currentZoom={currentZoom}
+        socketConnected={socketConnected}
+        markerUpdateKey={markerUpdateKey}
+        onZoomChange={setCurrentZoom}
+        onSensorClick={openSensorModal}
+        onDroneMarkerClick={openTelemetryWindow}
+      />
 
-      {/* Modal for sensor / alert actions */}
-      <Dialog open={modalOpen} onOpenChange={(open) => !open && closeModal()}>
-        <DialogContent className="z-[100] max-w-lg border-[#333] bg-[#111] text-white">
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="border-[#333] bg-[#111] text-white">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">
               {selectedSensor ? selectedSensor.name : "Sensor"}
@@ -709,7 +776,6 @@ export function MapView() {
 
           {selectedSensor && (
             <div className="space-y-4 py-2 text-sm">
-              {/* Sensor meta */}
               <div className="rounded-md border border-[#333] bg-[#1a1a1a] p-3">
                 <div className="flex justify-between text-xs text-gray-300">
                   <span>
@@ -723,7 +789,6 @@ export function MapView() {
                 </div>
               </div>
 
-              {/* Alert info */}
               {selectedAlert ? (
                 <div className="rounded-md border border-red-700 bg-red-950/40 p-3">
                   <div className="text-xs font-semibold text-red-300">
@@ -745,7 +810,6 @@ export function MapView() {
                 </div>
               )}
 
-              {/* Drone selection */}
               <div className="space-y-2">
                 <div className="text-xs text-gray-300">
                   Select Drone to Dispatch:
@@ -762,29 +826,27 @@ export function MapView() {
                     management section.
                   </div>
                 ) : (
-                  <>
-                    <select
-                      value={selectedDroneId}
-                      onChange={(e) => {
-                        setSelectedDroneId(e.target.value);
-                      }}
-                      disabled={actionLoading}
-                      className="h-9 w-full rounded-md border border-[#333] bg-[#111] px-3 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-                    >
-                      <option value="" className="bg-[#111] text-gray-400">
-                        Select a drone
+                  <select
+                    value={selectedDroneId}
+                    onChange={(e) => {
+                      setSelectedDroneId(e.target.value);
+                    }}
+                    disabled={actionLoading}
+                    className="h-9 w-full rounded-md border border-[#333] bg-[#111] px-3 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                  >
+                    <option value="" className="bg-[#111] text-gray-400">
+                      Select a drone
+                    </option>
+                    {drones.map((drone) => (
+                      <option
+                        key={drone.id}
+                        value={drone.id}
+                        className="bg-[#111] text-gray-100"
+                      >
+                        {drone.droneOSName} · {drone.droneType}
                       </option>
-                      {drones.map((drone) => (
-                        <option
-                          key={drone.id}
-                          value={drone.id}
-                          className="bg-[#111] text-gray-100"
-                        >
-                          {drone.droneOSName} · {drone.droneType}
-                        </option>
-                      ))}
-                    </select>
-                  </>
+                    ))}
+                  </select>
                 )}
               </div>
             </div>
@@ -841,6 +903,14 @@ export function MapView() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <TelemetryWindow
+        telemetry={selectedDroneTelemetry}
+        isOpen={telemetryWindowOpen}
+        onClose={closeTelemetryWindow}
+        onDropPayload={handleDropPayload}
+        onRecall={handleRecall}
+      />
     </>
   );
 }

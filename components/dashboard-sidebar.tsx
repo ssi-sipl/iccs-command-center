@@ -29,7 +29,7 @@ import {
 import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos";
 import { getAllAlarms, type Alarm } from "@/lib/api/alarms";
 import { openRtspBySensor } from "@/lib/api/rtsp";
-import { sendDrone } from "@/lib/api/droneCommand";
+import { sendDrone, dronePatrol } from "@/lib/api/droneCommand";
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -71,6 +71,10 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   const [dronesError2, setDronesError2] = useState<string | null>(null);
   const [selectedDroneId, setSelectedDroneId] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [selectedPatrolDroneId, setSelectedPatrolDroneId] =
+    useState<string>("");
+  const [patrolConfirmOpen, setPatrolConfirmOpen] = useState(false);
+  const [patrolLoading, setPatrolLoading] = useState(false);
 
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -491,9 +495,19 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
           {!dronesLoading && !dronesError && dronesList.length > 0 && (
             <div className="space-y-2 max-h-[200px] overflow-y-auto">
               {dronesList.map((drone) => (
+                // <div
+                //   key={drone.id}
+                //   className="rounded-lg border border-[#333] bg-[#222] p-3"
+                // >
                 <div
                   key={drone.id}
-                  className="rounded-lg border border-[#333] bg-[#222] p-3"
+                  onClick={() => setSelectedPatrolDroneId(drone.id)}
+                  className={`cursor-pointer rounded-lg border p-3 transition
+    ${
+      selectedPatrolDroneId === drone.id
+        ? "border-blue-500 bg-blue-950/40"
+        : "border-[#333] bg-[#222] hover:border-[#4A9FD4]"
+    }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-3 min-w-0">
@@ -521,9 +535,12 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
           <Button
             className="mt-4 w-full border border-[#444] bg-transparent text-white hover:bg-[#333]"
             variant="outline"
+            disabled={!selectedPatrolDroneId}
+            onClick={() => setPatrolConfirmOpen(true)}
           >
             PATROL
           </Button>
+
           <div className="mt-4 border-b border-[#333]" />
         </section>
 
@@ -769,6 +786,74 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                 className="border-[#444] bg-transparent text-xs text-gray-300 hover:bg-[#333]"
               >
                 Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {patrolConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="w-full max-w-sm rounded-lg border border-[#333] bg-[#111] p-5">
+            <h3 className="text-sm font-semibold text-white mb-2">
+              Confirm Patrol
+            </h3>
+
+            <p className="text-xs text-gray-400 mb-4">
+              Do you want to send{" "}
+              <span className="font-semibold text-blue-400">
+                {
+                  dronesList.find((d) => d.id === selectedPatrolDroneId)
+                    ?.droneOSName
+                }
+              </span>{" "}
+              on patrol?
+            </p>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setPatrolConfirmOpen(false)}
+                className="border-[#444] bg-transparent text-gray-300"
+              >
+                Cancel
+              </Button>
+
+              <Button
+                size="sm"
+                disabled={patrolLoading}
+                onClick={async () => {
+                  try {
+                    setPatrolLoading(true);
+
+                    const res = await dronePatrol({
+                      droneDbId: selectedPatrolDroneId,
+                    });
+
+                    if (!res.success) {
+                      throw new Error(res.error || "Failed to start patrol");
+                    }
+
+                    toast({
+                      title: "Patrol started",
+                      description: "Drone sent on patrol successfully",
+                    });
+
+                    setPatrolConfirmOpen(false);
+                  } catch (err) {
+                    toast({
+                      title: "Error",
+                      description:
+                        err instanceof Error ? err.message : "Patrol failed",
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setPatrolLoading(false);
+                  }
+                }}
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                {patrolLoading ? "Sending..." : "Confirm"}
               </Button>
             </div>
           </div>

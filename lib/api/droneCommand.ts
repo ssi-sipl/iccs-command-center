@@ -1,5 +1,5 @@
 // lib/api/droneCommand.ts
-// API service functions for drone command (send drone)
+// API service functions for drone commands
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -15,25 +15,24 @@ export interface SendDronePayload {
   alertId?: string;
 }
 
-export interface SendDroneResponse {
+export interface SimpleDroneCommandPayload {
+  droneDbId: string;
+}
+
+export interface DroneCommandResponse {
   success: boolean;
   message?: string;
-  flightId?: string;
+  flightId?: any;
   error?: string;
 }
 
 // ============================================
-// SEND DRONE
+// INTERNAL HELPER
 // ============================================
-/**
- * Send a drone to a target location
- * Creates a DroneFlightHistory entry on success
- */
-export async function sendDrone(
-  payload: SendDronePayload
-): Promise<SendDroneResponse> {
+
+async function postJson<T>(url: string, payload: any): Promise<T> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/drone-command`, {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,42 +40,110 @@ export async function sendDrone(
       body: JSON.stringify(payload),
     });
 
-    // Handle non-OK HTTP status
+    const contentType = response.headers.get("content-type");
+
     if (!response.ok) {
-      const contentType = response.headers.get("content-type");
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
 
-      if (contentType && contentType.includes("application/json")) {
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || errorMessage;
-        } catch {
-          // ignore JSON parse error
-        }
-      } else {
-        const text = await response.text();
-        console.error("Non-JSON error response:", text);
+      if (contentType?.includes("application/json")) {
+        const err = await response.json();
+        errorMessage = err.error || err.message || errorMessage;
       }
 
       throw new Error(errorMessage);
     }
 
-    // Validate JSON response
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      const text = await response.text();
-      console.error("Invalid response format:", text);
+    if (!contentType?.includes("application/json")) {
       throw new Error("Server returned non-JSON response");
     }
 
     return await response.json();
   } catch (error) {
-    console.error("Error sending drone command:", error);
+    console.error("[DroneCommand API]", error);
+    throw error;
+  }
+}
 
+// ============================================
+// SEND DRONE
+// ============================================
+
+/**
+ * Send a drone to a target location
+ * Also creates DroneFlightHistory on backend
+ */
+export async function sendDrone(
+  payload: SendDronePayload
+): Promise<DroneCommandResponse> {
+  try {
+    return await postJson<DroneCommandResponse>(
+      `${API_BASE_URL}/api/drone-command`,
+      payload
+    );
+  } catch (error) {
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to send drone command",
+      error: error instanceof Error ? error.message : "Failed to send drone",
+    };
+  }
+}
+
+// ============================================
+// DROP PAYLOAD
+// ============================================
+
+export async function dropPayload(
+  payload: SimpleDroneCommandPayload
+): Promise<DroneCommandResponse> {
+  try {
+    return await postJson<DroneCommandResponse>(
+      `${API_BASE_URL}/api/drone-command/dropPayload`,
+      payload
+    );
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to drop payload",
+    };
+  }
+}
+
+// ============================================
+// RECALL DRONE
+// ============================================
+
+export async function recallDrone(
+  payload: SimpleDroneCommandPayload
+): Promise<DroneCommandResponse> {
+  try {
+    return await postJson<DroneCommandResponse>(
+      `${API_BASE_URL}/api/drone-command/recallDrone`,
+      payload
+    );
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to recall drone",
+    };
+  }
+}
+
+// ============================================
+// DRONE PATROL
+// ============================================
+
+export async function dronePatrol(
+  payload: SimpleDroneCommandPayload
+): Promise<DroneCommandResponse> {
+  try {
+    return await postJson<DroneCommandResponse>(
+      `${API_BASE_URL}/api/drone-command/patrol`,
+      payload
+    );
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to start patrol",
     };
   }
 }
