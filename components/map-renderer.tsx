@@ -445,12 +445,12 @@ function MapRenderer({
                     {statusEmoji} {statusDisplay}
                   </div>
 
-                  {!isOnline && status?.lastUpdateTime && (
+                  {/* {!isOnline && status?.lastUpdateTime && (
                     <div className="text-[10px] text-black-300">
                       Last:{" "}
                       {new Date(status.lastUpdateTime).toLocaleTimeString()}
                     </div>
-                  )}
+                  )} */}
                 </div>
               </Tooltip>
             </Marker>
