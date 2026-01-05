@@ -28,6 +28,7 @@ import { latLng } from "leaflet";
 const gpsLostActions = ["RTL", "Land", "Hover", "Continue"];
 const telemetryLostActions = ["RTL", "Land", "Hover", "Continue"];
 const batteryFailSafeActions = ["RTL", "Land"];
+const droneTypes = ["quadcopter", "hexacopter", "fixed-wing", "VTOL"];
 
 export default function AddDronePage() {
   const router = useRouter();
@@ -327,7 +328,7 @@ export default function AddDronePage() {
                     </div>
 
                     {/* Drone Type */}
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label htmlFor="droneType" className="text-gray-300">
                         Drone Type<span className="text-red-500">*</span>
                       </Label>
@@ -341,6 +342,39 @@ export default function AddDronePage() {
                         required
                         className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
                       />
+                      {validationErrors.droneType && (
+                        <p className="text-xs text-red-500">
+                          {validationErrors.droneType}
+                        </p>
+                      )}
+                    </div> */}
+
+                    {/* Drone Type */}
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">
+                        Drone Type<span className="text-red-500">*</span>
+                      </Label>
+                      <Select
+                        value={formData.droneType}
+                        onValueChange={(value) =>
+                          handleChange("droneType", value)
+                        }
+                      >
+                        <SelectTrigger className="border-[#444] bg-[#2a2a2a] text-white focus:ring-[#4A9FD4]">
+                          <SelectValue placeholder="Select Sensor Type" />
+                        </SelectTrigger>
+                        <SelectContent className="border-[#333] bg-[#222]">
+                          {droneTypes.map((type) => (
+                            <SelectItem
+                              key={type}
+                              value={type}
+                              className="text-white focus:bg-[#333] focus:text-white"
+                            >
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       {validationErrors.droneType && (
                         <p className="text-xs text-red-500">
                           {validationErrors.droneType}

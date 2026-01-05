@@ -905,9 +905,9 @@ export default function ReportPage() {
                             <TableHead className="text-gray-400">
                               Sensor
                             </TableHead>
-                            <TableHead className="text-gray-400">
+                            {/* <TableHead className="text-gray-400">
                               Status
-                            </TableHead>
+                            </TableHead> */}
                             {/* <TableHead className="text-gray-400">
                               Duration
                             </TableHead>

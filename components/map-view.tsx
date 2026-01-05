@@ -596,7 +596,7 @@ export function MapView() {
     try {
       const res = await sendDrone({
         droneDbId: selectedDroneId,
-        sensorId: selectedSensor.id,
+        sensorId: selectedSensor.sensorId,
         alertId: selectedAlert?.id,
         targetLatitude: latitude,
         targetLongitude: longitude,
