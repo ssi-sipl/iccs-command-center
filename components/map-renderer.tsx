@@ -99,16 +99,30 @@ function getSensorBaseColor(sensorType: string): string {
   return "#9ca3af";
 }
 
-function getDroneIcon(): DivIcon {
+function getDroneIcon(isOnline: boolean): DivIcon {
   const leaflet = require("leaflet");
   const size = 26;
 
-  const bgColor = "#10B981"; // GREEN (always)
-  const borderColor = "#6EE7B7";
-  const glowColor = "rgba(16,185,129,0.9)";
-  const symbol = "✈";
+  const bgColor = isOnline ? "#6D28D9" : "#C4B5FD"; // deep purple / light purple
+  const borderColor = isOnline ? "#A78BFA" : "#DDD6FE";
+  const glowColor = isOnline
+    ? "rgba(109,40,217,0.9)" // deep purple glow
+    : "rgba(196,181,253,0.4)"; // soft light purple glow
+
+  const animation = isOnline
+    ? `
+      animation: drone-pulse 1.5s infinite;
+    `
+    : "";
 
   const html = `
+    <style>
+      @keyframes drone-pulse {
+        0% { box-shadow: 0 0 0 0 ${glowColor}; }
+        70% { box-shadow: 0 0 0 10px rgba(0,0,0,0); }
+        100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+      }
+    </style>
     <div style="
       width:${size}px;
       height:${size}px;
@@ -121,9 +135,9 @@ function getDroneIcon(): DivIcon {
       color:white;
       font-size:14px;
       font-weight:700;
-      box-shadow:0 0 10px ${glowColor};
+      ${animation}
     ">
-      ${symbol}
+      ✈
     </div>
   `;
 
@@ -405,7 +419,7 @@ function MapRenderer({
             <Marker
               key={`drone-${drone.id}-${markerUpdateKey}`}
               position={markerPos}
-              icon={getDroneIcon()}
+              icon={getDroneIcon(isOnline)}
               eventHandlers={{
                 click: () => onDroneMarkerClick?.(drone.id),
               }}

@@ -102,7 +102,7 @@ export function TelemetryWindow({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 w-80 rounded-lg border border-[#333] bg-[#111] shadow-2xl z-[900]">
+    <div className="fixed bottom-4 right-4 w-[26rem] rounded-lg border border-[#333] bg-[#111] shadow-2xl z-[900]">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[#333] px-4 py-3">
         <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export function TelemetryWindow({
 
       {/* Content */}
       {!isMinimized && (
-        <div className="max-h-96 overflow-y-auto px-4 py-3 space-y-3">
+        <div className="px-5 py-4 space-y-4">
           {/* Position & Altitude */}
           <div className="rounded-md bg-[#1a1a1a] p-3 space-y-2">
             <div className="text-xs font-semibold text-gray-300 uppercase tracking-wide">
