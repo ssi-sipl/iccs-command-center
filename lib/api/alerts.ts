@@ -439,3 +439,53 @@ export async function deleteAlert(
     };
   }
 }
+
+// ============================================
+// NEUTRALISE ALL ACTIVE ALERTS
+// ============================================
+/**
+ * Neutralise ALL active alerts at once
+ * Changes status from ACTIVE → NEUTRALISED
+ * @param reason - Optional reason (manual_clear | system_clear | maintenance)
+ */
+export async function neutraliseAllActiveAlerts(
+  reason?: string
+): Promise<ApiResponse<null>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/alerts/neutralise-all`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ reason }),
+    });
+
+    if (!response.ok) {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || errorData.message || "Failed to neutralise alerts"
+        );
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Server returned non-JSON response");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error neutralising all alerts:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to neutralise all alerts",
+    };
+  }
+}

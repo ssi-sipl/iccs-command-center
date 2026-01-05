@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   sendDroneForAlert,
   neutraliseAlert,
+  neutraliseAllActiveAlerts,
   type Alert as ApiAlert,
 } from "@/lib/api/alerts";
 import {
@@ -417,6 +418,42 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     }
   };
 
+  const handleNeutraliseAll = async () => {
+    if (alerts.length === 0) return;
+
+    try {
+      setActionLoading(true);
+
+      const res = await neutraliseAllActiveAlerts("manual_clear");
+
+      if (!res.success) {
+        throw new Error(res.error || "Failed to neutralise all alerts");
+      }
+
+      toast({
+        title: "All alerts neutralised",
+        description: `${res.count ?? alerts.length} alerts cleared`,
+      });
+
+      // Clear alerts locally (socket will also sync)
+      setAlerts([]);
+      setSelectedAlert(null);
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error("Error neutralising all alerts:", err);
+      toast({
+        title: "Error",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Failed to neutralise all alerts",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   return (
     <>
       {isOpen && (
@@ -547,17 +584,32 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
 
         {/* Alert Section */}
         <section className="flex-1 overflow-y-auto">
-          <div className="mb-1 flex items-center justify-between">
+          <div className="mb-2 flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold tracking-wide text-white">
               ALERT
             </h2>
-            <span
-              className={`text-[10px] ${
-                socketConnected ? "text-green-500" : "text-gray-500"
-              }`}
-            >
-              {socketConnected ? "live" : "offline"}
-            </span>
+
+            <div className="flex items-center gap-2">
+              {alerts.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={actionLoading}
+                  onClick={handleNeutraliseAll}
+                  className="h-6 px-2 text-[10px] border-red-500 text-red-400 hover:bg-red-500/10"
+                >
+                  Neutralise All
+                </Button>
+              )}
+
+              <span
+                className={`text-[10px] ${
+                  socketConnected ? "text-green-500" : "text-gray-500"
+                }`}
+              >
+                {socketConnected ? "live" : "offline"}
+              </span>
+            </div>
           </div>
 
           {alertsLoading2 && (
@@ -580,31 +632,78 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
           {!alertsLoading2 && !alertsError2 && alerts.length > 0 && (
             <div className="space-y-3">
               {alerts.map((alert) => (
-                <button
+                <div
                   key={alert.id}
-                  onClick={() => openAlertModal(alert)}
-                  className="w-full rounded-lg border border-[#333] bg-[#222] p-3 text-left text-sm hover:border-[#4A9FD4] hover:bg-[#252525]"
+                  className="relative w-full rounded-lg border border-[#333] bg-[#222] p-3 text-left text-sm hover:border-[#4A9FD4] hover:bg-[#252525]"
                 >
-                  <div className="mb-2 flex items-start gap-2">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 text-orange-500" />
-                    <div className="flex-1">
-                      <p className="font-medium text-white line-clamp-2">
-                        {alert.message || "Alert"}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Sensor:{" "}
-                        <span className="font-mono text-[#4A9FD4]">
-                          {alert.sensor?.name ||
-                            alert.sensorId ||
-                            "Unknown Sensor"}
-                        </span>
-                      </p>
+                  {/* ❌ Neutralise single alert */}
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+
+                      try {
+                        const res = await neutraliseAlert(
+                          alert.id,
+                          "manual_clear"
+                        );
+
+                        if (!res.success) {
+                          throw new Error(
+                            res.error || "Failed to neutralise alert"
+                          );
+                        }
+
+                        toast({
+                          title: "Alert neutralised",
+                          description: "Alert cleared successfully",
+                        });
+
+                        setAlerts((prev) =>
+                          prev.filter((a) => a.id !== alert.id)
+                        );
+                      } catch (err) {
+                        toast({
+                          title: "Error",
+                          description:
+                            err instanceof Error
+                              ? err.message
+                              : "Failed to neutralise alert",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    className="absolute right-2 top-2 text-gray-400 hover:text-red-500 text-xs"
+                    title="Neutralise alert"
+                  >
+                    ✕
+                  </button>
+
+                  {/* Main clickable area */}
+                  <button
+                    onClick={() => openAlertModal(alert)}
+                    className="w-full text-left"
+                  >
+                    <div className="mb-2 flex items-start gap-2">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 text-orange-500" />
+                      <div className="flex-1">
+                        <p className="font-medium text-white line-clamp-2">
+                          {alert.message || "Alert"}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Sensor:{" "}
+                          <span className="font-mono text-[#4A9FD4]">
+                            {alert.sensor?.name ||
+                              alert.sensorId ||
+                              "Unknown Sensor"}
+                          </span>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-[11px] text-gray-500">
-                    {new Date(alert.createdAt).toLocaleString()}
-                  </p>
-                </button>
+                    <p className="text-[11px] text-gray-500">
+                      {new Date(alert.createdAt).toLocaleString()}
+                    </p>
+                  </button>
+                </div>
               ))}
             </div>
           )}

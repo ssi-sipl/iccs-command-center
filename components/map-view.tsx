@@ -288,6 +288,30 @@ export function MapView() {
       reconnectionAttempts: 5,
     });
 
+    s.on(
+      "mission_started",
+      (payload: {
+        droneId: string;
+        sensorId: string | null;
+        targetLat: number;
+        targetLng: number;
+      }) => {
+        console.log("🎯 Mission started:", payload);
+
+        setActiveMissions((prev) => ({
+          ...prev,
+          [payload.droneId]: {
+            droneId: payload.droneId,
+            sensorId: payload.sensorId ?? "",
+            targetLat: payload.targetLat,
+            targetLng: payload.targetLng,
+          },
+        }));
+
+        setMarkerUpdateKey((k) => k + 1);
+      }
+    );
+
     s.on("drone_position", (pos: DronePosition) => {
       console.log("[MapView] Received drone position:", pos);
 
@@ -570,19 +594,6 @@ export function MapView() {
           ? `Drone sent for alert (Flight ID: ${res.flightId})`
           : `Drone sent for manual mission (Flight ID: ${res.flightId})`,
       });
-
-      const drone = drones.find((d) => d.id === selectedDroneId);
-      if (drone) {
-        setActiveMissions((prev) => ({
-          ...prev,
-          [drone.droneId]: {
-            droneId: drone.droneId,
-            sensorId: selectedSensor.id,
-            targetLat: latitude,
-            targetLng: longitude,
-          },
-        }));
-      }
 
       closeModal();
     } catch (err) {
