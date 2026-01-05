@@ -56,8 +56,9 @@ export default function DronesListPage() {
   const fetchDrones = async () => {
     setLoading(true);
     try {
-      const response = await getAllDroneOS();
+      const response = await getAllDroneOS({ include: true });
       if (response.success && response.data) {
+        console.log("Fetched drones:", response.data);
         setDrones(response.data);
       } else {
         toast({
@@ -195,10 +196,14 @@ export default function DronesListPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-[#333] hover:bg-transparent">
-                      <TableHead className="text-gray-400">OS Name</TableHead>
+                      <TableHead className="text-gray-400">Id</TableHead>
+                      <TableHead className="text-gray-400">Name</TableHead>
+                      <TableHead className="text-gray-400">Area</TableHead>
                       <TableHead className="text-gray-400">Type</TableHead>
-                      <TableHead className="text-gray-400">
-                        Speed (m/s)
+                      <TableHead className="text-gray-400">Latitude</TableHead>
+                      <TableHead className="text-gray-400">Longitude</TableHead>
+                      {/* <TableHead className="text-gray-400">
+                        Speed (m/s) 
                       </TableHead>
                       <TableHead className="text-gray-400">
                         Max Alt (m)
@@ -206,7 +211,7 @@ export default function DronesListPage() {
                       <TableHead className="text-gray-400">
                         Battery Min
                       </TableHead>
-                      <TableHead className="text-gray-400">GPS</TableHead>
+                      <TableHead className="text-gray-400">GPS</TableHead> */}
                       <TableHead className="text-right text-gray-400">
                         Actions
                       </TableHead>
@@ -219,12 +224,24 @@ export default function DronesListPage() {
                         className="border-[#333] hover:bg-[#2a2a2a]"
                       >
                         <TableCell className="font-medium text-white">
+                          {drone.droneId}
+                        </TableCell>
+                        <TableCell className="font-medium text-white">
                           {drone.droneOSName}
+                        </TableCell>
+                        <TableCell className="font-medium text-white">
+                          {drone?.area?.name || "Unassigned"}
                         </TableCell>
                         <TableCell className="text-gray-300">
                           {drone.droneType}
                         </TableCell>
-                        <TableCell className="font-mono text-sm text-gray-400">
+                        <TableCell className="text-gray-300">
+                          {drone.latitude}
+                        </TableCell>
+                        <TableCell className="text-gray-300">
+                          {drone.longitude}
+                        </TableCell>
+                        {/* <TableCell className="font-mono text-sm text-gray-400">
                           {drone.droneSpeed}
                         </TableCell>
                         <TableCell className="font-mono text-sm text-gray-400">
@@ -235,7 +252,7 @@ export default function DronesListPage() {
                         </TableCell>
                         <TableCell className="text-sm text-gray-400">
                           {drone.gpsName}
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Link href={`/drones/${drone.id}`}>

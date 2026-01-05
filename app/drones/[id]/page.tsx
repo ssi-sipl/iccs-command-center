@@ -201,7 +201,7 @@ export default function ViewDronePage() {
               </div>
               <div className="flex gap-2">
                 {/* NEW: Video Stream Button */}
-                {drone.videoLink && (
+                {/* {drone.videoLink && (
                   <a
                     href={drone.videoLink}
                     target="_blank"
@@ -216,7 +216,7 @@ export default function ViewDronePage() {
                       <ExternalLink className="h-3 w-3" />
                     </Button>
                   </a>
-                )}
+                )} */}
                 <Link href={`/drones/${drone.id}/edit`}>
                   <Button className="gap-2 bg-[#8B0000] text-white hover:bg-[#6B0000]">
                     <Pencil className="h-4 w-4" />
@@ -335,16 +335,9 @@ export default function ViewDronePage() {
                   {drone.videoLink && (
                     <div className="flex justify-between border-b border-[#333] pb-3">
                       <span className="text-gray-400">Video Stream</span>
-                      <a
-                        href={drone.videoLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-blue-400 hover:text-blue-300"
-                      >
-                        <Video className="h-4 w-4" />
-                        <span className="text-sm">View Stream</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+                      <span className="max-w-[260px] truncate font-mono text-white">
+                        {drone.videoLink || "N/A"}
+                      </span>
                     </div>
                   )}
                   {/* NEW: Assigned Area */}

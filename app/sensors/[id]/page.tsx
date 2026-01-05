@@ -483,17 +483,17 @@ export default function ViewSensorPage() {
             </div>
 
             {/* Map Preview */}
-            <Card className="mt-6 border-[#333] bg-[#222]">
+            {/* <Card className="mt-6 border-[#333] bg-[#222]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <MapPin className="h-5 w-5 text-[#4A9FD4]" />
                   Location Preview
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="relative h-48 overflow-hidden rounded-lg bg-[#1a1a1a] sm:h-64">
-                  {/* Placeholder preview - actual map is in main dashboard */}
-                  <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+              <CardContent> */}
+            {/* <div className="relative h-48 overflow-hidden rounded-lg bg-[#1a1a1a] sm:h-64"> */}
+            {/* Placeholder preview - actual map is in main dashboard */}
+            {/* <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
                     <div className="flex flex-col items-center gap-2">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4A9FD4] shadow-lg">
                         <Radio className="h-5 w-5 text-white" />
@@ -509,7 +509,7 @@ export default function ViewSensorPage() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </main>
       </div>

@@ -113,7 +113,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
       setDronesError(null);
 
       try {
-        const res = await getAllDroneOS();
+        const res = await getAllDroneOS({ include: true });
         if (res.success && res.data) {
           setDronesList(res.data);
         } else {
@@ -556,9 +556,15 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                         <p className="font-medium text-white truncate">
                           {drone.droneOSName}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {drone.droneType}
-                        </p>
+
+                        <div className="flex space-x-2">
+                          <p className="text-xs text-gray-500 truncate ">
+                            {drone.droneType}
+                          </p>
+                          <p className="text-xs font-medium text-yellow-800 truncate bg-yellow-400 px-2 rounded-full justify-center items-center">
+                            {drone?.area?.name || "Unassigned"}
+                          </p>
+                        </div>
                       </div>
                     </div>
                     <Badge className="shrink-0 bg-green-600 hover:bg-green-700 text-xs text-white">

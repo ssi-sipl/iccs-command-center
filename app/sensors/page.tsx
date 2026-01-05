@@ -261,8 +261,12 @@ export default function SensorsPage() {
                       <TableHead className="text-gray-400">Name</TableHead>
                       <TableHead className="text-gray-400">Area</TableHead>
                       <TableHead className="text-gray-400">Type</TableHead>
-                      <TableHead className="text-gray-400">Battery</TableHead>
-                      <TableHead className="text-gray-400">RTSP</TableHead>
+                      <TableHead className="text-gray-400">Latitude</TableHead>
+                      <TableHead className="text-gray-400">Longitude</TableHead>
+                      <TableHead className="text-gray-400">IP</TableHead>
+                      {/* <TableHead className="text-gray-400">Battery</TableHead>
+                      <TableHead className="text-gray-400">RTSP</TableHead> */}
+
                       <TableHead className="text-gray-400">Status</TableHead>
                       <TableHead className="text-right text-gray-400">
                         Actions
@@ -288,11 +292,20 @@ export default function SensorsPage() {
                           {sensor.sensorType}
                         </TableCell>
                         <TableCell className="text-gray-300">
-                          {sensor.battery || "N/A"}
+                          {sensor.latitude || "N/A"}
                         </TableCell>
+                        <TableCell className="text-gray-300">
+                          {sensor.longitude || "N/A"}
+                        </TableCell>
+                        <TableCell className="text-gray-300">
+                          {sensor.ipAddress || "N/A"}
+                        </TableCell>
+                        {/* <TableCell className="text-gray-300">
+                          {sensor.battery || "N/A"}
+                        </TableCell> */}
 
                         {/* RTSP column */}
-                        <TableCell className="text-gray-300">
+                        {/* <TableCell className="text-gray-300">
                           {sensor.rtspUrl ? (
                             <div className="flex items-center gap-2">
                               <a
@@ -311,7 +324,7 @@ export default function SensorsPage() {
                           ) : (
                             <span className="text-gray-500">N/A</span>
                           )}
-                        </TableCell>
+                        </TableCell> */}
 
                         <TableCell>{getStatusBadge(sensor.status)}</TableCell>
                         <TableCell className="text-right">

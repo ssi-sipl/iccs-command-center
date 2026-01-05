@@ -279,7 +279,7 @@ export default function ViewAreaPage() {
             </div>
 
             {/* Map Preview */}
-            <Card className="mt-6 border-[#333] bg-[#222]">
+            {/* <Card className="mt-6 border-[#333] bg-[#222]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <MapPin className="h-5 w-5" />
@@ -289,18 +289,18 @@ export default function ViewAreaPage() {
               <CardContent>
                 <div className="relative aspect-video overflow-hidden rounded-lg bg-[#1a1a1a]">
                   {/* Google Maps Static API or Mapbox Static Image */}
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    loading="lazy"
-                    allowFullScreen
-                    src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${area.latitude},${area.longitude}&zoom=15`}
-                    className="rounded-lg"
-                  ></iframe>
+            {/* <iframe
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${area.latitude},${area.longitude}&zoom=15`}
+              className="rounded-lg"
+            ></iframe> */}
 
-                  {/* Fallback - Static image with coordinates */}
-                  {/* <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+            {/* Fallback - Static image with coordinates */}
+            {/* <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
                     <div className="text-center">
                       <MapPin className="mx-auto mb-2 h-12 w-12 text-[#8B0000]" />
                       <p className="font-mono text-sm text-white">
@@ -309,14 +309,14 @@ export default function ViewAreaPage() {
                     </div>
                   </div> */}
 
-                  <div className="absolute bottom-4 left-4 rounded-lg bg-black/70 px-3 py-2">
+            {/* <div className="absolute bottom-4 left-4 rounded-lg bg-black/70 px-3 py-2">
                     <p className="font-mono text-sm text-white">
                       {area.latitude.toFixed(4)}, {area.longitude.toFixed(4)}
                     </p>
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Associated Sensors List */}
             {area.sensors && area.sensors.length > 0 && (
