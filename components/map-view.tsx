@@ -182,7 +182,7 @@ export function MapView() {
     const loadDrones = async () => {
       setLoadingDrones(true);
       try {
-        const res = await getAllDroneOS();
+        const res = await getAllDroneOS({ include: true });
         if (res.success && res.data) {
           setDrones(res.data);
           const initialStatus: Record<string, DroneStatus> = {};
@@ -497,6 +497,24 @@ export function MapView() {
     console.log("🎯 Active Missions:", activeMissions);
   }, [dronePositions, droneStatus, activeMissions]);
 
+  const dronesInSameArea = useMemo(() => {
+    if (!selectedSensor) return [];
+
+    return drones.filter((drone) => {
+      // CASE 1: both use areaId directly
+      if (drone.areaId && selectedSensor.areaId) {
+        return drone.areaId === selectedSensor.areaId;
+      }
+
+      // CASE 2: nested area object
+      // if (drone.area?.id && selectedSensor.area?.id) {
+      //   return drone.area.id === selectedSensor.area.id;
+      // }
+
+      return false;
+    });
+  }, [drones, selectedSensor]);
+
   const alertBySensorDbId = useMemo(() => {
     const map: Record<string, Alert> = {};
     for (const alert of activeAlerts) {
@@ -805,10 +823,9 @@ export function MapView() {
                     <Loader2 className="h-3 w-3 animate-spin" />
                     <span>Loading drones...</span>
                   </div>
-                ) : drones.length === 0 ? (
+                ) : dronesInSameArea.length === 0 ? (
                   <div className="rounded-md border border-amber-700 bg-amber-950/40 p-3 text-xs text-amber-200">
-                    No drones configured yet. Please add drones in the Drone OS
-                    management section.
+                    No drones available in this sensor's area.
                   </div>
                 ) : (
                   <select
@@ -822,7 +839,7 @@ export function MapView() {
                     <option value="" className="bg-[#111] text-gray-400">
                       Select a drone
                     </option>
-                    {drones.map((drone) => (
+                    {dronesInSameArea.map((drone) => (
                       <option
                         key={drone.id}
                         value={drone.id}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { Map as LeafletMap, DivIcon } from "leaflet";
 import dynamic from "next/dynamic";
 import type { Alert, Sensor, DroneOS } from "@/lib/api";
@@ -96,6 +96,7 @@ function getSensorBaseColor(sensorType: string): string {
   if (t.includes("thermal")) return "#f97316";
   if (t.includes("infrared") || t.includes("pir")) return "#a855f7";
   if (t.includes("motion")) return "#22c55e";
+  if (t.includes("post")) return "#3b82f6";
   return "#9ca3af";
 }
 
@@ -233,6 +234,7 @@ function getSensorIcon(
   else if (t.includes("thermal")) label = "T";
   else if (t.includes("infrared") || t.includes("pir")) label = "P";
   else if (t.includes("motion")) label = "M";
+  else if (t.includes("post")) label = "PT";
 
   const pulseAnimation = droneOnSensor
     ? `
@@ -319,6 +321,27 @@ function MapRenderer({
     };
   }, [onZoomChange]);
 
+  const visibleSensors = useMemo(() => {
+    return sensors.filter((sensor) => {
+      // ❌ sensor inactive
+      if (sensor.status !== "Active") return false;
+
+      // ❌ area inactive
+      if (sensor.area?.status !== "Active") return false;
+
+      return true;
+    });
+  }, [sensors]);
+
+  const visibleDrones = useMemo(() => {
+    return drones.filter((drone) => {
+      // ❌ area inactive
+      if (drone.area?.status !== "Active") return false;
+
+      return true;
+    });
+  }, [drones]);
+
   return (
     <div className="relative h-full w-full">
       {/* Socket status indicator */}
@@ -354,7 +377,7 @@ function MapRenderer({
         />
 
         {/* Sensor markers */}
-        {sensors.map((sensor) => {
+        {visibleSensors.map((sensor) => {
           const alert = alertBySensorDbId[sensor.id];
           const hasActiveAlert = !!alert && alert.status === "ACTIVE";
           const droneOnSensor =
@@ -399,7 +422,7 @@ function MapRenderer({
         })}
 
         {/* Drone markers */}
-        {drones.map((drone) => {
+        {visibleDrones.map((drone) => {
           const pos = dronePositions[drone.id];
           const status = droneStatus[drone.id];
 
