@@ -270,18 +270,17 @@ export default function ReportPage() {
   const filteredFlights = useMemo(() => {
     return flights.filter((flight) => {
       const matchesSearch =
-        flight.droneId.toLowerCase().includes(flightSearchTerm.toLowerCase()) ||
-        flight.sensorId
+        (flight.drone?.droneId ?? "")
           .toLowerCase()
           .includes(flightSearchTerm.toLowerCase()) ||
-        flight.drone?.droneOSName
+        (flight.sensorId ?? "")
+          .toLowerCase()
+          .includes(flightSearchTerm.toLowerCase()) ||
+        (flight.drone?.droneOSName ?? "")
           .toLowerCase()
           .includes(flightSearchTerm.toLowerCase());
 
-      const matchesStatus =
-        flightStatusFilter === "ALL" || flight.status === flightStatusFilter;
-
-      return matchesSearch && matchesStatus;
+      return matchesSearch;
     });
   }, [flights, flightSearchTerm, flightStatusFilter]);
 
@@ -310,13 +309,20 @@ export default function ReportPage() {
   }, [alerts]);
 
   // Calculate flight stats
+  // const flightStats = useMemo(() => {
+  //   return {
+  //     total: flights.length,
+  //     completed: flights.filter((f) => f.status === "Completed").length,
+  //     inFlight: flights.filter((f) => f.status === "In Flight").length,
+  //     dispatched: flights.filter((f) => f.status === "Dispatched").length,
+  //     aborted: flights.filter((f) => f.status === "Aborted").length,
+  //   };
+  // }, [flights]);
+
   const flightStats = useMemo(() => {
     return {
       total: flights.length,
-      completed: flights.filter((f) => f.status === "Completed").length,
-      inFlight: flights.filter((f) => f.status === "In Flight").length,
-      dispatched: flights.filter((f) => f.status === "Dispatched").length,
-      aborted: flights.filter((f) => f.status === "Aborted").length,
+      dispatched: flights.length,
     };
   }, [flights]);
 
@@ -343,19 +349,19 @@ export default function ReportPage() {
     }
   };
 
-  const getFlightStatusBadge = (status: string) => {
-    const statusConfig: Record<string, string> = {
-      Dispatched: "bg-yellow-600/20 text-yellow-400",
-      "In Flight": "bg-blue-600/20 text-blue-400",
-      Completed: "bg-green-600/20 text-green-400",
-      Aborted: "bg-red-600/20 text-red-400",
-    };
-    return (
-      <Badge className={statusConfig[status] || "bg-gray-600/20 text-gray-400"}>
-        {status}
-      </Badge>
-    );
-  };
+  // const getFlightStatusBadge = (status: string) => {
+  //   const statusConfig: Record<string, string> = {
+  //     Dispatched: "bg-yellow-600/20 text-yellow-400",
+  //     "In Flight": "bg-blue-600/20 text-blue-400",
+  //     Completed: "bg-green-600/20 text-green-400",
+  //     Aborted: "bg-red-600/20 text-red-400",
+  //   };
+  //   return (
+  //     <Badge className={statusConfig[status] || "bg-gray-600/20 text-gray-400"}>
+  //       {status}
+  //     </Badge>
+  //   );
+  // };
 
   const getAlertTypeBadge = (type: string) => {
     const colors: Record<string, string> = {
@@ -463,7 +469,11 @@ export default function ReportPage() {
               </TabsList>
 
               {/* ALERTS TAB */}
-              <TabsContent value="alerts" className="space-y-6">
+              <TabsContent
+                key="alerts-tab"
+                value="alerts"
+                className="space-y-6"
+              >
                 {/* Error State */}
                 {alertsError && (
                   <Card className="border-red-600/20 bg-red-600/10">
@@ -494,7 +504,7 @@ export default function ReportPage() {
                 )}
 
                 {!alertsLoading && !alertsError && (
-                  <>
+                  <div key="alerts-content" className="space-y-6">
                     {/* Stats Cards */}
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                       <Card className="border-[#333] bg-[#222]">
@@ -594,9 +604,9 @@ export default function ReportPage() {
                             <SelectItem value="ALL" className="text-white">
                               All Types
                             </SelectItem>
-                            {alertTypes.map((type) => (
+                            {alertTypes.map((type, idx) => (
                               <SelectItem
-                                key={type}
+                                key={`${type}-${idx}`}
                                 value={type}
                                 className="text-white"
                               >
@@ -749,12 +759,16 @@ export default function ReportPage() {
                         </Button>
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
               </TabsContent>
 
               {/* FLIGHTS TAB */}
-              <TabsContent value="flights" className="space-y-6">
+              <TabsContent
+                key="flights-tab"
+                value="flights"
+                className="space-y-6"
+              >
                 {/* Error State */}
                 {flightsError && (
                   <Card className="border-red-600/20 bg-red-600/10">
@@ -785,9 +799,9 @@ export default function ReportPage() {
                 )}
 
                 {!flightsLoading && !flightsError && (
-                  <>
+                  <div key="flights-content" className="space-y-6">
                     {/* Stats Cards */}
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
                       <Card className="border-[#333] bg-[#222]">
                         <CardHeader className="pb-3">
                           <CardDescription className="text-gray-400">
@@ -798,7 +812,7 @@ export default function ReportPage() {
                           </CardTitle>
                         </CardHeader>
                       </Card>
-                      <Card className="border-[#333] bg-[#222]">
+                      {/* <Card className="border-[#333] bg-[#222]">
                         <CardHeader className="pb-3">
                           <CardDescription className="flex items-center gap-2 text-green-400">
                             <CheckCircle className="h-4 w-4" />
@@ -808,8 +822,8 @@ export default function ReportPage() {
                             {flightStats.completed}
                           </CardTitle>
                         </CardHeader>
-                      </Card>
-                      <Card className="border-[#333] bg-[#222]">
+                      </Card> */}
+                      {/* <Card className="border-[#333] bg-[#222]">
                         <CardHeader className="pb-3">
                           <CardDescription className="flex items-center gap-2 text-blue-400">
                             <Plane className="h-4 w-4" />
@@ -819,7 +833,7 @@ export default function ReportPage() {
                             {flightStats.inFlight}
                           </CardTitle>
                         </CardHeader>
-                      </Card>
+                      </Card> */}
                       <Card className="border-[#333] bg-[#222]">
                         <CardHeader className="pb-3">
                           <CardDescription className="flex items-center gap-2 text-yellow-400">
@@ -831,7 +845,7 @@ export default function ReportPage() {
                           </CardTitle>
                         </CardHeader>
                       </Card>
-                      <Card className="border-[#333] bg-[#222]">
+                      {/* <Card className="border-[#333] bg-[#222]">
                         <CardHeader className="pb-3">
                           <CardDescription className="flex items-center gap-2 text-red-400">
                             <AlertTriangle className="h-4 w-4" />
@@ -841,7 +855,7 @@ export default function ReportPage() {
                             {flightStats.aborted}
                           </CardTitle>
                         </CardHeader>
-                      </Card>
+                      </Card> */}
                     </div>
 
                     {/* Filters */}
@@ -867,12 +881,8 @@ export default function ReportPage() {
                           <SelectItem value="ALL" className="text-white">
                             All Status
                           </SelectItem>
-                          {flightStatuses.map((status) => (
-                            <SelectItem
-                              key={status}
-                              value={status}
-                              className="text-white"
-                            >
+                          {flightStatuses.map((status, idx) => (
+                            <SelectItem key={`${status}-${idx}`} value={status}>
                               {status}
                             </SelectItem>
                           ))}
@@ -924,19 +934,19 @@ export default function ReportPage() {
                               <TableCell>
                                 <div>
                                   <p className="font-medium text-white">
-                                    {flight.droneId}
+                                    {flight.drone?.droneId || "Unknown"}
                                   </p>
                                   <p className="text-xs text-gray-500">
-                                    {flight.drone?.droneOSName || "Unknown"}
+                                    {flight.drone?.droneOSName || "-"}
                                   </p>
                                 </div>
                               </TableCell>
                               <TableCell className="text-gray-300">
                                 {flight.sensorId}
                               </TableCell>
-                              <TableCell>
+                              {/* <TableCell>
                                 {getFlightStatusBadge(flight.status)}
-                              </TableCell>
+                              </TableCell> */}
                               {/* <TableCell>
                                 <div className="flex items-center gap-1 text-gray-300">
                                   <Clock className="h-3 w-3" />
@@ -1024,7 +1034,7 @@ export default function ReportPage() {
                         </Button>
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
               </TabsContent>
             </Tabs>
@@ -1112,35 +1122,35 @@ export default function ReportPage() {
                     {selectedFlight.drone?.droneOSName}
                   </p>
                 </div>
-                <div>
+                {/* <div>
                   <p className="text-sm text-gray-400">Status</p>
                   <p className="text-white">
                     {getFlightStatusBadge(selectedFlight.status)}
                   </p>
-                </div>
+                </div> */}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-400">Sensor</p>
                   <p className="text-white">{selectedFlight.sensorId}</p>
                 </div>
-                <div>
+                {/* <div>
                   <p className="text-sm text-gray-400">Flight Duration</p>
                   <p className="text-white">
                     {formatDuration(selectedFlight.flightDuration)}
                   </p>
-                </div>
+                </div> */}
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <div>
+                {/* <div>
                   <p className="text-sm text-gray-400">Battery Used</p>
                   <p className="text-white">
                     {selectedFlight.batteryUsed
                       ? `${selectedFlight.batteryUsed}%`
                       : "-"}
                   </p>
-                </div>
-                <div>
+                </div> */}
+                {/* <div>
                   <p className="text-sm text-gray-400">Distance Covered</p>
                   <p className="text-white">
                     {selectedFlight.distanceCovered
@@ -1149,15 +1159,15 @@ export default function ReportPage() {
                         )}km`
                       : "-"}
                   </p>
-                </div>
-                <div>
+                </div> */}
+                {/* <div>
                   <p className="text-sm text-gray-400">Max Altitude</p>
                   <p className="text-white">
                     {selectedFlight.maxAltitude
                       ? `${selectedFlight.maxAltitude}m`
                       : "-"}
                   </p>
-                </div>
+                </div> */}
               </div>
               <div>
                 <p className="text-sm text-gray-400">Dispatched At</p>
@@ -1165,20 +1175,20 @@ export default function ReportPage() {
                   {formatDate(selectedFlight.dispatchedAt)}
                 </p>
               </div>
-              {selectedFlight.completedAt && (
+              {/* {selectedFlight.completedAt && (
                 <div>
                   <p className="text-sm text-gray-400">Completed At</p>
                   <p className="text-white">
                     {formatDate(selectedFlight.completedAt)}
                   </p>
                 </div>
-              )}
-              {selectedFlight.notes && (
+              )} */}
+              {/* {selectedFlight.notes && (
                 <div>
                   <p className="text-sm text-gray-400">Notes</p>
                   <p className="text-white">{selectedFlight.notes}</p>
                 </div>
-              )}
+              )} */}
             </div>
           </DialogContent>
         </Dialog>

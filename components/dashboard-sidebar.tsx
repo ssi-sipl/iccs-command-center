@@ -191,11 +191,12 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     });
 
     socket.on("alert_active", (alert: Alert) => {
-      console.log("🔔 alert_active:", alert);
       setAlerts((prev) => {
         const exists = prev.some((a) => a.id === alert.id);
         if (exists) return prev;
-        return [...prev, alert];
+
+        // ✅ add new alert at the TOP
+        return [alert, ...prev];
       });
     });
 
