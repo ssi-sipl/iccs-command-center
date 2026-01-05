@@ -113,8 +113,8 @@ export function MapView() {
   const [markerUpdateKey, setMarkerUpdateKey] = useState(0);
 
   const [telemetryWindowOpen, setTelemetryWindowOpen] = useState(false);
-  const [selectedDroneTelemetry, setSelectedDroneTelemetry] =
-    useState<DroneTelemetry | null>(null);
+  const [selectedDroneIdForTelemetry, setSelectedDroneIdForTelemetry] =
+    useState<string | null>(null);
 
   const [droneTelemetryData, setDroneTelemetryData] = useState<
     Record<string, DroneTelemetry>
@@ -122,6 +122,10 @@ export function MapView() {
 
   const timeoutRefsRef = useRef<Record<string, NodeJS.Timeout>>({});
   const statusUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const liveTelemetry = selectedDroneIdForTelemetry
+    ? droneTelemetryData[selectedDroneIdForTelemetry] ?? null
+    : null;
 
   useEffect(() => {
     const fetchActiveMap = async () => {
@@ -337,12 +341,10 @@ export function MapView() {
         [telemetry.droneDbId]: telemetry,
       }));
 
-      if (
-        telemetryWindowOpen &&
-        selectedDroneTelemetry?.droneDbId === telemetry.droneDbId
-      ) {
-        setSelectedDroneTelemetry(telemetry);
-      }
+      setDroneTelemetryData((prev) => ({
+        ...prev,
+        [telemetry.droneDbId]: telemetry,
+      }));
     });
 
     s.on("connect", () => {
@@ -498,57 +500,29 @@ export function MapView() {
   }
 
   function openTelemetryWindow(droneDbId: string) {
-    const drone = drones.find((d) => d.id === droneDbId);
-    if (!drone) return;
-
-    const telemetry = droneTelemetryData[droneDbId];
-
-    if (telemetry) {
-      setSelectedDroneTelemetry(telemetry);
-    } else {
-      const pos = dronePositions[droneDbId];
-      if (!pos) return;
-
-      setSelectedDroneTelemetry({
-        droneDbId,
-        droneId: drone.droneId,
-        lat: pos.lat,
-        lng: pos.lng,
-        alt: pos.alt || null,
-        speed: null,
-        battery: null,
-        mode: null,
-        gpsFix: null,
-        satellites: null,
-        windSpeed: null,
-        targetDistance: null,
-        status: null,
-        command: null,
-        ts: pos.ts,
-      });
-    }
-
+    console.log("🟢 Drone marker clicked:", droneDbId);
+    setSelectedDroneIdForTelemetry(droneDbId);
     setTelemetryWindowOpen(true);
   }
 
   function closeTelemetryWindow() {
     setTelemetryWindowOpen(false);
-    setSelectedDroneTelemetry(null);
+    setSelectedDroneIdForTelemetry(null);
   }
 
   async function handleDropPayload() {
-    if (!selectedDroneTelemetry) return;
+    if (!selectedDroneIdForTelemetry) return;
     toast({
       title: "Payload dropped",
-      description: `Payload dropped for drone ${selectedDroneTelemetry.droneId}`,
+      description: `Payload dropped for drone ${selectedDroneIdForTelemetry}`,
     });
   }
 
   async function handleRecall() {
-    if (!selectedDroneTelemetry) return;
+    if (!selectedDroneIdForTelemetry) return;
     toast({
       title: "Recall initiated",
-      description: `Recall command sent to ${selectedDroneTelemetry.droneId}`,
+      description: `Recall command sent to ${selectedDroneIdForTelemetry}`,
     });
   }
 
@@ -905,7 +879,7 @@ export function MapView() {
       </Dialog>
 
       <TelemetryWindow
-        telemetry={selectedDroneTelemetry}
+        telemetry={liveTelemetry}
         isOpen={telemetryWindowOpen}
         onClose={closeTelemetryWindow}
         onDropPayload={handleDropPayload}
