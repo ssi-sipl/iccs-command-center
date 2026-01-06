@@ -279,7 +279,7 @@ export default function SensorsPage() {
                         key={sensor.id}
                         className="border-[#333] hover:bg-[#2a2a2a]"
                       >
-                        <TableCell className="font-mono text-sm text-white">
+                        <TableCell className=" text-sm text-white">
                           {sensor.sensorId}
                         </TableCell>
                         <TableCell className="text-white">
@@ -405,7 +405,7 @@ export default function SensorsPage() {
                     <CardContent className="p-4">
                       <div className="mb-3 flex items-start justify-between">
                         <div>
-                          <p className="font-mono text-sm text-gray-400">
+                          <p className=" text-sm text-gray-400">
                             {sensor.sensorId}
                           </p>
                           <h3 className="text-lg font-medium text-white">

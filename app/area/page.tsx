@@ -191,10 +191,10 @@ export default function AreaListPage() {
                         <TableCell className="text-gray-300">
                           {area.name}
                         </TableCell>
-                        <TableCell className="font-mono text-sm text-gray-400">
+                        <TableCell className="text-sm text-gray-400">
                           {area.latitude.toFixed(4)}
                         </TableCell>
-                        <TableCell className="font-mono text-sm text-gray-400">
+                        <TableCell className="text-sm text-gray-400">
                           {area.longitude.toFixed(4)}
                         </TableCell>
                         <TableCell>
