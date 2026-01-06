@@ -103,6 +103,7 @@ export async function getAllFlightHistory(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -140,6 +141,7 @@ export async function getFlightHistoryById(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -187,6 +189,7 @@ export async function getFlightHistoryByDrone(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -236,6 +239,7 @@ export async function getFlightHistoryBySensor(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -277,6 +281,7 @@ export async function getFlightHistoryByAlert(
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         cache: "no-store",
       }
     );
@@ -328,6 +333,7 @@ export async function updateFlightHistory(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(updateData),
     });
 
@@ -365,6 +371,7 @@ export async function deleteFlightHistory(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -415,6 +422,7 @@ export async function getFlightStatistics(params?: {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 

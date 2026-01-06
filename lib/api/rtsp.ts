@@ -67,6 +67,7 @@ export async function openRtspBySensor(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sensorDbId }),
+        credentials: "include",
       },
       timeoutMs
     );
@@ -146,6 +147,7 @@ export async function stopRtsp(payload: {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        credentials: "include",
       },
       8000
     );

@@ -46,6 +46,7 @@ export async function getAllMaps(): Promise<ApiResponse<OfflineMap[]>> {
     const res = await fetch(`${API_BASE_URL}/api/maps`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -70,6 +71,7 @@ export async function getActiveMap(): Promise<ApiResponse<OfflineMap | null>> {
     const res = await fetch(`${API_BASE_URL}/api/maps/active`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -103,6 +105,7 @@ export async function createMap(payload: {
     const res = await fetch(`${API_BASE_URL}/api/maps`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(payload),
     });
 
@@ -129,6 +132,7 @@ export async function setActiveMap(
     const res = await fetch(`${API_BASE_URL}/api/maps/${id}/active`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
     });
 
     if (!res.ok) {
@@ -155,6 +159,7 @@ export async function deleteMap(id: string): Promise<ApiResponse<null>> {
     const res = await fetch(`${API_BASE_URL}/api/maps/${id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
     });
 
     if (!res.ok) {

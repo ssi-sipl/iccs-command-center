@@ -37,6 +37,7 @@ async function postJson<T>(url: string, payload: any): Promise<T> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(payload),
     });
 

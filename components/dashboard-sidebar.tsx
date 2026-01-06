@@ -146,6 +146,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           cache: "no-store",
         });
 

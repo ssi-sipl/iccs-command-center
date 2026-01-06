@@ -51,6 +51,7 @@ export async function getAllSensors(params?: {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -83,6 +84,7 @@ export async function getSensorById(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -111,6 +113,7 @@ export async function getSensorsByArea(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -151,6 +154,7 @@ export async function createSensor(sensorData: {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(sensorData),
     });
 
@@ -194,6 +198,7 @@ export async function updateSensor(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(sensorData),
     });
 
@@ -220,6 +225,7 @@ export async function deleteSensor(id: string): Promise<ApiResponse<null>> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
 
     if (!response.ok) {

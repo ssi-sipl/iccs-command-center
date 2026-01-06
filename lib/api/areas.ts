@@ -43,6 +43,7 @@ export async function getAllAreas(params?: {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store", // Disable caching for real-time data
     });
 
@@ -76,6 +77,7 @@ export async function getAreaById(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -108,6 +110,7 @@ export async function createArea(areaData: {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(areaData),
     });
 
@@ -143,6 +146,7 @@ export async function updateArea(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(areaData),
     });
 
@@ -169,6 +173,7 @@ export async function deleteArea(id: string): Promise<ApiResponse<null>> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
 
     if (!response.ok) {

@@ -94,6 +94,7 @@ export async function getAllAlerts(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -162,6 +163,7 @@ export async function getActiveAlerts(): Promise<ApiResponse<Alert[]>> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -211,6 +213,7 @@ export async function getAlertsBySensor(
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         cache: "no-store",
       }
     );
@@ -273,6 +276,7 @@ export async function sendDroneForAlert(
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ droneId }),
       }
     );
@@ -323,6 +327,7 @@ export async function neutraliseAlert(
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ reason }),
       }
     );
@@ -369,6 +374,7 @@ export async function getAlertById(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -413,6 +419,7 @@ export async function deleteAlert(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -457,6 +464,7 @@ export async function neutraliseAllActiveAlerts(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ reason }),
     });
 

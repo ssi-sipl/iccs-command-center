@@ -64,6 +64,7 @@ export async function getAllDroneOS(params?: {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -100,6 +101,7 @@ export async function getDroneOSById(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -134,6 +136,7 @@ export async function getDronesByArea(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -184,6 +187,7 @@ export async function createDroneOS(droneData: {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(droneData),
     });
 
@@ -235,6 +239,7 @@ export async function updateDroneOS(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(droneData),
     });
 
@@ -262,6 +267,7 @@ export async function deleteDroneOS(id: string): Promise<ApiResponse<null>> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
 
     if (!response.ok) {

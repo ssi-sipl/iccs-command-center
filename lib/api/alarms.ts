@@ -40,6 +40,7 @@ export async function getAllAlarms(params?: {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -72,6 +73,7 @@ export async function getAlarmById(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -100,6 +102,7 @@ export async function getAlarmsByArea(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -126,6 +129,7 @@ export async function getAlarmSensors(id: string): Promise<ApiResponse<any[]>> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -160,6 +164,7 @@ export async function createAlarm(alarmData: {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(alarmData),
     });
 
@@ -194,6 +199,7 @@ export async function updateAlarm(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(alarmData),
     });
 
@@ -220,6 +226,7 @@ export async function deleteAlarm(id: string): Promise<ApiResponse<null>> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
 
     if (!response.ok) {

@@ -19,6 +19,10 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Image from "next/image";
 
+import { logout } from "@/lib/api/auth";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+
 const navItems = [
   { icon: Eye, label: "MAIN SCREEN", href: "/" },
   { icon: Map, label: "AREA", href: "/area" },
@@ -39,7 +43,15 @@ export function DashboardHeader({
   activeItem = "MAIN SCREEN",
 }: DashboardHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
+  const { refreshUser } = useAuth();
+
+  async function handleLogout() {
+    await logout();
+    await refreshUser();
+    router.push("/login");
+  }
   return (
     <header className="flex h-14 items-center justify-between border-b border-[#333] bg-[#1a1a1a] px-3 md:px-4">
       {/* Logo */}
@@ -82,7 +94,8 @@ export function DashboardHeader({
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2 text-xs text-gray-400 hover:bg-[#333] hover:text-white"
+          className="gap-2 text-xs text-gray-400 hover:bg-[#333] hover:text-white hover:cursor-pointer"
+          onClick={handleLogout}
         >
           <LogOut className="h-4 w-4" />
           LOGOUT
@@ -128,6 +141,7 @@ export function DashboardHeader({
             <Button
               variant="ghost"
               className="justify-start gap-3 text-gray-400 hover:bg-[#333] hover:text-white"
+              onClick={handleLogout}
             >
               <LogOut className="h-5 w-5" />
               LOGOUT
