@@ -24,7 +24,7 @@ const navItems = [
   { icon: Map, label: "AREA", href: "/area" },
   { icon: Radio, label: "SENSORS", href: "/sensors" },
   { icon: Plane, label: "DRONES", href: "/drones" },
-  { icon: Bell, label: "ALARM", href: "/alarm" },
+  // { icon: Bell, label: "ALARM", href: "/alarm" },
   // { icon: Key, label: "LICENSE", href: "/license" },
   { icon: FileText, label: "REPORT", href: "/report" },
   { icon: MapPin, label: "MAP", href: "/maps/manage" },
