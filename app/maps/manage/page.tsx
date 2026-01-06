@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardHeader } from "@/components/dashboard-header";
@@ -38,6 +38,20 @@ import {
   Layers,
 } from "lucide-react";
 
+function mergeMaps(prev: OfflineMap[], next: OfflineMap[]) {
+  const prevById = new Map(prev.map((m) => [m.id, m]));
+
+  return next.map((incoming) => ({
+    ...prevById.get(incoming.id),
+    ...incoming,
+  }));
+}
+
+function shallowEqualMaps(a: OfflineMap[], b: OfflineMap[]) {
+  if (a.length !== b.length) return false;
+  return a.every((m, i) => m === b[i]);
+}
+
 export default function ManageMapsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [maps, setMaps] = useState<OfflineMap[]>([]);
@@ -49,15 +63,14 @@ export default function ManageMapsPage() {
   // form state for new map
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [mapType, setMapType] = useState<"image" | "tiles">("image");
-  const [imagePath, setImagePath] = useState("/maps/base-map.jpg");
-  const [tileRoot, setTileRoot] = useState("/maps/tiles");
   const [minZoom, setMinZoom] = useState("13");
   const [maxZoom, setMaxZoom] = useState("18");
   const [north, setNorth] = useState<string>("");
   const [south, setSouth] = useState<string>("");
   const [east, setEast] = useState<string>("");
   const [west, setWest] = useState<string>("");
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const isFetchingRef = useRef(false);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -65,31 +78,68 @@ export default function ManageMapsPage() {
   // =============================
   // Fetch maps
   // =============================
-  const loadMaps = async () => {
-    setLoading(true);
+  const loadMaps = async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) {
+      setLoading(true); // ONLY initial/manual load
+    }
+
     setError(null);
+
     try {
       const res = await getAllMaps();
+
       if (res.success && res.data) {
-        setMaps(res.data);
+        setMaps((prev) => {
+          const merged = mergeMaps(prev, res.data);
+          return shallowEqualMaps(prev, merged) ? prev : merged;
+        });
       } else {
-        setMaps([]);
         setError(res.error || "Failed to fetch maps");
       }
     } catch (err: any) {
-      console.error("Error loading maps:", err);
-      setMaps([]);
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch maps from API"
-      );
+      setError(err?.message || "Failed to fetch maps");
     } finally {
-      setLoading(false);
+      if (!opts?.silent) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
     loadMaps();
   }, []);
+
+  useEffect(() => {
+    const hasDownloading = maps.some((m) => m.downloadStatus === "DOWNLOADING");
+
+    // START polling
+    if (hasDownloading && !pollingRef.current) {
+      pollingRef.current = setInterval(() => {
+        // 🛑 prevent overlapping requests
+        if (isFetchingRef.current) return;
+
+        isFetchingRef.current = true;
+
+        loadMaps({ silent: true }).finally(() => {
+          isFetchingRef.current = false;
+        });
+      }, 2000);
+    }
+
+    // STOP polling
+    if (!hasDownloading && pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+    };
+  }, [maps]);
 
   const activeMapId = maps.find((m) => m.isActive)?.id || null;
 
@@ -105,26 +155,6 @@ export default function ManageMapsPage() {
       toast({
         title: "Name required",
         description: "Please enter a name for the map.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (mapType === "image" && !imagePath.trim()) {
-      toast({
-        title: "Image path required",
-        description:
-          "Provide a relative path to the image in /public (e.g. /maps/site-1.jpg).",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (mapType === "tiles" && !tileRoot.trim()) {
-      toast({
-        title: "Tile root required",
-        description:
-          "Provide the tile root path (e.g. /maps/tiles or http://localhost:8080/tiles).",
         variant: "destructive",
       });
       return;
@@ -184,7 +214,7 @@ export default function ManageMapsPage() {
 
     setSubmitting(true);
     try {
-      const payload: any = {
+      const payload = {
         name: name.trim(),
         description: description.trim() || undefined,
         north: northNum,
@@ -194,12 +224,6 @@ export default function ManageMapsPage() {
         minZoom: minZoomNum,
         maxZoom: maxZoomNum,
       };
-
-      if (mapType === "image") {
-        payload.imagePath = imagePath.trim();
-      } else {
-        payload.tileRoot = tileRoot.trim();
-      }
 
       const res = await createMap(payload);
 
@@ -223,7 +247,7 @@ export default function ManageMapsPage() {
       setMaxZoom("18");
 
       // reload list
-      await loadMaps();
+      await loadMaps({ silent: true });
     } catch (err: any) {
       console.error("Error creating map:", err);
       toast({
@@ -253,7 +277,7 @@ export default function ManageMapsPage() {
         description: `"${res.data.name}" is now the active map.`,
       });
 
-      await loadMaps();
+      await loadMaps({ silent: true });
     } catch (err: any) {
       console.error("Error setting active map:", err);
       toast({
@@ -296,7 +320,7 @@ export default function ManageMapsPage() {
         description: `"${name}" has been removed.`,
       });
 
-      await loadMaps();
+      await loadMaps({ silent: true });
     } catch (err: any) {
       console.error("Error deleting map:", err);
       toast({
@@ -382,7 +406,7 @@ export default function ManageMapsPage() {
                       maps.map((map) => {
                         const isActive = map.isActive;
                         const loadingThis = actionLoadingId === map.id;
-                        const isTiled = !!map.tileRoot;
+                        const isTiled = true;
 
                         return (
                           <div
@@ -404,17 +428,8 @@ export default function ManageMapsPage() {
                                   variant="outline"
                                   className="flex items-center gap-1 border-[#444] text-[10px] text-gray-400"
                                 >
-                                  {isTiled ? (
-                                    <>
-                                      <Layers className="h-3 w-3" />
-                                      Tiled
-                                    </>
-                                  ) : (
-                                    <>
-                                      <ImageIcon className="h-3 w-3" />
-                                      Image
-                                    </>
-                                  )}
+                                  <Layers className="h-3 w-3" />
+                                  Satellite
                                 </Badge>
                               </div>
                               {map.description && (
@@ -430,7 +445,7 @@ export default function ManageMapsPage() {
                                     <ImageIcon className="h-3 w-3 text-gray-500" />
                                   )}
                                   <span className="truncate">
-                                    {isTiled ? map.tileRoot : map.imagePath}
+                                    Stored locally
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -446,6 +461,26 @@ export default function ManageMapsPage() {
                               <div className="text-[10px] text-gray-500">
                                 Zoom: {map.minZoom} - {map.maxZoom}
                               </div>
+                              {map.downloadStatus === "DOWNLOADING" && (
+                                <div className="text-xs text-blue-400">
+                                  Downloading… {map.downloadProgress}%
+                                </div>
+                              )}
+
+                              {map.downloadStatus === "READY" && (
+                                <div className="text-xs text-green-400">
+                                  Ready
+                                </div>
+                              )}
+
+                              {map.downloadStatus === "FAILED" && (
+                                <div className="text-xs text-red-400">
+                                  Failed{" "}
+                                  {map.downloadError &&
+                                    `– ${map.downloadError}`}
+                                </div>
+                              )}
+
                               <p className="text-[10px] text-gray-500">
                                 Created:{" "}
                                 {new Date(map.createdAt).toLocaleString()}
@@ -457,7 +492,10 @@ export default function ManageMapsPage() {
                                 <Button
                                   size="sm"
                                   className="bg-[#2563EB] text-[11px] text-white hover:bg-[#1D4ED8]"
-                                  disabled={loadingThis}
+                                  disabled={
+                                    loadingThis ||
+                                    map.downloadStatus !== "READY"
+                                  }
                                   onClick={() => handleSetActive(map.id)}
                                 >
                                   {loadingThis ? (
@@ -534,88 +572,6 @@ export default function ManageMapsPage() {
                           className="h-9 border-[#444] bg-[#1a1a1a] text-xs text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
                         />
                       </div>
-
-                      <div className="space-y-1">
-                        <Label className="text-xs text-gray-300">
-                          Map Type<span className="text-red-500">*</span>
-                        </Label>
-                        <div className="flex gap-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant={
-                              mapType === "image" ? "default" : "outline"
-                            }
-                            className={`flex-1 text-xs ${
-                              mapType === "image"
-                                ? "bg-[#2563EB] text-white"
-                                : "border-[#444] text-gray-300"
-                            }`}
-                            onClick={() => setMapType("image")}
-                          >
-                            <ImageIcon className="mr-1 h-3 w-3" />
-                            Image Overlay
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant={
-                              mapType === "tiles" ? "default" : "outline"
-                            }
-                            className={`flex-1 text-xs ${
-                              mapType === "tiles"
-                                ? "bg-[#2563EB] text-white"
-                                : "border-[#444] text-gray-300"
-                            }`}
-                            onClick={() => setMapType("tiles")}
-                          >
-                            <Layers className="mr-1 h-3 w-3" />
-                            Tiled Map
-                          </Button>
-                        </div>
-                      </div>
-
-                      {mapType === "image" ? (
-                        <div className="space-y-1">
-                          <Label
-                            htmlFor="imagePath"
-                            className="text-xs text-gray-300"
-                          >
-                            Image Path<span className="text-red-500">*</span>
-                          </Label>
-                          <Input
-                            id="imagePath"
-                            value={imagePath}
-                            onChange={(e) => setImagePath(e.target.value)}
-                            placeholder="/maps/base-map.jpg"
-                            className="h-9 border-[#444] bg-[#1a1a1a] text-xs text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
-                          />
-                          <p className="text-[10px] text-gray-500">
-                            Put the image file in <code>/public/maps</code> and
-                            reference it as <code>/maps/filename.jpg</code>.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-1">
-                          <Label
-                            htmlFor="tileRoot"
-                            className="text-xs text-gray-300"
-                          >
-                            Tile Root URL<span className="text-red-500">*</span>
-                          </Label>
-                          <Input
-                            id="tileRoot"
-                            value={tileRoot}
-                            onChange={(e) => setTileRoot(e.target.value)}
-                            placeholder="/maps/tiles or http://localhost:8080/tiles"
-                            className="h-9 border-[#444] bg-[#1a1a1a] text-xs text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
-                          />
-                          <p className="text-[10px] text-gray-500">
-                            Base URL for tiles. Will use {"{z}/{x}/{y}.jpg"}{" "}
-                            pattern.
-                          </p>
-                        </div>
-                      )}
 
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">

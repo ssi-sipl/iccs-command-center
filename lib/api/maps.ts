@@ -1,19 +1,33 @@
 // lib/api/maps.ts
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+export type MapDownloadStatus = "PENDING" | "DOWNLOADING" | "READY" | "FAILED";
+
 export interface OfflineMap {
   id: string;
+
   name: string;
   description?: string | null;
-  imagePath?: string; // for simple image overlay
-  tileRoot?: string; // e.g. "/maps/manekshaw" for tiled maps
+
+  // Tiles are always served from backend now
+  // Example: /maps/<mapId>/{z}/{x}/{y}.jpg
+  tileRoot: string;
+
   minZoom: number;
   maxZoom: number;
+
   north: number;
   south: number;
   east: number;
   west: number;
+
   isActive: boolean;
+
+  // 🔽 NEW (must match Prisma)
+  downloadStatus: MapDownloadStatus;
+  downloadProgress: number; // 0 - 100
+  downloadError?: string | null;
+
   createdAt: string;
   updatedAt: string;
 }
@@ -78,10 +92,8 @@ export async function getActiveMap(): Promise<ApiResponse<OfflineMap | null>> {
 export async function createMap(payload: {
   name: string;
   description?: string;
-  imagePath?: string;
-  tileRoot?: string;
-  minZoom?: number;
-  maxZoom?: number;
+  minZoom: number;
+  maxZoom: number;
   north: number;
   south: number;
   east: number;

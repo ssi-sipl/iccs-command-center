@@ -6,6 +6,8 @@ import dynamic from "next/dynamic";
 import type { Alert, Sensor, DroneOS } from "@/lib/api";
 import type { OfflineMap } from "@/lib/api/maps";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 type DronePosition = {
   id: string;
   droneId: string;
@@ -307,17 +309,17 @@ function MapRenderer({
   ];
 
   useEffect(() => {
-    if (!leafletMapRef.current) return;
+    const map = leafletMapRef.current;
+    if (!map) return;
 
-    const handleZoom = () => {
-      const newZoom = leafletMapRef.current?.getZoom();
-      if (newZoom) onZoomChange(newZoom);
+    const onZoomEnd = () => {
+      onZoomChange(map.getZoom());
     };
 
-    leafletMapRef.current.on("zoom", handleZoom);
+    map.on("zoomend", onZoomEnd);
 
     return () => {
-      leafletMapRef.current?.off("zoom", handleZoom);
+      map.off("zoomend", onZoomEnd);
     };
   }, [onZoomChange]);
 
@@ -356,23 +358,36 @@ function MapRenderer({
         </span>
       </div>
 
-      <div className="absolute top-4 left-4 z-[1000] rounded-md bg-black/70 px-3 py-1.5 text-xs text-gray-300 backdrop-blur-sm">
-        Zoom: {currentZoom.toFixed(1)}x
-      </div>
+      {/* <div className="absolute top-4 left-4 z-[1000] rounded-md bg-black/70 px-3 py-1.5 text-xs text-gray-300 backdrop-blur-sm">
+        Zoom Level: {currentZoom}
+      </div> */}
 
       <MapContainer
         center={center}
-        zoom={mapConfig.minZoom}
+        zoom={mapConfig.minZoom} // only initial value
         minZoom={mapConfig.minZoom}
-        maxZoom={mapConfig.maxZoom}
+        maxZoom={Math.min(mapConfig.maxZoom, 19)}
+        maxBounds={[
+          [mapConfig.south, mapConfig.west],
+          [mapConfig.north, mapConfig.east],
+        ]}
+        maxBoundsViscosity={1.0}
         className="h-full w-full bg-black"
         zoomControl={false}
         whenCreated={(mapInstance) => {
           leafletMapRef.current = mapInstance;
+          onZoomChange(mapInstance.getZoom()); // 🔑 initialize state once
         }}
       >
         <TileLayer
-          url={`${mapConfig.tileRoot}/{z}/{x}/{y}.jpg`}
+          url={`${API_BASE_URL}/maps/${mapConfig.id}/{z}/{x}/{y}.jpg`}
+          minZoom={mapConfig.minZoom}
+          maxZoom={Math.min(mapConfig.maxZoom, 19)}
+          noWrap={true}
+          bounds={[
+            [mapConfig.south, mapConfig.west],
+            [mapConfig.north, mapConfig.east],
+          ]}
           attribution=""
         />
 
