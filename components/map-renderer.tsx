@@ -5,6 +5,7 @@ import type { Map as LeafletMap, DivIcon } from "leaflet";
 import dynamic from "next/dynamic";
 import type { Alert, Sensor, DroneOS } from "@/lib/api";
 import type { OfflineMap } from "@/lib/api/maps";
+import { Badge } from "./ui/badge";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -47,7 +48,7 @@ interface MapRendererProps {
   markerUpdateKey: number;
   onZoomChange: (zoom: number) => void;
   onSensorClick: (sensor: Sensor) => void;
-  onDroneMarkerClick?: (droneId: string) => void;
+  onDroneMarkerClick?: (droneId: string, e?: MouseEvent) => void;
 }
 
 const REACH_RADIUS_METERS = 6;
@@ -374,6 +375,7 @@ function MapRenderer({
         maxBoundsViscosity={1.0}
         className="h-full w-full bg-black"
         zoomControl={false}
+        doubleClickZoom={false}
         whenCreated={(mapInstance) => {
           leafletMapRef.current = mapInstance;
           onZoomChange(mapInstance.getZoom()); // 🔑 initialize state once
@@ -416,6 +418,7 @@ function MapRenderer({
                 <div className="space-y-1 text-xs">
                   <div className="font-semibold text-black">{sensor.name}</div>
                   <div className="text-black-200">{sensor.sensorType}</div>
+
                   <div className="text-[10px] text-black-300">
                     Lat: {sensor.latitude.toFixed(5)}, Lon:{" "}
                     {sensor.longitude.toFixed(5)}
@@ -459,7 +462,13 @@ function MapRenderer({
               position={markerPos}
               icon={getDroneIcon(isOnline)}
               eventHandlers={{
-                click: () => onDroneMarkerClick?.(drone.id),
+                click: (e) => {
+                  e.originalEvent?.stopPropagation();
+                  onDroneMarkerClick?.(drone.id, e.originalEvent);
+                },
+                dblclick: (e) => {
+                  e.originalEvent?.stopPropagation();
+                },
               }}
             >
               <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>

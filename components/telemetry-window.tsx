@@ -64,7 +64,7 @@ export function TelemetryWindow({
     return () => clearInterval(i);
   }, []);
 
-  if (!telemetry || !isOpen) return null;
+  if (!isOpen) return null;
 
   const formatTime = (ts: number) => {
     return new Date(ts).toLocaleTimeString();
@@ -108,7 +108,7 @@ export function TelemetryWindow({
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
           <h3 className="text-sm font-semibold text-white">
-            {telemetry.droneId}
+            {telemetry?.droneId ?? `Drone (Offline)`}
           </h3>
         </div>
         <div className="flex items-center gap-1">
@@ -145,21 +145,21 @@ export function TelemetryWindow({
               <div>
                 <span className="text-gray-400">Latitude:</span>
                 <div className="text-gray-200 font-mono">
-                  {toNumber(telemetry.lat)?.toFixed(6) ?? "N/A"}
+                  {toNumber(telemetry?.lat)?.toFixed(6) ?? "N/A"}
                 </div>
               </div>
               <div>
                 <span className="text-gray-400">Longitude:</span>
                 <div className="text-gray-200 font-mono">
-                  {toNumber(telemetry.lng)?.toFixed(6) ?? "N/A"}
+                  {toNumber(telemetry?.lng)?.toFixed(6) ?? "N/A"}
                 </div>
               </div>
             </div>
-            {telemetry.alt !== null && (
+            {telemetry?.alt !== null && (
               <div>
                 <span className="text-gray-400">Altitude:</span>
                 <div className="text-blue-400 font-semibold">
-                  {toNumber(telemetry.alt) ?? "N/A"} m
+                  {toNumber(telemetry?.alt) ?? "N/A"} m
                 </div>
               </div>
             )}
@@ -171,36 +171,36 @@ export function TelemetryWindow({
               Status
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              {telemetry.battery !== null && (
+              {telemetry?.battery !== null && (
                 <div>
                   <span className="text-gray-400">Battery:</span>
                   <div
                     className={`font-semibold ${getTelemetryColor(
-                      toNumber(telemetry.battery),
+                      toNumber(telemetry?.battery),
                       {
                         good: 12,
                         warning: 10,
                       }
                     )}`}
                   >
-                    {toNumber(telemetry.battery)?.toFixed(2) ?? "N/A"} V
+                    {toNumber(telemetry?.battery)?.toFixed(2) ?? "N/A"} V
                   </div>
                 </div>
               )}
-              {telemetry.speed !== null && (
+              {telemetry?.speed !== null && (
                 <div>
                   <span className="text-gray-400">Speed:</span>
                   <div className="text-gray-200 font-semibold">
-                    {toNumber(telemetry.speed)?.toFixed(1) ?? "N/A"} m/s
+                    {toNumber(telemetry?.speed)?.toFixed(1) ?? "N/A"} m/s
                   </div>
                 </div>
               )}
             </div>
-            {telemetry.mode && (
+            {telemetry?.mode && (
               <div>
                 <span className="text-gray-400">Mode:</span>
                 <div className="text-purple-400 font-semibold">
-                  {telemetry.mode}
+                  {telemetry?.mode}
                 </div>
               </div>
             )}
@@ -212,19 +212,19 @@ export function TelemetryWindow({
               GPS
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              {telemetry.gpsFix && (
+              {telemetry?.gpsFix && (
                 <div>
                   <span className="text-gray-400">Fix:</span>
                   <div className="text-green-400 font-semibold">
-                    {telemetry.gpsFix}
+                    {telemetry?.gpsFix}
                   </div>
                 </div>
               )}
-              {telemetry.satellites !== null && (
+              {telemetry?.satellites !== null && (
                 <div>
                   <span className="text-gray-400">Satellites:</span>
                   <div className="text-gray-200 font-semibold">
-                    {toNumber(telemetry.satellites) ?? "N/A"}
+                    {toNumber(telemetry?.satellites) ?? "N/A"}
                   </div>
                 </div>
               )}
@@ -232,26 +232,26 @@ export function TelemetryWindow({
           </div>
 
           {/* Environmental */}
-          {(telemetry.windSpeed !== null ||
-            telemetry.targetDistance !== null) && (
+          {(telemetry?.windSpeed !== null ||
+            telemetry?.targetDistance !== null) && (
             <div className="rounded-md bg-[#1a1a1a] p-3 space-y-2">
               <div className="text-xs font-semibold text-gray-300 uppercase tracking-wide">
                 Environment
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                {telemetry.windSpeed !== null && (
+                {telemetry?.windSpeed !== null && (
                   <div>
                     <span className="text-gray-400">Wind:</span>
                     <div className="text-gray-200 font-semibold">
-                      {toNumber(telemetry.windSpeed)?.toFixed(1) ?? "N/A"} m/s
+                      {toNumber(telemetry?.windSpeed)?.toFixed(1) ?? "N/A"} m/s
                     </div>
                   </div>
                 )}
-                {telemetry.targetDistance !== null && (
+                {telemetry?.targetDistance !== null && (
                   <div>
                     <span className="text-gray-400">To Target:</span>
                     <div className="text-gray-200 font-semibold">
-                      {toNumber(telemetry.targetDistance)?.toFixed(1) ?? "N/A"}{" "}
+                      {toNumber(telemetry?.targetDistance)?.toFixed(1) ?? "N/A"}{" "}
                       m
                     </div>
                   </div>
@@ -262,7 +262,7 @@ export function TelemetryWindow({
 
           {/* Timestamp */}
           <div className="text-[10px] text-gray-500 text-center">
-            Last update: {formatTime(telemetry.ts)}
+            Last update: {formatTime(telemetry?.ts)}
           </div>
         </div>
       )}

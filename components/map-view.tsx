@@ -25,6 +25,8 @@ import {
   TelemetryWindow,
   type DroneTelemetry,
 } from "@/components/telemetry-window";
+import { useRouter } from "next/navigation";
+import { Badge } from "./ui/badge";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const REACH_RADIUS_METERS = 6;
@@ -77,6 +79,9 @@ type ActiveMission = {
 
 export function MapView() {
   const { toast } = useToast();
+  const router = useRouter();
+  const CLICK_DELAY_MS = 250;
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [mapConfig, setMapConfig] = useState<OfflineMap | null>(null);
   const [currentZoom, setCurrentZoom] = useState(18);
@@ -541,10 +546,27 @@ export function MapView() {
     setActionLoading(false);
   }
 
-  function openTelemetryWindow(droneDbId: string) {
-    console.log("🟢 Drone marker clicked:", droneDbId);
-    setSelectedDroneIdForTelemetry(droneDbId);
-    setTelemetryWindowOpen(true);
+  function handleDroneMarkerClick(droneDbId: string, e?: MouseEvent) {
+    // Ctrl / Cmd + click → open in new tab
+    if (e?.ctrlKey || e?.metaKey) {
+      window.open(`/drones/${droneDbId}`, "_blank");
+      return;
+    }
+
+    // Double click → navigate
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = null;
+      router.push(`/drones/${droneDbId}`);
+      return;
+    }
+
+    // Single click → open telemetry (delay to detect double click)
+    clickTimeoutRef.current = setTimeout(() => {
+      setSelectedDroneIdForTelemetry(droneDbId);
+      setTelemetryWindowOpen(true);
+      clickTimeoutRef.current = null;
+    }, CLICK_DELAY_MS);
   }
 
   function closeTelemetryWindow() {
@@ -747,6 +769,14 @@ export function MapView() {
     );
   }
 
+  const goToSensor = (sensorId: string) => {
+    router.push(`/sensors/${sensorId}`);
+  };
+
+  function goToDronePage(droneDbId: string) {
+    router.push(`/drones/${droneDbId}`);
+  }
+
   return (
     <>
       <MapRenderer
@@ -762,19 +792,33 @@ export function MapView() {
         markerUpdateKey={markerUpdateKey}
         onZoomChange={setCurrentZoom}
         onSensorClick={openSensorModal}
-        onDroneMarkerClick={openTelemetryWindow}
+        onDroneMarkerClick={handleDroneMarkerClick}
       />
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="border-[#333] bg-[#111] text-white">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">
+            <DialogTitle
+              onClick={() => goToSensor(selectedSensor?.id || "")}
+              className="text-lg font-semibold hover:cursor-pointer hover:underline"
+            >
               {selectedSensor ? selectedSensor.name : "Sensor"}
             </DialogTitle>
-            <DialogDescription className="text-xs text-gray-400">
-              {selectedSensor?.sensorId} ·{" "}
-              {selectedSensor?.sensorType || "Unknown type"}
-            </DialogDescription>
+            <div className="flex items-center space-x-4">
+              <DialogDescription className="text-xs text-gray-400">
+                {selectedSensor?.sensorId} ·{" "}
+                {selectedSensor?.sensorType || "Unknown type"}
+              </DialogDescription>
+              <Badge
+                className={`w-fit px-2 rounded-xl ${
+                  selectedSensor?.addedBy.toLowerCase()
+                    ? "bg-yellow-400 text-black "
+                    : "bg-red-600/20 text-red-400 hover:bg-red-600/30 "
+                }`}
+              >
+                {selectedSensor?.addedBy || "N/A"}
+              </Badge>
+            </div>
           </DialogHeader>
 
           {selectedSensor && (
