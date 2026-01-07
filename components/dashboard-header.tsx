@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation"; // Add this import
 import {
   Eye,
   Map,
@@ -28,30 +29,36 @@ const navItems = [
   { icon: Map, label: "AREA", href: "/area" },
   { icon: Radio, label: "SENSORS", href: "/sensors" },
   { icon: Plane, label: "DRONES", href: "/drones" },
-  // { icon: Bell, label: "ALARM", href: "/alarm" },
-  // { icon: Key, label: "LICENSE", href: "/license" },
   { icon: FileText, label: "REPORT", href: "/report" },
   { icon: MapPin, label: "MAP", href: "/maps/manage" },
-  // { icon: BookOpen, label: "USER MANUAL", href: "/manual" },
 ];
 
-interface DashboardHeaderProps {
-  activeItem?: string;
-}
-
-export function DashboardHeader({
-  activeItem = "MAIN SCREEN",
-}: DashboardHeaderProps) {
+export function DashboardHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
-
+  const pathname = usePathname(); // Get current pathname
   const { refreshUser } = useAuth();
+
+  // Function to determine if a nav item is active
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(href);
+  };
+
+  // Function to get the active label
+  const getActiveLabel = () => {
+    const activeNav = navItems.find((item) => isActive(item.href));
+    return activeNav?.label || "MAIN SCREEN";
+  };
 
   async function handleLogout() {
     await logout();
     await refreshUser();
     router.push("/login");
   }
+
   return (
     <header className="flex h-14 items-center justify-between border-b border-[#333] bg-[#1a1a1a] px-3 md:px-4">
       {/* Logo */}
@@ -75,10 +82,10 @@ export function DashboardHeader({
         {navItems.map((item) => (
           <Link key={item.label} href={item.href}>
             <Button
-              variant={activeItem === item.label ? "secondary" : "ghost"}
+              variant={isActive(item.href) ? "secondary" : "ghost"}
               size="sm"
               className={`gap-2 text-xs ${
-                activeItem === item.label
+                isActive(item.href)
                   ? "bg-[#333] text-white hover:bg-[#444]"
                   : "text-gray-400 hover:bg-[#333] hover:text-white"
               }`}
@@ -100,7 +107,6 @@ export function DashboardHeader({
           <LogOut className="h-4 w-4" />
           LOGOUT
         </Button>
-        <span className="text-xs text-gray-500">v2.2.7</span>
       </div>
 
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -124,9 +130,9 @@ export function DashboardHeader({
             {navItems.map((item) => (
               <Link key={item.label} href={item.href}>
                 <Button
-                  variant={activeItem === item.label ? "secondary" : "ghost"}
+                  variant={isActive(item.href) ? "secondary" : "ghost"}
                   className={`w-full justify-start gap-3 ${
-                    activeItem === item.label
+                    isActive(item.href)
                       ? "bg-[#333] text-white hover:bg-[#444]"
                       : "text-gray-400 hover:bg-[#333] hover:text-white"
                   }`}
@@ -146,7 +152,6 @@ export function DashboardHeader({
               <LogOut className="h-5 w-5" />
               LOGOUT
             </Button>
-            <span className="mt-4 text-xs text-gray-500">v2.2.7</span>
           </nav>
         </SheetContent>
       </Sheet>
