@@ -23,6 +23,7 @@ export interface DroneOS {
   maxAltitude: number;
   latitude?: number | null; // NEW: Home Latitude
   longitude?: number | null; // NEW: Home Longitude
+  addedBy: string; // NEW: User who added the drone
   areaId?: string | null; // NEW: Area relation
   area?: {
     // NEW: Area details when included
@@ -179,6 +180,7 @@ export async function createDroneOS(droneData: {
   maxAltitude: number;
   latitude: number; // OPTIONAL: Home Latitude
   longitude: number; // OPTIONAL: Home Longitude
+  addedBy: string; // REQUIRED: User who added the drone
   areaId?: string; // OPTIONAL: Area ID
 }): Promise<ApiResponse<DroneOS>> {
   try {

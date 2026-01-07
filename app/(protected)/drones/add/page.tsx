@@ -59,6 +59,7 @@ export default function AddDronePage() {
     maxAltitude: "",
     latitude: "", // NEW: Home Latitude
     longitude: "", // NEW: Home Longitude
+    addedBy: "", // NEW: User who added the drone
   });
 
   const [validationErrors, setValidationErrors] = useState({
@@ -73,6 +74,7 @@ export default function AddDronePage() {
     batteryFailSafe: "",
     latitude: "", // NEW
     longitude: "", // NEW
+    addedBy: "", // NEW
   });
 
   // Fetch areas on mount
@@ -106,6 +108,7 @@ export default function AddDronePage() {
       batteryFailSafe: "",
       latitude: "",
       longitude: "",
+      addedBy: "",
     };
 
     let isValid = true;
@@ -113,6 +116,14 @@ export default function AddDronePage() {
     // NEW: Drone ID validation
     if (!formData.droneId.trim()) {
       errors.droneId = "Drone ID is required";
+      isValid = false;
+    }
+
+    if (!formData.addedBy.trim()) {
+      errors.addedBy = "Added By is required";
+      isValid = false;
+    } else if (formData.addedBy.trim().length < 3) {
+      errors.addedBy = "Added By must be at least 3 characters";
       isValid = false;
     }
 
@@ -214,6 +225,7 @@ export default function AddDronePage() {
         maxAltitude: parseFloat(formData.maxAltitude),
         latitude: parseFloat(formData.latitude), // NEW
         longitude: parseFloat(formData.longitude), // NEW
+        addedBy: formData.addedBy.trim(), // NEW
       });
 
       if (response.success) {
@@ -462,6 +474,24 @@ export default function AddDronePage() {
                   {/* <p className="text-xs text-gray-500">
                         Optional: Assign drone to a specific area
                       </p> */}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="addedBy" className="text-gray-300">
+                    Added By<span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="addedBy"
+                    placeholder="Operator Name"
+                    value={formData.addedBy}
+                    onChange={(e) => handleChange("addedBy", e.target.value)}
+                    required
+                    className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                  />
+                  {validationErrors.addedBy && (
+                    <p className="text-xs text-red-500">
+                      {validationErrors.addedBy}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

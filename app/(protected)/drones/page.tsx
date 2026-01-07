@@ -195,6 +195,7 @@ export default function DronesListPage() {
                   <TableHead className="text-gray-400">Type</TableHead>
                   <TableHead className="text-gray-400">Latitude</TableHead>
                   <TableHead className="text-gray-400">Longitude</TableHead>
+                  <TableHead className="text-gray-400">Added By</TableHead>
                   {/* <TableHead className="text-gray-400">
                         Speed (m/s) 
                       </TableHead>
@@ -233,6 +234,17 @@ export default function DronesListPage() {
                     </TableCell>
                     <TableCell className="text-gray-300">
                       {drone.longitude}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          drone?.addedBy.toLowerCase()
+                            ? "bg-yellow-400 text-black font-medium"
+                            : "bg-red-600/20 text-red-400 hover:bg-red-600/30"
+                        }
+                      >
+                        {drone?.addedBy || "N/A"}
+                      </Badge>
                     </TableCell>
                     {/* <TableCell className="font-mono text-sm text-gray-400">
                           {drone.droneSpeed}

@@ -62,6 +62,7 @@ export default function EditDronePage() {
     maxAltitude: "",
     latitude: "", // NEW
     longitude: "", // NEW
+    addedBy: "", // NEW
   });
 
   const [validationErrors, setValidationErrors] = useState({
@@ -124,6 +125,7 @@ export default function EditDronePage() {
           maxAltitude: droneData.maxAltitude.toString(),
           latitude: droneData.latitude?.toString() || "", // NEW
           longitude: droneData.longitude?.toString() || "", // NEW
+          addedBy: droneData.addedBy || "", // NEW
         });
       } else {
         setError(response.error || "Failed to fetch drone details");
@@ -514,6 +516,21 @@ export default function EditDronePage() {
                   </Select>
                   <p className="text-xs text-gray-500">
                     Optional: Assign drone to a specific area
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="addedBy" className="text-gray-300">
+                    Added By<span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="addedBy"
+                    placeholder="Operator Name"
+                    value={formData.addedBy}
+                    disabled={true}
+                    className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Added By cannot be changed
                   </p>
                 </div>
               </div>

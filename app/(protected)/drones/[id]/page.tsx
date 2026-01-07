@@ -173,6 +173,12 @@ export default function ViewDronePage() {
                     >
                       {drone.droneId}
                     </Badge>
+                    <Badge
+                      variant="outline"
+                      className=" bg-yellow-400 text-black font-medium px-2 rounded-md"
+                    >
+                      {drone.addedBy}
+                    </Badge>
                   </>
                 )}
               </div>
