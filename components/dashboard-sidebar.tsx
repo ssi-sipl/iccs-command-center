@@ -31,6 +31,7 @@ import { getAllDroneOS, type DroneOS } from "@/lib/api/droneos";
 import { getAllAlarms, type Alarm } from "@/lib/api/alarms";
 import { openRtspBySensor } from "@/lib/api/rtsp";
 import { sendDrone, dronePatrol } from "@/lib/api/droneCommand";
+import { useRef } from "react";
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -47,6 +48,10 @@ interface AlertResolvedPayload {
 
 export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   const { toast } = useToast();
+
+  const alertSoundRef = useRef<HTMLAudioElement | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundInitialized, setSoundInitialized] = useState(false);
 
   const [alarmsList, setAlarmsList] = useState<Alarm[]>([]);
   const [alarmsLoading, setAlarmsLoading] = useState(false);
@@ -79,6 +84,22 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
 
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+  useEffect(() => {
+    // Create audio element for alert sound
+    // You can use a different sound URL or host your own sound file
+    alertSoundRef.current = new Audio(
+      "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+    );
+    alertSoundRef.current.volume = 0.7; // Adjust volume (0.0 to 1.0)
+
+    return () => {
+      if (alertSoundRef.current) {
+        alertSoundRef.current.pause();
+        alertSoundRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const fetchAlarms = async () => {
@@ -133,6 +154,36 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
 
     fetchDrones();
   }, []);
+
+  const enableSound = async () => {
+    if (!alertSoundRef.current) {
+      alertSoundRef.current = new Audio(
+        "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+      );
+      alertSoundRef.current.volume = 0.7;
+    }
+
+    try {
+      // Play and immediately pause to "unlock" audio
+      await alertSoundRef.current.play();
+      alertSoundRef.current.pause();
+      alertSoundRef.current.currentTime = 0;
+      setSoundEnabled(true);
+      setSoundInitialized(true);
+
+      toast({
+        title: "Alert sounds enabled",
+        description: "You will now hear sounds for new alerts",
+      });
+    } catch (err) {
+      console.error("Failed to enable sound:", err);
+      toast({
+        title: "Sound permission denied",
+        description: "Please check your browser settings",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Initial fetch of active alerts
   useEffect(() => {
@@ -197,6 +248,14 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
         const exists = prev.some((a) => a.id === alert.id);
         if (exists) return prev;
 
+        // ✅ Play sound for new alert (only if enabled)
+        if (soundEnabled && alertSoundRef.current) {
+          alertSoundRef.current.currentTime = 0;
+          alertSoundRef.current.play().catch((err) => {
+            console.error("Failed to play alert sound:", err);
+          });
+        }
+
         // ✅ add new alert at the TOP
         return [alert, ...prev];
       });
@@ -216,6 +275,9 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
 
     return () => {
       socket.disconnect();
+      if (alertSoundRef.current) {
+        alertSoundRef.current.pause();
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API_BASE_URL]);
