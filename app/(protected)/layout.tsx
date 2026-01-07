@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
-import { MapView } from "@/components/map-view";
 
-export default function DashboardPage() {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -16,9 +19,7 @@ export default function DashboardPage() {
           isOpen={sidebarOpen}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
-        <main className="relative flex-1">
-          <MapView />
-        </main>
+        <main className="relative flex-1 overflow-auto">{children}</main>
       </div>
     </div>
   );
