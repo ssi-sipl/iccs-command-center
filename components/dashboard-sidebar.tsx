@@ -156,10 +156,14 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   }, []);
 
   const enableSound = async () => {
+    // if (!alertSoundRef.current) {
+    //   alertSoundRef.current = new Audio(
+    //     "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+    //   );
+    //   alertSoundRef.current.volume = 0.7;
+    // }
     if (!alertSoundRef.current) {
-      alertSoundRef.current = new Audio(
-        "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
-      );
+      alertSoundRef.current = new Audio("/sounds/alert.mp3");
       alertSoundRef.current.volume = 0.7;
     }
 
