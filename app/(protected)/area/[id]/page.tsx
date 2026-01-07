@@ -140,9 +140,14 @@ export default function ViewAreaPage() {
               </Badge>
             </div>
 
-            <p className="text-sm w-fit bg-yellow-400 text-black font-medium px-2 rounded-md">
-              {area.addedBy}
-            </p>
+            <div className="flex space-x-2 items-center mt-1">
+              <p className="mt-1 font-mono text-sm text-gray-400">
+                {area.areaId}
+              </p>
+              <p className="text-sm  bg-yellow-400 text-black font-medium px-2 rounded-md">
+                {area.addedBy}
+              </p>
+            </div>
           </div>
           <Link href={`/area/${area.id}/edit`}>
             <Button className="gap-2 bg-[#8B0000] text-white hover:bg-[#6B0000]">

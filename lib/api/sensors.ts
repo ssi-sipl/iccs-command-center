@@ -19,6 +19,7 @@ export interface Sensor {
   updatedAt: string;
   area?: any;
   alarm?: any;
+  addedBy?: string; // NEW: User who added the sensor
 }
 
 export interface ApiResponse<T> {
@@ -147,6 +148,7 @@ export async function createSensor(sensorData: {
   activeShuruMode: string;
   areaId?: string;
   alarmId?: string;
+  addedBy?: string; // NEW: User who added the sensor
 }): Promise<ApiResponse<Sensor>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/sensors`, {

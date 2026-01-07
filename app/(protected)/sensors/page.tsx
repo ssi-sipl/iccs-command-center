@@ -253,7 +253,7 @@ export default function SensorsPage() {
                   <TableHead className="text-gray-400">IP</TableHead>
                   {/* <TableHead className="text-gray-400">Battery</TableHead>
                       <TableHead className="text-gray-400">RTSP</TableHead> */}
-
+                  <TableHead className="text-gray-400">Added By</TableHead>
                   <TableHead className="text-gray-400">Status</TableHead>
                   <TableHead className="text-right text-gray-400">
                     Actions
@@ -284,6 +284,17 @@ export default function SensorsPage() {
                     </TableCell>
                     <TableCell className="text-gray-300">
                       {sensor.ipAddress || "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          sensor?.addedBy.toLowerCase()
+                            ? "bg-yellow-400 text-black font-medium"
+                            : "bg-red-600/20 text-red-400 hover:bg-red-600/30"
+                        }
+                      >
+                        {sensor.addedBy || "N/A"}
+                      </Badge>
                     </TableCell>
                     {/* <TableCell className="text-gray-300">
                           {sensor.battery || "N/A"}

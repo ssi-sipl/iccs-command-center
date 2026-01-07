@@ -62,6 +62,7 @@ export default function AddSensorPage() {
     status: "Active",
     sendDrone: "No",
     activeShuruMode: "Active",
+    addedBy: "", // NEW: User who added the sensor
   });
 
   const [validationErrors, setValidationErrors] = useState({
@@ -72,6 +73,7 @@ export default function AddSensorPage() {
     longitude: "",
     status: "",
     activeShuruMode: "",
+    addedBy: "",
   });
 
   useEffect(() => {
@@ -116,6 +118,7 @@ export default function AddSensorPage() {
       longitude: "",
       status: "",
       activeShuruMode: "",
+      addedBy: "",
     };
 
     let isValid = true;
@@ -132,6 +135,14 @@ export default function AddSensorPage() {
       isValid = false;
     } else if (formData.name.trim().length < 3) {
       errors.name = "Sensor name must be at least 3 characters";
+      isValid = false;
+    }
+
+    if (!formData.addedBy.trim()) {
+      errors.addedBy = "Added By is required";
+      isValid = false;
+    } else if (formData.addedBy.trim().length < 3) {
+      errors.addedBy = "Added By must be at least 3 characters";
       isValid = false;
     }
 
@@ -200,6 +211,7 @@ export default function AddSensorPage() {
         activeShuruMode: formData.activeShuruMode,
         areaId: formData.areaId || undefined,
         alarmId: formData.alarmId || undefined,
+        addedBy: formData.addedBy.trim(),
       });
 
       if (response.success) {
@@ -580,6 +592,25 @@ export default function AddSensorPage() {
               {validationErrors.activeShuruMode && (
                 <p className="text-xs text-red-500">
                   {validationErrors.activeShuruMode}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="addedBy" className="text-gray-300">
+                Added By:<span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="addedBy"
+                placeholder="Enter Operator Name"
+                value={formData.addedBy}
+                onChange={(e) => handleChange("addedBy", e.target.value)}
+                required
+                className="border-[#444] bg-[#2a2a2a] text-white placeholder:text-gray-500 focus:border-[#4A9FD4] focus:ring-[#4A9FD4]"
+              />
+              {validationErrors.addedBy && (
+                <p className="text-xs text-red-500">
+                  {validationErrors.addedBy}
                 </p>
               )}
             </div>

@@ -64,6 +64,7 @@ export default function EditSensorPage() {
     status: "",
     sendDrone: "",
     activeShuruMode: "",
+    addedBy: "",
   });
 
   const [validationErrors, setValidationErrors] = useState({
@@ -110,6 +111,7 @@ export default function EditSensorPage() {
           status: sensorData.status,
           sendDrone: sensorData.sendDrone,
           activeShuruMode: sensorData.activeShuruMode,
+          addedBy: sensorData.addedBy || "",
         });
       } else {
         setError(sensorResponse.error || "Failed to fetch sensor details");
@@ -597,6 +599,21 @@ export default function EditSensorPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="addedBy" className="text-gray-300">
+                  Added By <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="addedBy"
+                  placeholder="Operator Name"
+                  value={formData.addedBy}
+                  disabled
+                  className="border-[#333] bg-[#1a1a1a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                />
+                <p className="text-xs text-gray-500">
+                  Added By cannot be changed
+                </p>
               </div>
             </div>
 

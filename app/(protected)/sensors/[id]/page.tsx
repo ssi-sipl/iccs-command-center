@@ -199,9 +199,14 @@ export default function ViewSensorPage() {
               </h1>
               {getStatusBadge(sensor.status)}
             </div>
-            <p className="mt-1 font-mono text-sm text-gray-400">
-              {sensor.sensorId}
-            </p>
+            <div className="flex space-x-2 items-center mt-1">
+              <p className="mt-1 font-mono text-sm text-gray-400">
+                {sensor.sensorId}
+              </p>
+              <p className="text-sm  bg-yellow-400 text-black font-medium px-2 rounded-md">
+                {sensor.addedBy}
+              </p>
+            </div>
           </div>
           <div className="flex gap-2">
             <Link href={`/sensors/${sensor.id}/edit`}>
