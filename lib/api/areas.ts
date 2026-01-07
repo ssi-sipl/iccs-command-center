@@ -11,6 +11,7 @@ export interface Area {
   status: string;
   createdAt: string;
   updatedAt: string;
+  addedBy: string; // NEW: User who added the area
   sensors?: any[];
   alarms?: any[];
   drones?: any[]; // NEW: Drones relation
@@ -102,6 +103,7 @@ export async function createArea(areaData: {
   name: string;
   latitude: number;
   longitude: number;
+  addedBy?: string; // NEW: User who added the area
   status?: string;
 }): Promise<ApiResponse<Area>> {
   try {

@@ -44,6 +44,7 @@ export default function EditAreaPage() {
     name: "",
     latitude: "",
     longitude: "",
+    addedBy: "",
     status: "Active",
   });
 
@@ -72,6 +73,7 @@ export default function EditAreaPage() {
           name: areaData.name,
           latitude: areaData.latitude.toString(),
           longitude: areaData.longitude.toString(),
+          addedBy: areaData.addedBy || "",
           status: areaData.status,
         });
       } else {
@@ -298,6 +300,37 @@ export default function EditAreaPage() {
                     {validationErrors.name}
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="addedBy" className="text-gray-300">
+                  Added By <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="addedBy"
+                  placeholder="Operator Name"
+                  value={formData.addedBy}
+                  disabled
+                  className="border-[#333] bg-[#1a1a1a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                />
+                <p className="text-xs text-gray-500">
+                  Added By cannot be changed
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="areaId" className="text-gray-300">
+                  Area ID
+                </Label>
+                <Input
+                  id="areaId"
+                  value={formData.areaId}
+                  disabled
+                  className="border-[#333] bg-[#1a1a1a] text-gray-500"
+                />
+                <p className="text-xs text-gray-500">
+                  Area ID cannot be changed
+                </p>
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2">

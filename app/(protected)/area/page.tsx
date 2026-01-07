@@ -166,6 +166,8 @@ export default function AreaListPage() {
                   <TableHead className="text-gray-400">Area Name</TableHead>
                   <TableHead className="text-gray-400">Latitude</TableHead>
                   <TableHead className="text-gray-400">Longitude</TableHead>
+                  <TableHead className="text-gray-400">Added By</TableHead>
+
                   <TableHead className="text-gray-400">Status</TableHead>
                   <TableHead className="text-right text-gray-400">
                     Actions
@@ -187,6 +189,17 @@ export default function AreaListPage() {
                     </TableCell>
                     <TableCell className="text-sm text-gray-400">
                       {area.longitude.toFixed(4)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          area.addedBy.toLowerCase()
+                            ? "bg-yellow-400 text-black font-medium"
+                            : "bg-red-600/20 text-red-400 hover:bg-red-600/30"
+                        }
+                      >
+                        {area.addedBy || "N/A"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge

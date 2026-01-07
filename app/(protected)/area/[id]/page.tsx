@@ -79,21 +79,12 @@ export default function ViewAreaPage() {
   // Loading State
   if (loading) {
     return (
-      <div className="flex h-screen flex-col bg-[#1a1a1a]">
-        <DashboardHeader activeItem="AREA" />
-        <div className="relative flex flex-1 overflow-hidden">
-          <DashboardSidebar
-            isOpen={sidebarOpen}
-            onToggle={() => setSidebarOpen(!sidebarOpen)}
-          />
-          <main className="flex flex-1 items-center justify-center p-4">
-            <div className="text-center">
-              <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-[#8B0000]" />
-              <p className="text-lg font-medium text-gray-400">
-                Loading area details...
-              </p>
-            </div>
-          </main>
+      <div className="flex flex-1 items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-[#8B0000]" />
+          <p className="text-lg font-medium text-gray-400">
+            Loading area details...
+          </p>
         </div>
       </div>
     );
@@ -102,29 +93,18 @@ export default function ViewAreaPage() {
   // Error State or Area Not Found
   if (error || !area) {
     return (
-      <div className="flex h-screen flex-col bg-[#1a1a1a]">
-        <DashboardHeader activeItem="AREA" />
-        <div className="relative flex flex-1 overflow-hidden">
-          <DashboardSidebar
-            isOpen={sidebarOpen}
-            onToggle={() => setSidebarOpen(!sidebarOpen)}
-          />
-          <main className="flex flex-1 items-center justify-center p-4">
-            <div className="text-center">
-              <MapPin className="mx-auto mb-4 h-12 w-12 text-gray-600" />
-              <h1 className="mb-2 text-xl font-bold text-white">
-                Area Not Found
-              </h1>
-              <p className="mb-4 text-gray-400">
-                {error || "The requested area does not exist."}
-              </p>
-              <Link href="/area">
-                <Button className="bg-[#8B0000] text-white hover:bg-[#6B0000]">
-                  Back to Areas
-                </Button>
-              </Link>
-            </div>
-          </main>
+      <div className="flex flex-1 items-center justify-center p-4">
+        <div className="text-center">
+          <MapPin className="mx-auto mb-4 h-12 w-12 text-gray-600" />
+          <h1 className="mb-2 text-xl font-bold text-white">Area Not Found</h1>
+          <p className="mb-4 text-gray-400">
+            {error || "The requested area does not exist."}
+          </p>
+          <Link href="/area">
+            <Button className="bg-[#8B0000] text-white hover:bg-[#6B0000]">
+              Back to Areas
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -159,7 +139,10 @@ export default function ViewAreaPage() {
                 {area.status}
               </Badge>
             </div>
-            <p className="text-sm text-gray-400">{area.areaId}</p>
+
+            <p className="text-sm w-fit bg-yellow-400 text-black font-medium px-2 rounded-md">
+              {area.addedBy}
+            </p>
           </div>
           <Link href={`/area/${area.id}/edit`}>
             <Button className="gap-2 bg-[#8B0000] text-white hover:bg-[#6B0000]">

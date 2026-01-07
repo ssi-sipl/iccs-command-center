@@ -38,6 +38,7 @@ export default function AddAreaPage() {
     name: "",
     latitude: "",
     longitude: "",
+    addedBy: "",
     status: "Active",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,6 +47,7 @@ export default function AddAreaPage() {
     name: "",
     latitude: "",
     longitude: "",
+    addedBy: "",
   });
 
   const validateForm = () => {
@@ -54,6 +56,7 @@ export default function AddAreaPage() {
       name: "",
       latitude: "",
       longitude: "",
+      addedBy: "",
     };
 
     let isValid = true;
@@ -96,6 +99,14 @@ export default function AddAreaPage() {
       isValid = false;
     }
 
+    if (!formData.addedBy.trim()) {
+      errors.addedBy = "Added By is required";
+      isValid = false;
+    } else if (formData.addedBy.trim().length < 3) {
+      errors.addedBy = "Added By must be at least 3 characters";
+      isValid = false;
+    }
+
     setValidationErrors(errors);
     return isValid;
   };
@@ -121,6 +132,7 @@ export default function AddAreaPage() {
         name: formData.name.trim(),
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
+        addedBy: formData.addedBy.trim(),
         status: formData.status,
       });
 
@@ -262,6 +274,25 @@ export default function AddAreaPage() {
                 {validationErrors.name && (
                   <p className="text-xs text-red-500">
                     {validationErrors.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="addedBy" className="text-gray-300">
+                  Added By <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="addedBy"
+                  placeholder="Operator Name"
+                  value={formData.addedBy}
+                  onChange={(e) => handleFieldChange("addedBy", e.target.value)}
+                  required
+                  className="border-[#333] bg-[#1a1a1a] text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
+                />
+                {validationErrors.addedBy && (
+                  <p className="text-xs text-red-500">
+                    {validationErrors.addedBy}
                   </p>
                 )}
               </div>
