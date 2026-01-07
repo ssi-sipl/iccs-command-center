@@ -273,6 +273,7 @@ export function TelemetryWindow({
           <Button
             size="sm"
             variant="outline"
+            disabled={!telemetry?.droneDbId || dropDisabled}
             className="flex-1 border-amber-700 bg-transparent text-amber-400 hover:bg-amber-900/30 hover:text-amber-300 text-xs"
             onClick={handleDropPayload}
           >
@@ -284,6 +285,7 @@ export function TelemetryWindow({
           <Button
             size="sm"
             variant="outline"
+            disabled={!telemetry?.droneDbId || recallDisabled}
             className="flex-1 border-blue-700 bg-transparent text-blue-400 hover:bg-blue-900/30 hover:text-blue-300 text-xs"
             onClick={handleRecallDrone}
           >
