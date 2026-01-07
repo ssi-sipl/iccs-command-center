@@ -67,7 +67,7 @@ export function DashboardHeader({
         </div>
 
         <span className="text-base font-bold tracking-wide text-white md:text-xl">
-          RUDRARAKSHAK
+          RUDRARAKSHAK 2.0
         </span>
       </Link>
 

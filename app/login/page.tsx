@@ -42,7 +42,7 @@ export default function LoginPage() {
             <div className="w-16 h-16 relative">
               <Image
                 src="/icon.svg"
-                alt="I.C.C.S Logo"
+                alt="RUDRARAKSHAK 2.0 Logo"
                 width={64}
                 height={64}
                 className="w-full h-full"
@@ -50,7 +50,9 @@ export default function LoginPage() {
               />
             </div>
             <div className="text-center space-y-1">
-              <h1 className="text-3xl font-bold text-foreground">I.C.C.S</h1>
+              <h1 className="text-2xl font-bold text-foreground">
+                RUDRARAKSHAK 2.0
+              </h1>
               {/* <p className="text-sm text-muted-foreground">Welcome back</p> */}
             </div>
           </div>

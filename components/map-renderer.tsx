@@ -107,7 +107,7 @@ function getDroneIcon(isOnline: boolean): DivIcon {
   const size = 26;
 
   const bgColor = isOnline ? "#6D28D9" : "#C4B5FD"; // deep purple / light purple
-  const borderColor = isOnline ? "#A78BFA" : "#DDD6FE";
+  const borderColor = isOnline ? "#A78BFA" : "#6D28D9";
   const glowColor = isOnline
     ? "rgba(109,40,217,0.9)" // deep purple glow
     : "rgba(196,181,253,0.4)"; // soft light purple glow
@@ -135,7 +135,7 @@ function getDroneIcon(isOnline: boolean): DivIcon {
       display:flex;
       align-items:center;
       justify-content:center;
-      color:white;
+      color:${isOnline ? "white" : borderColor};
       font-size:14px;
       font-weight:700;
       ${animation}
@@ -263,7 +263,7 @@ function getSensorIcon(
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: ${hasActiveAlert ? "white" : border};
       font-size: ${fontSize}px;
       font-weight: 600;
       ${
