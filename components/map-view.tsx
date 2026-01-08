@@ -786,6 +786,7 @@ export function MapView() {
         alertBySensorDbId={alertBySensorDbId}
         dronePositions={dronePositions}
         droneStatus={droneStatus}
+        droneTelemetryData={droneTelemetryData}
         activeMissions={activeMissions}
         currentZoom={currentZoom}
         socketConnected={socketConnected}

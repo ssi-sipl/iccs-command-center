@@ -35,6 +35,24 @@ type ActiveMission = {
   targetLng: number;
 };
 
+export interface DroneTelemetry {
+  droneDbId: string;
+  droneId: string;
+  lat: number;
+  lng: number;
+  alt: number | null;
+  speed: number | null;
+  battery: number | null;
+  mode: string | null;
+  gpsFix: string | null;
+  satellites: number | null;
+  windSpeed: number | null;
+  targetDistance: number | null;
+  status: "on_air" | "ground" | "reached" | null; // ✅ UPDATED
+  command: string | null;
+  ts: number;
+}
+
 interface MapRendererProps {
   mapConfig: OfflineMap;
   sensors: Sensor[];
@@ -49,6 +67,7 @@ interface MapRendererProps {
   onZoomChange: (zoom: number) => void;
   onSensorClick: (sensor: Sensor) => void;
   onDroneMarkerClick?: (droneId: string, e?: MouseEvent) => void;
+  droneTelemetryData: Record<string, DroneTelemetry>;
 }
 
 const REACH_RADIUS_METERS = 6;
@@ -103,21 +122,109 @@ function getSensorBaseColor(sensorType: string): string {
   return "#9ca3af";
 }
 
-function getDroneIcon(isOnline: boolean): DivIcon {
+// function getDroneIcon(isOnline: boolean): DivIcon {
+//   const leaflet = require("leaflet");
+//   const size = 26;
+
+//   const bgColor = isOnline ? "#6D28D9" : "#C4B5FD"; // deep purple / light purple
+//   const borderColor = isOnline ? "#A78BFA" : "#6D28D9";
+//   const glowColor = isOnline
+//     ? "rgba(109,40,217,0.9)" // deep purple glow
+//     : "rgba(196,181,253,0.4)"; // soft light purple glow
+
+//   const animation = isOnline
+//     ? `
+//       animation: drone-pulse 1.5s infinite;
+//     `
+//     : "";
+
+//   const html = `
+//     <style>
+//       @keyframes drone-pulse {
+//         0% { box-shadow: 0 0 0 0 ${glowColor}; }
+//         70% { box-shadow: 0 0 0 10px rgba(0,0,0,0); }
+//         100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+//       }
+//     </style>
+//     <div style="
+//       width:${size}px;
+//       height:${size}px;
+//       border-radius:9999px;
+//       background:${bgColor};
+//       border:2px solid ${borderColor};
+//       display:flex;
+//       align-items:center;
+//       justify-content:center;
+//       color:${isOnline ? "white" : borderColor};
+//       font-size:14px;
+//       font-weight:700;
+//       ${animation}
+//     ">
+//       ✈
+//     </div>
+//   `;
+
+//   return leaflet.divIcon({
+//     html,
+//     className: "",
+//     iconSize: [size, size],
+//     iconAnchor: [size / 2, size / 2],
+//   });
+// }
+
+// map-renderer.tsx - Updated getDroneIcon function
+function getDroneIcon(
+  isOnline: boolean,
+  status: "on_air" | "ground" | "reached" | null
+): DivIcon {
   const leaflet = require("leaflet");
   const size = 26;
 
-  const bgColor = isOnline ? "#6D28D9" : "#C4B5FD"; // deep purple / light purple
-  const borderColor = isOnline ? "#A78BFA" : "#6D28D9";
-  const glowColor = isOnline
-    ? "rgba(109,40,217,0.9)" // deep purple glow
-    : "rgba(196,181,253,0.4)"; // soft light purple glow
+  // Determine colors and animation based on status
+  let bgColor: string;
+  let borderColor: string;
+  let glowColor: string;
+  let icon: string;
+  let animation = "";
 
-  const animation = isOnline
-    ? `
-      animation: drone-pulse 1.5s infinite;
-    `
-    : "";
+  if (!isOnline) {
+    // Offline state
+    bgColor = "#C4B5FD";
+    borderColor = "#6D28D9";
+    glowColor = "rgba(196,181,253,0.4)";
+    icon = "✈";
+  } else {
+    // Online states based on status
+    switch (status) {
+      case "on_air":
+        bgColor = "#3B82F6"; // blue
+        borderColor = "#60A5FA";
+        glowColor = "rgba(59,130,246,0.9)";
+        icon = "✈";
+        animation = `animation: drone-pulse 1.5s infinite;`;
+        break;
+      case "ground":
+        bgColor = "#6B7280"; // gray
+        borderColor = "#9CA3AF";
+        glowColor = "rgba(107,116,128,0.6)";
+        icon = "🛬";
+        break;
+      case "reached":
+        bgColor = "#10B981"; // green
+        borderColor = "#34D399";
+        glowColor = "rgba(16,185,129,0.9)";
+        icon = "🎯";
+        animation = `animation: drone-reached 2s infinite;`;
+        break;
+      default:
+        // Default online state (purple)
+        bgColor = "#6D28D9";
+        borderColor = "#A78BFA";
+        glowColor = "rgba(109,40,217,0.9)";
+        icon = "✈";
+        animation = `animation: drone-pulse 1.5s infinite;`;
+    }
+  }
 
   const html = `
     <style>
@@ -125,6 +232,16 @@ function getDroneIcon(isOnline: boolean): DivIcon {
         0% { box-shadow: 0 0 0 0 ${glowColor}; }
         70% { box-shadow: 0 0 0 10px rgba(0,0,0,0); }
         100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+      }
+      @keyframes drone-reached {
+        0%, 100% { 
+          box-shadow: 0 0 0 0 ${glowColor};
+          transform: scale(1);
+        }
+        50% { 
+          box-shadow: 0 0 0 8px rgba(0,0,0,0);
+          transform: scale(1.15);
+        }
       }
     </style>
     <div style="
@@ -136,12 +253,12 @@ function getDroneIcon(isOnline: boolean): DivIcon {
       display:flex;
       align-items:center;
       justify-content:center;
-      color:${isOnline ? "white" : borderColor};
+      color:white;
       font-size:14px;
       font-weight:700;
       ${animation}
     ">
-      ✈
+      ${icon}
     </div>
   `;
 
@@ -301,6 +418,7 @@ function MapRenderer({
   onZoomChange,
   onSensorClick,
   onDroneMarkerClick,
+  droneTelemetryData,
 }: MapRendererProps) {
   const leafletMapRef = useRef<LeafletMap | null>(null);
 
@@ -392,7 +510,6 @@ function MapRenderer({
           ]}
           attribution=""
         />
-
         {/* Sensor markers */}
         {visibleSensors.map((sensor) => {
           const alert = alertBySensorDbId[sensor.id];
@@ -438,11 +555,11 @@ function MapRenderer({
             </Marker>
           );
         })}
-
         {/* Drone markers */}
         {visibleDrones.map((drone) => {
           const pos = dronePositions[drone.id];
           const status = droneStatus[drone.id];
+          const telemetry = droneTelemetryData[drone.id]; // Get telemetry for status
 
           if (!pos) return null;
 
@@ -452,15 +569,49 @@ function MapRenderer({
             ? Math.round((Date.now() - status.lastUpdateTime) / 1000)
             : null;
           const isOnline = telemetryAge !== null && telemetryAge < 10;
-          const statusDisplay = isOnline ? "Online" : "Offline";
-          const statusColor = isOnline ? "text-green-600" : "text-gray-500";
-          const statusEmoji = isOnline ? "🟢" : "⚪";
+
+          // Get status from telemetry (renamed to avoid conflict)
+          const currentDroneStatus = telemetry?.status || null;
+
+          // Status display based on telemetry.status
+          let statusDisplay = "Offline";
+          let statusColor = "text-gray-500";
+          let statusEmoji = "⚪";
+          let statusBadge = "";
+
+          if (isOnline) {
+            switch (currentDroneStatus) {
+              case "on_air":
+                statusDisplay = "In Flight";
+                statusColor = "text-blue-400";
+                statusEmoji = "✈️";
+                statusBadge = "🔵 Flying";
+                break;
+              case "ground":
+                statusDisplay = "On Ground";
+                statusColor = "text-gray-400";
+                statusEmoji = "🛬";
+                statusBadge = "⚪ Landed";
+                break;
+              case "reached":
+                statusDisplay = "Target Reached";
+                statusColor = "text-green-400";
+                statusEmoji = "🎯";
+                statusBadge = "🟢 Reached";
+                break;
+              default:
+                statusDisplay = "Online";
+                statusColor = "text-green-600";
+                statusEmoji = "🟢";
+                statusBadge = "🟢 Active";
+            }
+          }
 
           return (
             <Marker
               key={`drone-${drone.id}-${markerUpdateKey}`}
               position={markerPos}
-              icon={getDroneIcon(isOnline)}
+              icon={getDroneIcon(isOnline, currentDroneStatus)}
               eventHandlers={{
                 click: (e) => {
                   e.originalEvent?.stopPropagation();
@@ -479,6 +630,12 @@ function MapRenderer({
                   <div className="text-[10px] text-black-300">
                     {drone.droneOSName}
                   </div>
+
+                  {/* Status Badge */}
+                  <div className={`text-[10px] font-bold ${statusColor}`}>
+                    {statusBadge}
+                  </div>
+
                   <div className="text-[10px] text-black-300">
                     Lat: {pos.lat.toFixed(5)}, Lon: {pos.lng.toFixed(5)}
                   </div>
@@ -487,23 +644,11 @@ function MapRenderer({
                       Alt: {pos.alt} m
                     </div>
                   )}
-
-                  <div className={`text-[10px] font-semibold ${statusColor}`}>
-                    {statusEmoji} {statusDisplay}
-                  </div>
-
-                  {/* {!isOnline && status?.lastUpdateTime && (
-                    <div className="text-[10px] text-black-300">
-                      Last:{" "}
-                      {new Date(status.lastUpdateTime).toLocaleTimeString()}
-                    </div>
-                  )} */}
                 </div>
               </Tooltip>
             </Marker>
           );
         })}
-
         {/* Active missions path lines */}
         {Object.values(activeMissions).map((mission) => {
           const drone = drones.find((d) => d.droneId === mission.droneId);
