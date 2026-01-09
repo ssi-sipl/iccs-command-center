@@ -15,6 +15,7 @@ export interface Alert {
   createdAt: string;
   decidedAt: string | null;
   decision: string | null;
+  time: string | null;
   metadata?: any;
   sensor?: {
     id: string;
