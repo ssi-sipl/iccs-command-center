@@ -75,6 +75,7 @@ type ActiveMission = {
   sensorId: string;
   targetLat: number;
   targetLng: number;
+  auto?: boolean;
 };
 
 export function MapView() {
@@ -128,8 +129,22 @@ export function MapView() {
   const timeoutRefsRef = useRef<Record<string, NodeJS.Timeout>>({});
   const statusUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [autoDispatchCountdown, setAutoDispatchCountdown] = useState<
+    number | null
+  >(null);
+  const autoDispatchTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [autoDispatchBlocked, setAutoDispatchBlocked] = useState<{
+    sensor: Sensor;
+    alert: Alert;
+    reason: string;
+  } | null>(null);
+
+  const sensorsRef = useRef<Sensor[]>([]);
+  const dronesRef = useRef<DroneOS[]>([]);
+
   const liveTelemetry = selectedDroneIdForTelemetry
-    ? droneTelemetryData[selectedDroneIdForTelemetry] ?? null
+    ? (droneTelemetryData[selectedDroneIdForTelemetry] ?? null)
     : null;
 
   useEffect(() => {
@@ -184,6 +199,10 @@ export function MapView() {
   }, [toast]);
 
   useEffect(() => {
+    sensorsRef.current = sensors;
+  }, [sensors]);
+
+  useEffect(() => {
     const loadDrones = async () => {
       setLoadingDrones(true);
       try {
@@ -232,6 +251,10 @@ export function MapView() {
 
     loadDrones();
   }, [toast]);
+
+  useEffect(() => {
+    dronesRef.current = drones;
+  }, [drones]);
 
   const setDroneLocationTimeout = (droneId: string) => {
     if (timeoutRefsRef.current[droneId]) {
@@ -293,29 +316,35 @@ export function MapView() {
       reconnectionAttempts: 5,
     });
 
-    s.on(
-      "mission_started",
-      (payload: {
-        droneId: string;
-        sensorId: string | null;
-        targetLat: number;
-        targetLng: number;
-      }) => {
-        console.log("🎯 Mission started:", payload);
+    s.on("mission_started", (payload) => {
+      setActiveMissions((prev) => {
+        // 🔒 HARD LOCK: Do NOT overwrite existing mission
+        if (prev[payload.droneId]) {
+          showAutoDispatchBlockedModal(
+            sensorsRef.current.find((s) => s.sensorId === payload.sensorId)!,
+            {
+              id: "system",
+              message: "Drone already executing another mission",
+            } as Alert,
+            "Drone is already on an active mission. New mission request was ignored."
+          );
+          return prev;
+        }
 
-        setActiveMissions((prev) => ({
+        return {
           ...prev,
           [payload.droneId]: {
             droneId: payload.droneId,
             sensorId: payload.sensorId ?? "",
             targetLat: payload.targetLat,
             targetLng: payload.targetLng,
+            auto: true, // or false depending on source
           },
-        }));
+        };
+      });
 
-        setMarkerUpdateKey((k) => k + 1);
-      }
-    );
+      setMarkerUpdateKey((k) => k + 1);
+    });
 
     s.on("drone_position", (pos: DronePosition) => {
       console.log("[MapView] Received drone position:", pos);
@@ -408,6 +437,51 @@ export function MapView() {
         if (prev.some((a) => a.id === alert.id)) return prev;
         return [alert, ...prev];
       });
+
+      const sensor = sensorsRef.current.find((s) => s.id === alert.sensorDbId);
+      if (!sensor) return;
+
+      if (sensor.sendDrone === "Yes") {
+        const availableDrone = dronesRef.current.find((d) => {
+          if (d.areaId !== sensor.areaId) return false;
+
+          // HARD LOCK: never override an active mission
+          if (activeMissions[d.id]) return false;
+
+          // Telemetry-based safety
+          const telemetry = droneTelemetryData[d.id];
+          if (telemetry?.status === "on_air") return false;
+
+          return true;
+        });
+
+        if (!availableDrone) {
+          showAutoDispatchBlockedModal(
+            sensor,
+            alert,
+            "No drones are currently available in this area. All drones are either flying or already assigned to another mission."
+          );
+
+          // log decision
+          neutraliseAlert(alert.id, "auto_skipped:no_available_drone");
+
+          return;
+        }
+
+        console.log("[AutoDispatch] Alert received", alert.id);
+        console.log("[AutoDispatch] Sensors:", sensorsRef.current.length);
+        console.log("[AutoDispatch] Drones:", dronesRef.current.length);
+
+        if (availableDrone) {
+          startAutoDispatchCountdown(sensor, alert, availableDrone.id);
+        } else {
+          console.warn(
+            "[AutoDispatch] All drones busy for area",
+            sensor.areaId
+          );
+        }
+      }
+
       setMarkerUpdateKey((k) => k + 1);
     });
 
@@ -416,6 +490,56 @@ export function MapView() {
         if (prev.some((a) => a.id === alert.id)) return prev;
         return [alert, ...prev];
       });
+
+      const sensor = sensorsRef.current.find((s) => s.id === alert.sensorDbId);
+      if (!sensor) {
+        console.warn("[AutoDispatch] Sensor not found for alert", alert);
+        return;
+      }
+
+      if (sensor.sendDrone === "Yes") {
+        const availableDrone = dronesRef.current.find((d) => {
+          if (d.areaId !== sensor.areaId) return false;
+
+          // HARD LOCK: never override an active mission
+          if (activeMissions[d.id]) return false;
+
+          // Telemetry-based safety
+          const telemetry = droneTelemetryData[d.id];
+          if (telemetry?.status === "on_air") return false;
+
+          return true;
+        });
+
+        if (!availableDrone) {
+          showAutoDispatchBlockedModal(
+            sensor,
+            alert,
+            "No drones are currently available in this area. All drones are either flying or already assigned to another mission."
+          );
+
+          // log decision
+          neutraliseAlert(alert.id, "auto_skipped:no_available_drone");
+
+          return;
+        }
+
+        if (!availableDrone) {
+          console.warn(
+            "[AutoDispatch] No drone available for sensor",
+            sensor.id
+          );
+          return;
+        }
+
+        console.log("[AutoDispatch] alert_created: ");
+        console.log("[AutoDispatch] Alert received", alert.id);
+        console.log("[AutoDispatch] Sensors:", sensorsRef.current.length);
+        console.log("[AutoDispatch] Drones:", dronesRef.current.length);
+
+        startAutoDispatchCountdown(sensor, alert, availableDrone.id);
+      }
+
       setMarkerUpdateKey((k) => k + 1);
     });
 
@@ -539,6 +663,8 @@ export function MapView() {
   }
 
   function closeModal() {
+    cancelAutoDispatch();
+    setAutoDispatchBlocked(null);
     setModalOpen(false);
     setSelectedSensor(null);
     setSelectedAlert(null);
@@ -591,6 +717,15 @@ export function MapView() {
   }
 
   const handleSendDrone = async () => {
+    if (activeMissions[selectedDroneId]) {
+      toast({
+        title: "Drone already on mission",
+        description: "This drone is currently executing another mission.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!selectedSensor) return;
 
     if (!selectedDroneId) {
@@ -648,6 +783,112 @@ export function MapView() {
       setActionLoading(false);
     }
   };
+
+  function isDroneBusy(droneId: string): boolean {
+    // Case 1: Active mission exists
+    if (activeMissions[droneId]) return true;
+
+    // Case 2: Telemetry says drone is flying
+    const telemetry = droneTelemetryData[droneId];
+    if (telemetry?.status === "on_air") return true;
+
+    return false;
+  }
+
+  function showAutoDispatchBlockedModal(
+    sensor: Sensor,
+    alert: Alert,
+    reason: string
+  ) {
+    setSelectedSensor(sensor); // 🔑 REQUIRED
+    setSelectedAlert(alert); // 🔑 REQUIRED
+    setSelectedDroneId(""); // no drone selectable
+    setAutoDispatchBlocked({ sensor, alert, reason });
+    setModalOpen(true);
+  }
+
+  function startAutoDispatchCountdown(
+    sensor: Sensor,
+    alert: Alert,
+    droneId: string
+  ) {
+    // Open modal with everything pre-filled
+    setSelectedSensor(sensor);
+    setSelectedAlert(alert);
+    setSelectedDroneId(droneId);
+    setModalOpen(true);
+
+    // Clear any existing timer
+    if (autoDispatchTimerRef.current) {
+      clearInterval(autoDispatchTimerRef.current);
+    }
+
+    let remaining = 10;
+    setAutoDispatchCountdown(remaining);
+
+    autoDispatchTimerRef.current = setInterval(async () => {
+      remaining -= 1;
+      setAutoDispatchCountdown(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(autoDispatchTimerRef.current!);
+        autoDispatchTimerRef.current = null;
+        setAutoDispatchCountdown(null);
+
+        try {
+          setActionLoading(true);
+
+          setActiveMissions((prev) => ({
+            ...prev,
+            [droneId]: {
+              droneId,
+              sensorId: sensor.sensorId,
+              targetLat: sensor.latitude,
+              targetLng: sensor.longitude,
+              auto: true, // 🔑 NEW FLAG
+            },
+          }));
+
+          await sendDrone({
+            droneDbId: droneId,
+            sensorId: sensor.sensorId,
+            alertId: alert.id,
+            targetLatitude: sensor.latitude,
+            targetLongitude: sensor.longitude,
+          });
+
+          toast({
+            title: "Drone auto-dispatched",
+            description: `Drone sent automatically for alert ${alert.id}`,
+          });
+
+          closeModal();
+        } catch (err) {
+          toast({
+            title: "Auto-dispatch failed",
+            description:
+              err instanceof Error ? err.message : "Failed to auto-send drone",
+            variant: "destructive",
+          });
+        } finally {
+          setActionLoading(false);
+        }
+      }
+    }, 1000);
+  }
+
+  function cancelAutoDispatch() {
+    if (autoDispatchTimerRef.current) {
+      clearInterval(autoDispatchTimerRef.current);
+      autoDispatchTimerRef.current = null;
+    }
+    setAutoDispatchCountdown(null);
+
+    toast({
+      title: "Auto-dispatch cancelled",
+      description: "Drone was not sent automatically.",
+    });
+  }
 
   const handleNeutralise = async () => {
     if (!selectedAlert) return;
@@ -796,7 +1037,12 @@ export function MapView() {
         onDroneMarkerClick={handleDroneMarkerClick}
       />
 
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+      <Dialog
+        open={modalOpen || autoDispatchBlocked !== null}
+        onOpenChange={(open) => {
+          if (!open) closeModal();
+        }}
+      >
         <DialogContent className="border-[#333] bg-[#111] text-white">
           <DialogHeader>
             <DialogTitle
@@ -821,6 +1067,44 @@ export function MapView() {
               </Badge>
             </div>
           </DialogHeader>
+
+          {autoDispatchBlocked && (
+            <div className="rounded-md border border-red-700 bg-red-950/40 p-4">
+              <div className="text-sm font-semibold text-red-300">
+                🚫 Auto-dispatch blocked
+              </div>
+
+              <div className="mt-2 text-xs text-red-200">
+                {autoDispatchBlocked.reason}
+              </div>
+
+              <div className="mt-3 text-[11px] text-red-300">
+                Sensor: {autoDispatchBlocked.sensor.name} (
+                {autoDispatchBlocked.sensor.sensorId})
+              </div>
+
+              <div className="mt-1 text-[11px] text-red-300">
+                Alert ID: {autoDispatchBlocked.alert.id}
+              </div>
+            </div>
+          )}
+
+          {autoDispatchCountdown !== null && (
+            <div className="rounded-md border border-amber-500 bg-amber-950/40 p-3 text-xs text-amber-200">
+              🚨 Auto-dispatching drone in{" "}
+              <span className="font-bold">{autoDispatchCountdown}s</span>
+              <div className="mt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-amber-500 text-amber-300 hover:bg-amber-900/40"
+                  onClick={cancelAutoDispatch}
+                >
+                  Cancel Auto Send
+                </Button>
+              </div>
+            </div>
+          )}
 
           {selectedSensor && (
             <div className="space-y-4 py-2 text-sm">

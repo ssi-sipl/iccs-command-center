@@ -115,6 +115,14 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+[data-radix-toast-viewport] {
+  position: fixed !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto;
+}
+
 /* Keep Leaflet always under app overlays (dialogs, toasts, etc.) */
 .leaflet-container {
   z-index: 0 !important;
@@ -128,6 +136,7 @@
 
 .leaflet-container {
   background: #000 !important;
+  z-index: 0 !important;
 }
 
 .leaflet-pane,
@@ -135,6 +144,7 @@
 .leaflet-tile-pane,
 .leaflet-overlay-pane {
   background: #000 !important;
+  z-index: 0 !important;
 }
 
 @layer base {

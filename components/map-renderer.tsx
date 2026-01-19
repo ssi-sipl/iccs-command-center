@@ -33,6 +33,7 @@ type ActiveMission = {
   sensorId: string;
   targetLat: number;
   targetLng: number;
+  auto?: boolean;
 };
 
 export interface DroneTelemetry {
@@ -636,6 +637,12 @@ function MapRenderer({
                     {statusBadge}
                   </div>
 
+                  {activeMissions[drone.id]?.auto && (
+                    <div className="text-[10px] font-bold text-amber-500">
+                      🤖 AUTO MISSION
+                    </div>
+                  )}
+
                   <div className="text-[10px] text-black-300">
                     Lat: {pos.lat.toFixed(5)}, Lon: {pos.lng.toFixed(5)}
                   </div>
@@ -651,6 +658,7 @@ function MapRenderer({
         })}
         {/* Active missions path lines */}
         {Object.values(activeMissions).map((mission) => {
+          const isAuto = mission.auto;
           const drone = drones.find((d) => d.droneId === mission.droneId);
           if (!drone) return null;
 
@@ -665,7 +673,7 @@ function MapRenderer({
                 [mission.targetLat, mission.targetLng],
               ]}
               pathOptions={{
-                color: "red",
+                color: isAuto ? "#f59e0b" : "red",
                 weight: 3,
                 dashArray: "6 8",
               }}
