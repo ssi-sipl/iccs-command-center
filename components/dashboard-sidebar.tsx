@@ -773,8 +773,8 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                       </div>
                     </div>
                     <p className="text-[11px] text-gray-500">
-                      {alert.time}
-                      {/* {new Date(alert.createdAt).toLocaleString()} */}
+                      {/* {alert.time} */}
+                      {new Date(alert.createdAt).toLocaleString()}
                     </p>
                   </button>
                 </div>
