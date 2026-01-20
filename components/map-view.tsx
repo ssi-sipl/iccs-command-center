@@ -122,6 +122,8 @@ export function MapView() {
   const [selectedDroneIdForTelemetry, setSelectedDroneIdForTelemetry] =
     useState<string | null>(null);
 
+  const droneTelemetryRef = useRef<Record<string, DroneTelemetry>>({});
+
   const [droneTelemetryData, setDroneTelemetryData] = useState<
     Record<string, DroneTelemetry>
   >({});
@@ -146,6 +148,10 @@ export function MapView() {
   const liveTelemetry = selectedDroneIdForTelemetry
     ? (droneTelemetryData[selectedDroneIdForTelemetry] ?? null)
     : null;
+
+  useEffect(() => {
+    droneTelemetryRef.current = droneTelemetryData;
+  }, [droneTelemetryData]);
 
   useEffect(() => {
     const fetchActiveMap = async () => {
@@ -253,6 +259,12 @@ export function MapView() {
   }, [toast]);
 
   useEffect(() => {
+    if (autoDispatchBlocked) {
+      setModalOpen(false);
+    }
+  }, [autoDispatchBlocked]);
+
+  useEffect(() => {
     dronesRef.current = drones;
   }, [drones]);
 
@@ -301,7 +313,8 @@ export function MapView() {
     );
 
     const flyingDrone = dronesInArea.find((d) => {
-      const telemetry = droneTelemetryData[d.id];
+      const telemetry = droneTelemetryRef.current[d.id];
+
       console.log(
         `[v0] Drone ${d.droneOSName}: telemetry status =`,
         telemetry?.status,
@@ -317,9 +330,9 @@ export function MapView() {
       showAutoDispatchBlockedModal(
         sensor,
         alert,
-        `Auto-dispatch is disabled because ${flyingDrone.droneOSName} is currently in the air. Dispatching another drone could create safety conflicts. Please wait for the drone to land or manually override this alert.`,
+        `Auto-dispatch is disabled because ${flyingDrone.droneOSName} is currently in the air. Please wait for the drone to land.`,
       );
-      neutraliseAlert(alert.id, "auto_skipped:drone_flying");
+      // neutraliseAlert(alert.id, "auto_skipped:drone_flying");
       return;
     }
 
@@ -332,9 +345,18 @@ export function MapView() {
       showAutoDispatchBlockedModal(
         sensor,
         alert,
-        "No drones are currently available in this area. All drones are assigned to other missions. Please manually override when ready.",
+        "No drones are currently available in this area. All drones are assigned to other missions.",
       );
       neutraliseAlert(alert.id, "auto_skipped:no_available_drone");
+      return;
+    }
+
+    if (isDroneBusy(availableDrone.id)) {
+      showAutoDispatchBlockedModal(
+        sensor,
+        alert,
+        "Auto-dispatch blocked because the drone is currently flying or executing another mission.",
+      );
       return;
     }
 
@@ -622,6 +644,10 @@ export function MapView() {
   }, [activeAlerts]);
 
   function openSensorModal(sensor: Sensor) {
+    if (autoDispatchBlocked) {
+      // System state active → no user modal
+      return;
+    }
     const alert = alertBySensorDbId[sensor.id];
     setSelectedSensor(sensor);
     setSelectedAlert(alert ?? null);
@@ -772,11 +798,7 @@ export function MapView() {
     alert: Alert,
     reason: string,
   ) {
-    setSelectedSensor(sensor); // 🔑 REQUIRED
-    setSelectedAlert(alert); // 🔑 REQUIRED
-    setSelectedDroneId(""); // no drone selectable
     setAutoDispatchBlocked({ sensor, alert, reason });
-    setModalOpen(true);
   }
 
   function startAutoDispatchCountdown(
@@ -784,6 +806,15 @@ export function MapView() {
     alert: Alert,
     droneId: string,
   ) {
+    const telemetry = droneTelemetryRef.current[droneId];
+    if (telemetry?.status === "on_air") {
+      showAutoDispatchBlockedModal(
+        sensor,
+        alert,
+        "Drone is currently flying. Auto-dispatch aborted.",
+      );
+      return;
+    }
     // Open modal with everything pre-filled
     setSelectedSensor(sensor);
     setSelectedAlert(alert);
@@ -795,7 +826,7 @@ export function MapView() {
       clearInterval(autoDispatchTimerRef.current);
     }
 
-    let remaining = 10;
+    let remaining = 5; // seconds
     setAutoDispatchCountdown(remaining);
 
     autoDispatchTimerRef.current = setInterval(async () => {
@@ -1006,6 +1037,40 @@ export function MapView() {
 
   return (
     <>
+      {autoDispatchBlocked && (
+        <div className="fixed top-4 left-1/2 z-50 w-[90%] max-w-2xl -translate-x-1/2 rounded-lg border border-red-700 bg-red-950/90 p-4 shadow-xl backdrop-blur">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-sm font-semibold text-red-300">
+                🚫 Auto-dispatch blocked
+              </div>
+
+              <div className="mt-1 text-xs text-red-200">
+                {autoDispatchBlocked.reason}
+              </div>
+
+              <div className="mt-2 text-[11px] text-red-300">
+                Sensor: {autoDispatchBlocked.sensor.name} (
+                {autoDispatchBlocked.sensor.sensorId})
+              </div>
+
+              <div className="text-[11px] text-red-300">
+                Alert ID: {autoDispatchBlocked.alert.id}
+              </div>
+            </div>
+
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-red-500 text-red-300 hover:bg-red-900/40"
+              onClick={() => setAutoDispatchBlocked(null)}
+            >
+              Acknowledge
+            </Button>
+          </div>
+        </div>
+      )}
+
       <MapRenderer
         mapConfig={mapConfig}
         sensors={sensors}
@@ -1024,9 +1089,11 @@ export function MapView() {
       />
 
       <Dialog
-        open={modalOpen || autoDispatchBlocked !== null}
+        open={modalOpen && autoDispatchBlocked === null}
         onOpenChange={(open) => {
-          if (!open) closeModal();
+          if (!open && !autoDispatchBlocked) {
+            closeModal();
+          }
         }}
       >
         <DialogContent className="border-[#333] bg-[#111] text-white">
