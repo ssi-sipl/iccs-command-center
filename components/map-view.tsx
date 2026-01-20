@@ -281,16 +281,50 @@ export function MapView() {
     }, DRONE_LOCATION_TIMEOUT_MS);
   };
 
-  // Extract shared alert dispatch logic to avoid duplication
   const handleAlertDispatch = (alert: Alert) => {
     const sensor = sensorsRef.current.find((s) => s.id === alert.sensorDbId);
-    if (!sensor || sensor.sendDrone !== "Yes") return;
+    if (!sensor || sensor.sendDrone !== "Yes") {
+      console.log(
+        "[v0] Auto-dispatch skipped: sensor not found or sendDrone != Yes",
+      );
+      return;
+    }
 
-    const availableDrone = dronesRef.current.find((d) => {
-      if (d.areaId !== sensor.areaId) return false;
-      if (activeMissions[d.id]) return false; // Already on mission
+    const dronesInArea = dronesRef.current.filter(
+      (d) => d.areaId === sensor.areaId,
+    );
+    console.log(
+      "[v0] Drones in area:",
+      dronesInArea.length,
+      "Alert:",
+      alert.id,
+    );
+
+    const flyingDrone = dronesInArea.find((d) => {
       const telemetry = droneTelemetryData[d.id];
-      if (telemetry?.status === "on_air") return false; // Already flying
+      console.log(
+        `[v0] Drone ${d.droneOSName}: telemetry status =`,
+        telemetry?.status,
+      );
+      return telemetry?.status === "on_air";
+    });
+
+    if (flyingDrone) {
+      console.log(
+        "[v0] AUTO-DISPATCH BLOCKED: Flying drone detected:",
+        flyingDrone.droneOSName,
+      );
+      showAutoDispatchBlockedModal(
+        sensor,
+        alert,
+        `Auto-dispatch is disabled because ${flyingDrone.droneOSName} is currently in the air. Dispatching another drone could create safety conflicts. Please wait for the drone to land or manually override this alert.`,
+      );
+      neutraliseAlert(alert.id, "auto_skipped:drone_flying");
+      return;
+    }
+
+    const availableDrone = dronesInArea.find((d) => {
+      if (activeMissions[d.id]) return false;
       return true;
     });
 
@@ -298,15 +332,17 @@ export function MapView() {
       showAutoDispatchBlockedModal(
         sensor,
         alert,
-        "No drones are currently available in this area. All drones are either flying or already assigned to another mission.",
+        "No drones are currently available in this area. All drones are assigned to other missions. Please manually override when ready.",
       );
       neutraliseAlert(alert.id, "auto_skipped:no_available_drone");
       return;
     }
 
     console.log("[AutoDispatch] Alert received", alert.id);
-    console.log("[AutoDispatch] Sensors:", sensorsRef.current.length);
-    console.log("[AutoDispatch] Drones:", dronesRef.current.length);
+    console.log(
+      "[AutoDispatch] Auto-dispatching drone:",
+      availableDrone.droneOSName,
+    );
     startAutoDispatchCountdown(sensor, alert, availableDrone.id);
   };
 
@@ -657,11 +693,9 @@ export function MapView() {
       return;
     }
 
-    // Check if drone is busy (on mission OR actively flying)
     if (isDroneBusy(selectedDroneId)) {
       const telemetry = droneTelemetryData[selectedDroneId];
       const isFlying = telemetry?.status === "on_air";
-      const onMission = activeMissions[selectedDroneId];
 
       toast({
         title: "Drone unavailable",
@@ -772,6 +806,20 @@ export function MapView() {
         clearInterval(autoDispatchTimerRef.current!);
         autoDispatchTimerRef.current = null;
         setAutoDispatchCountdown(null);
+
+        // Safety check: verify drone is not flying before dispatch
+        const droneStatus = droneTelemetryData[droneId];
+        if (droneStatus?.status === "on_air") {
+          console.log("[v0] Auto-dispatch blocked: Drone is still flying");
+          toast({
+            title: "Auto-dispatch cancelled",
+            description:
+              "Drone is currently in the air. Cancelled to prevent safety conflicts.",
+            variant: "destructive",
+          });
+          closeModal();
+          return;
+        }
 
         try {
           setActionLoading(true);
@@ -1190,7 +1238,8 @@ export function MapView() {
                 actionLoading ||
                 !selectedSensor ||
                 !selectedDroneId ||
-                drones.length === 0
+                drones.length === 0 ||
+                (selectedDroneId && isDroneBusy(selectedDroneId))
               }
               onClick={handleSendDrone}
             >
