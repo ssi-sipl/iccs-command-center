@@ -78,7 +78,7 @@ const MapContainer = dynamic(
     const { MapContainer } = await import("react-leaflet");
     return MapContainer;
   },
-  { ssr: false }
+  { ssr: false },
 );
 
 const TileLayer = dynamic(
@@ -86,7 +86,7 @@ const TileLayer = dynamic(
     const { TileLayer } = await import("react-leaflet");
     return TileLayer;
   },
-  { ssr: false }
+  { ssr: false },
 );
 
 const Marker = dynamic(
@@ -94,7 +94,7 @@ const Marker = dynamic(
     const { Marker } = await import("react-leaflet");
     return Marker;
   },
-  { ssr: false }
+  { ssr: false },
 );
 
 const Tooltip = dynamic(
@@ -102,7 +102,7 @@ const Tooltip = dynamic(
     const { Tooltip } = await import("react-leaflet");
     return Tooltip;
   },
-  { ssr: false }
+  { ssr: false },
 );
 
 const Polyline = dynamic(
@@ -110,7 +110,7 @@ const Polyline = dynamic(
     const { Polyline } = await import("react-leaflet");
     return Polyline;
   },
-  { ssr: false }
+  { ssr: false },
 );
 
 function getSensorBaseColor(sensorType: string): string {
@@ -176,7 +176,7 @@ function getSensorBaseColor(sensorType: string): string {
 // map-renderer.tsx - Updated getDroneIcon function
 function getDroneIcon(
   isOnline: boolean,
-  status: "on_air" | "ground" | "reached" | null
+  status: "on_air" | "ground" | "reached" | null,
 ): DivIcon {
   const leaflet = require("leaflet");
   const size = 26;
@@ -271,13 +271,16 @@ function getDroneIcon(
   });
 }
 
+// Zoom scale config
+const ZOOM_SCALE_CONFIG = {
+  minZoom: 10,
+  maxZoom: 40,
+  minSize: 18,
+  maxSize: 48,
+};
+
 function calculateMarkerSize(zoom: number): number {
-  const { minZoom, maxZoom, minSize, maxSize } = {
-    minZoom: 10,
-    maxZoom: 40,
-    minSize: 18,
-    maxSize: 48,
-  };
+  const { minZoom, maxZoom, minSize, maxSize } = ZOOM_SCALE_CONFIG;
   const normalizedZoom = Math.max(minZoom, Math.min(maxZoom, zoom));
   const progress = (normalizedZoom - minZoom) / (maxZoom - minZoom);
   return Math.round(minSize + (maxSize - minSize) * progress);
@@ -287,7 +290,7 @@ function offsetLatLng(
   lat: number,
   lng: number,
   metersNorth: number,
-  metersEast: number
+  metersEast: number,
 ): [number, number] {
   const dLat = metersNorth / 111111;
   const dLng = metersEast / (111111 * Math.cos((lat * Math.PI) / 180));
@@ -298,7 +301,7 @@ function haversineMeters(
   lat1: number,
   lon1: number,
   lat2: number,
-  lon2: number
+  lon2: number,
 ) {
   const R = 6371000;
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -316,7 +319,7 @@ function haversineMeters(
 // Function to detect if any drone is on a sensor
 function getDroneOnSensor(
   sensor: Sensor,
-  dronePositions: Record<string, any>
+  dronePositions: Record<string, any>,
 ): string | null {
   for (const [droneId, pos] of Object.entries(dronePositions)) {
     if (!pos) continue;
@@ -324,7 +327,7 @@ function getDroneOnSensor(
       sensor.latitude,
       sensor.longitude,
       pos.lat,
-      pos.lng
+      pos.lng,
     );
     if (distance <= REACH_RADIUS_METERS) {
       return droneId;
@@ -337,7 +340,7 @@ function getSensorIcon(
   sensor: Sensor,
   hasActiveAlert: boolean,
   zoom: number,
-  droneOnSensor: boolean
+  droneOnSensor: boolean,
 ): DivIcon {
   const leaflet = require("leaflet");
 
@@ -427,6 +430,36 @@ function MapRenderer({
     (mapConfig.north + mapConfig.south) / 2,
     (mapConfig.east + mapConfig.west) / 2,
   ];
+
+  // Memoize icon generation to prevent unnecessary HTML string regeneration
+  const droneIconCache = useRef<Map<string, DivIcon>>(new Map());
+  const sensorIconCache = useRef<Map<string, DivIcon>>(new Map());
+
+  const getMemoizedDroneIcon = (
+    isOnline: boolean,
+    status: "on_air" | "ground" | "reached" | null,
+  ) => {
+    const key = `${isOnline}-${status}`;
+    if (!droneIconCache.current.has(key)) {
+      droneIconCache.current.set(key, getDroneIcon(isOnline, status));
+    }
+    return droneIconCache.current.get(key)!;
+  };
+
+  const getMemoizedSensorIcon = (
+    sensor: Sensor,
+    hasActiveAlert: boolean,
+    droneOnSensor: boolean,
+  ) => {
+    const key = `${sensor.id}-${hasActiveAlert}-${currentZoom}-${droneOnSensor}`;
+    if (!sensorIconCache.current.has(key)) {
+      sensorIconCache.current.set(
+        key,
+        getSensorIcon(sensor, hasActiveAlert, currentZoom, droneOnSensor),
+      );
+    }
+    return sensorIconCache.current.get(key)!;
+  };
 
   useEffect(() => {
     const map = leafletMapRef.current;
@@ -522,11 +555,10 @@ function MapRenderer({
             <Marker
               key={`${sensor.id}-${markerUpdateKey}`}
               position={[sensor.latitude, sensor.longitude]}
-              icon={getSensorIcon(
+              icon={getMemoizedSensorIcon(
                 sensor,
                 hasActiveAlert,
-                currentZoom,
-                droneOnSensor
+                droneOnSensor,
               )}
               eventHandlers={{
                 click: () => onSensorClick(sensor),
@@ -612,7 +644,7 @@ function MapRenderer({
             <Marker
               key={`drone-${drone.id}-${markerUpdateKey}`}
               position={markerPos}
-              icon={getDroneIcon(isOnline, currentDroneStatus)}
+              icon={getMemoizedDroneIcon(isOnline, currentDroneStatus)}
               eventHandlers={{
                 click: (e) => {
                   e.originalEvent?.stopPropagation();
