@@ -654,7 +654,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
         </section>
 
         {/* Alert Section */}
-        <section className="flex-1 flex flex-col">
+        <section className="flex-1 flex flex-col min-h-0">
           <div className="sticky top-0 z-10 mb-2 flex items-center justify-between gap-2 bg-[#1a1a1a] pb-2">
             <h2 className="text-sm font-semibold tracking-wide text-white">
               ALERT
