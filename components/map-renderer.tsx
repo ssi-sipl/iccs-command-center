@@ -500,7 +500,7 @@ function MapRenderer({
   return (
     <div className="relative h-full w-full">
       {/* Socket status indicator */}
-      <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2 rounded-md bg-black/70 px-3 py-1.5 text-xs backdrop-blur-sm">
+      {/* <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2 rounded-md bg-black/70 px-3 py-1.5 text-xs backdrop-blur-sm">
         <div
           className={`h-2 w-2 rounded-full ${
             socketConnected ? "bg-green-500" : "bg-gray-500"
@@ -509,7 +509,7 @@ function MapRenderer({
         <span className="text-white">
           {socketConnected ? "Live" : "Offline"}
         </span>
-      </div>
+      </div> */}
 
       {/* <div className="absolute top-4 left-4 z-[1000] rounded-md bg-black/70 px-3 py-1.5 text-xs text-gray-300 backdrop-blur-sm">
         Zoom Level: {currentZoom}

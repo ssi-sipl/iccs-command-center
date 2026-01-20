@@ -82,6 +82,8 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   const [patrolConfirmOpen, setPatrolConfirmOpen] = useState(false);
   const [patrolLoading, setPatrolLoading] = useState(false);
 
+  const [videoLoading, setVideoLoading] = useState(false);
+
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -89,7 +91,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     // Create audio element for alert sound
     // You can use a different sound URL or host your own sound file
     alertSoundRef.current = new Audio(
-      "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+      "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
     );
     alertSoundRef.current.volume = 0.7; // Adjust volume (0.0 to 1.0)
 
@@ -117,7 +119,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
       } catch (err: any) {
         console.error("Error fetching alarms:", err);
         setAlarmsError(
-          err instanceof Error ? err.message : "Failed to fetch alarms"
+          err instanceof Error ? err.message : "Failed to fetch alarms",
         );
         setAlarmsList([]);
       } finally {
@@ -144,7 +146,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
       } catch (err: any) {
         console.error("Error fetching drones:", err);
         setDronesError(
-          err instanceof Error ? err.message : "Failed to fetch drones"
+          err instanceof Error ? err.message : "Failed to fetch drones",
         );
         setDronesList([]);
       } finally {
@@ -220,7 +222,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
       } catch (err: any) {
         console.error("Error fetching active alerts:", err);
         setAlertsError2(
-          err instanceof Error ? err.message : "Failed to fetch active alerts"
+          err instanceof Error ? err.message : "Failed to fetch active alerts",
         );
         setAlerts([]);
       } finally {
@@ -270,10 +272,10 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
       setAlerts((prev) => prev.filter((a) => a.id !== payload.id));
 
       setSelectedAlert((current) =>
-        current && current.id === payload.id ? null : current
+        current && current.id === payload.id ? null : current,
       );
       setIsModalOpen((open) =>
-        selectedAlert && selectedAlert.id === payload.id ? false : open
+        selectedAlert && selectedAlert.id === payload.id ? false : open,
       );
     });
 
@@ -311,7 +313,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
         console.error("Error fetching drones:", err);
         setDrones([]);
         setDronesError2(
-          err instanceof Error ? err.message : "Failed to fetch drones"
+          err instanceof Error ? err.message : "Failed to fetch drones",
         );
       } finally {
         setDronesLoading2(false);
@@ -342,50 +344,46 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   };
 
   const handleOpenVideoFeed = async () => {
-    if (!selectedAlert || !selectedAlert.sensor) return;
+    if (!selectedAlert?.sensor?.id) {
+      toast({
+        title: "Sensor data missing",
+        description: "Cannot launch video feed for this alert.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    if (!("rtspUrl" in selectedAlert.sensor) || !selectedAlert.sensor.rtspUrl) {
+    if (!selectedAlert.sensor.rtspUrl) {
       toast({
         title: "No RTSP configured",
-        description: "This sensor has no RTSP URL configured in the backend.",
+        description: "This sensor has no RTSP URL configured.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      setActionLoading(true);
-      const res = await openRtspBySensor(selectedAlert?.sensor?.id);
+      setVideoLoading(true);
 
-      if (res && res.success) {
-        const extra = res.data
-          ? ` ${res.data.pid ? `(pid ${res.data.pid})` : ""}`
-          : "";
+      const res = await openRtspBySensor(selectedAlert.sensor.id);
+
+      if (res?.success) {
         toast({
           title: "Video Feed launched",
-          description:
-            res.message || `Launched video on server.${extra}`.trim(),
+          description: res.message || "RTSP stream launched successfully",
         });
       } else {
-        const msg =
-          (res && (res.error || (res.details && String(res.details)))) ||
-          "Server could not launch the video feed.";
-        toast({
-          title: "Failed to launch video",
-          description: msg,
-          variant: "destructive",
-        });
+        throw new Error(res?.error || "Failed to launch video feed");
       }
     } catch (err) {
-      console.error("Error opening RTSP:", err);
       toast({
-        title: "Network / Server error",
+        title: "Video launch failed",
         description:
-          err instanceof Error ? err.message : "Unable to reach backend.",
+          err instanceof Error ? err.message : "Unable to reach backend",
         variant: "destructive",
       });
     } finally {
-      setActionLoading(false);
+      setVideoLoading(false);
     }
   };
 
@@ -458,7 +456,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     try {
       const res = await neutraliseAlert(
         selectedAlert.id,
-        "Manual neutralisation"
+        "Manual neutralisation",
       );
 
       if (!res.success) {
@@ -579,7 +577,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
 
         <section className="mb-6">
           <h2 className="mb-3 text-sm font-semibold tracking-wide text-white">
-            DRONE
+            PATROL
           </h2>
 
           {dronesLoading && (
@@ -628,14 +626,14 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                           <p className="text-xs text-gray-500 truncate ">
                             {drone.droneType}
                           </p>
-                          <p className="text-xs font-medium text-yellow-800 truncate bg-yellow-400 px-2 rounded-full justify-center items-center">
+                          {/* <p className="text-xs font-medium text-yellow-800 truncate bg-yellow-400 px-2 rounded-full justify-center items-center">
                             {drone?.area?.name || "Unassigned"}
-                          </p>
+                          </p> */}
                         </div>
                       </div>
                     </div>
                     <Badge className="shrink-0 bg-green-600 hover:bg-green-700 text-xs text-white">
-                      Active
+                      {drone?.area?.name || "Unassigned"}
                     </Badge>
                   </div>
                 </div>
@@ -649,15 +647,15 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
             disabled={!selectedPatrolDroneId}
             onClick={() => setPatrolConfirmOpen(true)}
           >
-            PATROL
+            Send Drone
           </Button>
 
           <div className="mt-4 border-b border-[#333]" />
         </section>
 
         {/* Alert Section */}
-        <section className="flex-1 overflow-y-auto">
-          <div className="mb-2 flex items-center justify-between gap-2">
+        <section className="flex-1 flex flex-col">
+          <div className="sticky top-0 z-10 mb-2 flex items-center justify-between gap-2 bg-[#1a1a1a] pb-2">
             <h2 className="text-sm font-semibold tracking-wide text-white">
               ALERT
             </h2>
@@ -675,112 +673,114 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                 </Button>
               )}
 
-              <span
+              {/* <span
                 className={`text-[10px] ${
                   socketConnected ? "text-green-500" : "text-gray-500"
                 }`}
               >
                 {socketConnected ? "live" : "offline"}
-              </span>
+              </span> */}
             </div>
           </div>
 
-          {alertsLoading2 && (
-            <div className="flex items-center gap-2 text-sm text-gray-400">
-              <Loader2 className="h-4 w-4 animate-spin text-[#4A9FD4]" />
-              <span>Loading active alerts...</span>
-            </div>
-          )}
+          <div className="flex-1 overflow-y-auto pr-1">
+            {alertsLoading2 && (
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Loader2 className="h-4 w-4 animate-spin text-[#4A9FD4]" />
+                <span>Loading active alerts...</span>
+              </div>
+            )}
 
-          {!alertsLoading2 && alertsError2 && (
-            <p className="text-sm text-red-500">
-              Failed to load alerts: {alertsError2}
-            </p>
-          )}
+            {!alertsLoading2 && alertsError2 && (
+              <p className="text-sm text-red-500">
+                Failed to load alerts: {alertsError2}
+              </p>
+            )}
 
-          {!alertsLoading2 && !alertsError2 && alerts.length === 0 && (
-            <p className="text-sm text-gray-500">No Active Alerts Found...</p>
-          )}
+            {!alertsLoading2 && !alertsError2 && alerts.length === 0 && (
+              <p className="text-sm text-gray-500">No Active Alerts Found...</p>
+            )}
 
-          {!alertsLoading2 && !alertsError2 && alerts.length > 0 && (
-            <div className="space-y-3">
-              {alerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className="relative w-full rounded-lg border border-[#333] bg-[#222] p-3 text-left text-sm hover:border-[#4A9FD4] hover:bg-[#252525]"
-                >
-                  {/* ❌ Neutralise single alert */}
-                  <button
-                    onClick={async (e) => {
-                      e.stopPropagation();
+            {!alertsLoading2 && !alertsError2 && alerts.length > 0 && (
+              <div className="space-y-3">
+                {alerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className="relative w-full rounded-lg border border-[#333] bg-[#222] p-3 text-left text-sm hover:border-[#4A9FD4] hover:bg-[#252525]"
+                  >
+                    {/* ❌ Neutralise single alert */}
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
 
-                      try {
-                        const res = await neutraliseAlert(
-                          alert.id,
-                          "manual_clear"
-                        );
-
-                        if (!res.success) {
-                          throw new Error(
-                            res.error || "Failed to neutralise alert"
+                        try {
+                          const res = await neutraliseAlert(
+                            alert.id,
+                            "manual_clear",
                           );
+
+                          if (!res.success) {
+                            throw new Error(
+                              res.error || "Failed to neutralise alert",
+                            );
+                          }
+
+                          toast({
+                            title: "Alert neutralised",
+                            description: "Alert cleared successfully",
+                          });
+
+                          setAlerts((prev) =>
+                            prev.filter((a) => a.id !== alert.id),
+                          );
+                        } catch (err) {
+                          toast({
+                            title: "Error",
+                            description:
+                              err instanceof Error
+                                ? err.message
+                                : "Failed to neutralise alert",
+                            variant: "destructive",
+                          });
                         }
+                      }}
+                      className="absolute right-2 top-2 text-gray-400 hover:text-red-500 text-xs"
+                      title="Neutralise alert"
+                    >
+                      ✕
+                    </button>
 
-                        toast({
-                          title: "Alert neutralised",
-                          description: "Alert cleared successfully",
-                        });
-
-                        setAlerts((prev) =>
-                          prev.filter((a) => a.id !== alert.id)
-                        );
-                      } catch (err) {
-                        toast({
-                          title: "Error",
-                          description:
-                            err instanceof Error
-                              ? err.message
-                              : "Failed to neutralise alert",
-                          variant: "destructive",
-                        });
-                      }
-                    }}
-                    className="absolute right-2 top-2 text-gray-400 hover:text-red-500 text-xs"
-                    title="Neutralise alert"
-                  >
-                    ✕
-                  </button>
-
-                  {/* Main clickable area */}
-                  <button
-                    onClick={() => openAlertModal(alert)}
-                    className="w-full text-left"
-                  >
-                    <div className="mb-2 flex items-start gap-2">
-                      <AlertTriangle className="mt-0.5 h-4 w-4 text-orange-500" />
-                      <div className="flex-1">
-                        <p className="font-medium text-white line-clamp-2">
-                          {alert.message || "Alert"}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          Sensor:{" "}
-                          <span className="font-mono text-[#4A9FD4]">
-                            {alert.sensor?.name ||
-                              alert.sensorId ||
-                              "Unknown Sensor"}
-                          </span>
-                        </p>
+                    {/* Main clickable area */}
+                    <button
+                      onClick={() => openAlertModal(alert)}
+                      className="w-full text-left"
+                    >
+                      <div className="mb-2 flex items-start gap-2">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 text-orange-500" />
+                        <div className="flex-1">
+                          <p className="font-medium text-white line-clamp-2">
+                            {alert.message || "Alert"}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Sensor:{" "}
+                            <span className="font-mono text-[#4A9FD4]">
+                              {alert.sensor?.name ||
+                                alert.sensorId ||
+                                "Unknown Sensor"}
+                            </span>
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-[11px] text-gray-500">
-                      {alert.time}
-                      {/* {new Date(alert.createdAt).toLocaleString()} */}
-                    </p>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                      <p className="text-[11px] text-gray-500">
+                        {alert.time}
+                        {/* {new Date(alert.createdAt).toLocaleString()} */}
+                      </p>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       </aside>
 
@@ -854,7 +854,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                       {typeof selectedAlert.sensor?.latitude === "number" &&
                       typeof selectedAlert.sensor?.longitude === "number"
                         ? `${selectedAlert.sensor.latitude.toFixed(
-                            5
+                            5,
                           )}, ${selectedAlert.sensor.longitude.toFixed(5)}`
                         : "N/A"}
                     </span>
@@ -940,10 +940,11 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
               <Button
                 type="button"
                 variant="outline"
-                className="border-[#444] bg-transparent text-xs text-gray-200 hover:bg-[#333]"
+                disabled={videoLoading}
                 onClick={handleOpenVideoFeed}
+                className="border-[#444] bg-transparent text-xs text-gray-200 hover:bg-[#333]"
               >
-                {actionLoading ? (
+                {videoLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Launching...
@@ -952,6 +953,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                   "Video Feed"
                 )}
               </Button>
+
               <Button
                 type="button"
                 variant="outline"
