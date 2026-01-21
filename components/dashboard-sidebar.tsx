@@ -198,13 +198,13 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     socket.on("alert_resolved", (payload: AlertResolvedPayload) => {
       setAlerts((prev) => prev.filter((a) => a.id !== payload.id));
 
-      // close modal safely if the active alert was resolved
-      setSelectedAlert((current) =>
-        current?.id === payload.id ? null : current,
-      );
-      setIsModalOpen((open) =>
-        selectedAlert?.id === payload.id ? false : open,
-      );
+      setSelectedAlert((current) => {
+        if (current?.id === payload.id) {
+          setIsModalOpen(false);
+          return null;
+        }
+        return current;
+      });
     });
 
     return () => {
@@ -288,9 +288,9 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     }
 
     try {
-      setVideoLoading(true);
-
       const res = await openRtspBySensor(selectedAlert.sensor.id);
+
+      setVideoLoading(true);
 
       if (res?.success) {
         toast({
@@ -848,7 +848,11 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
               <Button
                 type="button"
                 variant="outline"
-                disabled={videoLoading}
+                disabled={
+                  videoLoading ||
+                  !selectedAlert?.sensor?.id ||
+                  !selectedAlert?.sensor?.rtspUrl
+                }
                 onClick={handleOpenVideoFeed}
                 className="border-[#444] bg-transparent text-xs text-gray-200 hover:bg-[#333]"
               >
