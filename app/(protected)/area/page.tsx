@@ -402,32 +402,32 @@ export default function AreaListPage() {
             </p>
           </div>
         )}
+        {!loading && pagination && pagination.totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-between">
+            <Button
+              variant="outline"
+              disabled={!pagination.hasPrevPage}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="border-[#333] bg-transparent text-white hover:bg-[#333]"
+            >
+              Previous
+            </Button>
+
+            <p className="text-sm text-gray-400">
+              Page {page} of {pagination.totalPages}
+            </p>
+
+            <Button
+              variant="outline"
+              disabled={!pagination.hasNextPage}
+              onClick={() => setPage((p) => p + 1)}
+              className="border-[#333] bg-transparent text-white hover:bg-[#333]"
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
-      {!loading && pagination && pagination.totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between">
-          <Button
-            variant="outline"
-            disabled={!pagination.hasPrevPage}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="border-[#333] bg-transparent text-white hover:bg-[#333]"
-          >
-            Previous
-          </Button>
-
-          <p className="text-sm text-gray-400">
-            Page {page} of {pagination.totalPages}
-          </p>
-
-          <Button
-            variant="outline"
-            disabled={!pagination.hasNextPage}
-            onClick={() => setPage((p) => p + 1)}
-            className="border-[#333] bg-transparent text-white hover:bg-[#333]"
-          >
-            Next
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

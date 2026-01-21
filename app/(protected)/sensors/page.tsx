@@ -334,7 +334,7 @@ export default function SensorsPage() {
                     <TableCell>
                       <Badge
                         className={
-                          sensor?.addedBy.toLowerCase()
+                          sensor?.addedBy
                             ? "bg-yellow-400 text-black font-medium"
                             : "bg-red-600/20 text-red-400 hover:bg-red-600/30"
                         }
@@ -588,32 +588,32 @@ export default function SensorsPage() {
             </Link>
           </div>
         )}
+        {!loading && pagination && pagination.totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-between">
+            <Button
+              variant="outline"
+              disabled={!pagination.hasPrevPage}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="border-[#333] bg-transparent text-white hover:bg-[#333]"
+            >
+              Previous
+            </Button>
+
+            <p className="text-sm text-gray-400">
+              Page {page} of {pagination.totalPages}
+            </p>
+
+            <Button
+              variant="outline"
+              disabled={!pagination.hasNextPage}
+              onClick={() => setPage((p) => p + 1)}
+              className="border-[#333] bg-transparent text-white hover:bg-[#333]"
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
-      {!loading && pagination && pagination.totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between">
-          <Button
-            variant="outline"
-            disabled={!pagination.hasPrevPage}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="border-[#333] bg-transparent text-white hover:bg-[#333]"
-          >
-            Previous
-          </Button>
-
-          <p className="text-sm text-gray-400">
-            Page {page} of {pagination.totalPages}
-          </p>
-
-          <Button
-            variant="outline"
-            disabled={!pagination.hasNextPage}
-            onClick={() => setPage((p) => p + 1)}
-            className="border-[#333] bg-transparent text-white hover:bg-[#333]"
-          >
-            Next
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

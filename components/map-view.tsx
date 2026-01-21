@@ -179,7 +179,12 @@ export function MapView() {
     const loadSensors = async () => {
       setLoadingSensors(true);
       try {
-        const res = await getAllSensors({ include: true });
+        const res = await getAllSensors({
+          include: true,
+          page: 1,
+          limit: 10000, // or higher than max sensors you’ll ever have
+        });
+
         if (res.success && res.data) {
           setSensors(res.data);
         } else {
