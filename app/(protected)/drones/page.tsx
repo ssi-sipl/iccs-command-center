@@ -41,6 +41,15 @@ import { getAllDroneOS, deleteDroneOS, type DroneOS } from "@/lib/api/droneos";
 import { useToast } from "@/hooks/use-toast";
 
 export default function DronesListPage() {
+  const [page, setPage] = useState(1);
+  const [limit] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalPages: number;
+    totalCount: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  } | null>(null);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [drones, setDrones] = useState<DroneOS[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,15 +60,25 @@ export default function DronesListPage() {
   // Fetch drones on component mount
   useEffect(() => {
     fetchDrones();
-  }, []);
+  }, [page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
 
   const fetchDrones = async () => {
     setLoading(true);
     try {
-      const response = await getAllDroneOS({ include: true });
-      if (response.success && response.data) {
-        console.log("Fetched drones:", response.data);
+      const response = await getAllDroneOS({
+        include: true,
+        page,
+        limit,
+        search: searchTerm || undefined,
+      });
+
+      if (response.success && response.data && response.pagination) {
         setDrones(response.data);
+        setPagination(response.pagination);
       } else {
         toast({
           title: "Error",
@@ -67,7 +86,7 @@ export default function DronesListPage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to fetch drones",
@@ -77,13 +96,6 @@ export default function DronesListPage() {
       setLoading(false);
     }
   };
-
-  const filteredDrones = drones.filter(
-    (drone) =>
-      drone.droneOSName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      drone.droneType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      drone.gpsName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleDelete = async (id: string, droneName: string) => {
     setDeleting(id);
@@ -165,11 +177,18 @@ export default function DronesListPage() {
               placeholder="Search drones..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  setPage(1);
+                  fetchDrones();
+                }
+              }}
               className="border-[#333] bg-[#222] pl-10 text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
             />
           </div>
           <p className="text-sm text-gray-400">
-            Showing {filteredDrones.length} of {drones.length} drones
+            Showing {drones.length} of {pagination?.totalCount ?? 0} drones
           </p>
         </div>
 
@@ -212,7 +231,7 @@ export default function DronesListPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredDrones.map((drone) => (
+                {drones.map((drone) => (
                   <TableRow
                     key={drone.id}
                     className="border-[#333] hover:bg-[#2a2a2a]"
@@ -331,7 +350,7 @@ export default function DronesListPage() {
         {/* Cards - Mobile/Tablet */}
         {!loading && (
           <div className="flex flex-col gap-4 lg:hidden">
-            {filteredDrones.map((drone) => (
+            {drones.map((drone) => (
               <div
                 key={drone.id}
                 className="rounded-lg border border-[#333] bg-[#222] p-4"
@@ -426,7 +445,7 @@ export default function DronesListPage() {
           </div>
         )}
 
-        {!loading && filteredDrones.length === 0 && (
+        {!loading && drones.length === 0 && (
           <div className="flex flex-col items-center justify-center rounded-lg border border-[#333] bg-[#222] py-12">
             <Plane className="mb-4 h-12 w-12 text-gray-600" />
             <p className="text-lg font-medium text-gray-400">No drones found</p>
@@ -436,6 +455,31 @@ export default function DronesListPage() {
           </div>
         )}
       </div>
+      {!loading && pagination && pagination.totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between">
+          <Button
+            variant="outline"
+            disabled={!pagination.hasPrevPage}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="border-[#333] bg-transparent text-white hover:bg-[#333]"
+          >
+            Previous
+          </Button>
+
+          <p className="text-sm text-gray-400">
+            Page {page} of {pagination.totalPages}
+          </p>
+
+          <Button
+            variant="outline"
+            disabled={!pagination.hasNextPage}
+            onClick={() => setPage((p) => p + 1)}
+            className="border-[#333] bg-transparent text-white hover:bg-[#333]"
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

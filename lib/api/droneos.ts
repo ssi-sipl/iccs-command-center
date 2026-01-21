@@ -46,15 +46,39 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface PaginatedApiResponse<T> {
+  success: boolean;
+  data?: T;
+  pagination?: PaginationMeta;
+  error?: string;
+  message?: string;
+}
+
 // Get all drone OS settings
 export async function getAllDroneOS(params?: {
   areaId?: string;
   include?: boolean;
-}): Promise<ApiResponse<DroneOS[]>> {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<PaginatedApiResponse<DroneOS[]>> {
   try {
     const queryParams = new URLSearchParams();
+
     if (params?.areaId) queryParams.append("areaId", params.areaId);
     if (params?.include) queryParams.append("include", "true");
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.search) queryParams.append("search", params.search);
 
     const url = `${API_BASE_URL}/api/droneos${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
@@ -87,10 +111,43 @@ export async function getAllDroneOS(params?: {
   }
 }
 
+export async function getDroneStats(): Promise<
+  ApiResponse<{
+    total: number;
+    assigned: number;
+    unassigned: number;
+  }>
+> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/droneos/stats`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch drone stats");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching drone stats:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to fetch drone stats",
+    };
+  }
+}
+
 // Get single drone OS by ID
 export async function getDroneOSById(
   id: string,
-  includeArea = false
+  includeArea = false,
 ): Promise<ApiResponse<DroneOS>> {
   try {
     const url = `${API_BASE_URL}/api/droneos/${id}${
@@ -125,7 +182,7 @@ export async function getDroneOSById(
 // Get drones by area ID
 export async function getDronesByArea(
   areaId: string,
-  includeArea = false
+  includeArea = false,
 ): Promise<ApiResponse<DroneOS[]>> {
   try {
     const url = `${API_BASE_URL}/api/droneos/area/${areaId}${
@@ -233,7 +290,7 @@ export async function updateDroneOS(
     latitude: number | null;
     longitude: number | null;
     areaId: string | null;
-  }>
+  }>,
 ): Promise<ApiResponse<DroneOS>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/droneos/${id}`, {
