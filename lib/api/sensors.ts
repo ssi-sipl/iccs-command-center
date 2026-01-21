@@ -30,23 +30,56 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface PaginatedApiResponse<T> {
+  success: boolean;
+  data?: T;
+  pagination?: PaginationMeta;
+  error?: string;
+  message?: string;
+}
+
+export interface SensorStats {
+  total: number;
+  active: number;
+  inactive: number;
+  warning: number;
+}
+
 // Get all sensors
 export async function getAllSensors(params?: {
   status?: string;
   areaId?: string;
   sensorType?: string;
   include?: boolean;
-}): Promise<ApiResponse<Sensor[]>> {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<PaginatedApiResponse<Sensor[]>> {
   try {
     const queryParams = new URLSearchParams();
+
     if (params?.status) queryParams.append("status", params.status);
     if (params?.areaId) queryParams.append("areaId", params.areaId);
     if (params?.sensorType) queryParams.append("sensorType", params.sensorType);
     if (params?.include) queryParams.append("include", "true");
 
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.search) queryParams.append("search", params.search);
+
     const url = `${API_BASE_URL}/api/sensors${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
+
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -71,10 +104,33 @@ export async function getAllSensors(params?: {
   }
 }
 
+export async function getSensorStats(): Promise<ApiResponse<SensorStats>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/sensors/stats`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch sensor stats");
+    }
+
+    return await response.json();
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch stats",
+    };
+  }
+}
+
 // Get single sensor by ID
 export async function getSensorById(
   id: string,
-  includeRelations = false
+  includeRelations = false,
 ): Promise<ApiResponse<Sensor>> {
   try {
     const url = `${API_BASE_URL}/api/sensors/${id}${
@@ -106,7 +162,7 @@ export async function getSensorById(
 
 // Get sensors by area ID
 export async function getSensorsByArea(
-  areaId: string
+  areaId: string,
 ): Promise<ApiResponse<Sensor[]>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/sensors/area/${areaId}`, {
@@ -192,7 +248,7 @@ export async function updateSensor(
     activeShuruMode: string;
     areaId: string;
     alarmId: string;
-  }>
+  }>,
 ): Promise<ApiResponse<Sensor>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/sensors/${id}`, {

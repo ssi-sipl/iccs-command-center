@@ -40,7 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function AreaListPage() {
   const [page, setPage] = useState(1);
-  const [limit] = useState(1);
+  const [limit] = useState(10);
   const [pagination, setPagination] = useState<{
     totalPages: number;
     totalCount: number;

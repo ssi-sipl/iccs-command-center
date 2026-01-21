@@ -40,27 +40,69 @@ import {
   Loader2,
   ExternalLink,
 } from "lucide-react";
-import { getAllSensors, deleteSensor, type Sensor } from "@/lib/api/sensors";
+import {
+  getAllSensors,
+  deleteSensor,
+  type Sensor,
+  getSensorStats,
+} from "@/lib/api/sensors";
 import { useToast } from "@/hooks/use-toast";
 
 export default function SensorsPage() {
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [pagination, setPagination] = useState<{
+    totalPages: number;
+    totalCount: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  } | null>(null);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const { toast } = useToast();
+  const [stats, setStats] = useState<{
+    total: number;
+    active: number;
+    inactive: number;
+    warning: number;
+  } | null>(null);
+
+  useEffect(() => {
+    fetchSensorStats();
+  }, []);
+
+  const fetchSensorStats = async () => {
+    const response = await getSensorStats();
+    if (response.success && response.data) {
+      setStats(response.data);
+    }
+  };
 
   useEffect(() => {
     fetchSensors();
-  }, []);
+  }, [page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
 
   const fetchSensors = async () => {
     setLoading(true);
     try {
-      const response = await getAllSensors({ include: true });
-      if (response.success && response.data) {
+      const response = await getAllSensors({
+        include: true,
+        page,
+        limit,
+        search: searchQuery || undefined,
+      });
+
+      if (response.success && response.data && response.pagination) {
         setSensors(response.data);
+        setPagination(response.pagination);
       } else {
         toast({
           title: "Error",
@@ -68,7 +110,7 @@ export default function SensorsPage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to fetch sensors",
@@ -78,13 +120,6 @@ export default function SensorsPage() {
       setLoading(false);
     }
   };
-
-  const filteredSensors = sensors.filter(
-    (sensor) =>
-      sensor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sensor.sensorId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sensor.sensorType.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const getStatusBadge = (status: string) => {
     const normalizedStatus = status.toLowerCase();
@@ -137,13 +172,13 @@ export default function SensorsPage() {
   // Stats calculations
   const totalSensors = sensors.length;
   const onlineSensors = sensors.filter(
-    (s) => s.status.toLowerCase() === "active"
+    (s) => s.status.toLowerCase() === "active",
   ).length;
   const warningSensors = sensors.filter(
-    (s) => s.status.toLowerCase() === "warning"
+    (s) => s.status.toLowerCase() === "warning",
   ).length;
   const offlineSensors = sensors.filter(
-    (s) => s.status.toLowerCase() === "inactive"
+    (s) => s.status.toLowerCase() === "inactive",
   ).length;
 
   return (
@@ -169,15 +204,22 @@ export default function SensorsPage() {
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
-            placeholder="Search sensors by name, ID, or type..."
+            placeholder="Search sensors by name, ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                setPage(1);
+                fetchSensors();
+              }
+            }}
             className="border-[#333] bg-[#222] pl-10 text-white placeholder:text-gray-500"
           />
         </div>
 
         {/* Stats Cards */}
-        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid gap-4 sm:grid-cols-3 lg:grid-cols-3">
           <Card className="border-[#333] bg-[#222]">
             <CardContent className="flex items-center gap-4 p-4">
               <div className="rounded-full bg-blue-500/20 p-3">
@@ -185,7 +227,9 @@ export default function SensorsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-400">Total Sensors</p>
-                <p className="text-2xl font-bold text-white">{totalSensors}</p>
+                <p className="text-2xl font-bold text-white">
+                  {stats?.total ?? 0}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -196,11 +240,13 @@ export default function SensorsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-400">Active</p>
-                <p className="text-2xl font-bold text-white">{onlineSensors}</p>
+                <p className="text-2xl font-bold text-white">
+                  {stats?.active ?? 0}
+                </p>
               </div>
             </CardContent>
           </Card>
-          <Card className="border-[#333] bg-[#222]">
+          {/* <Card className="border-[#333] bg-[#222]">
             <CardContent className="flex items-center gap-4 p-4">
               <div className="rounded-full bg-yellow-500/20 p-3">
                 <Battery className="h-6 w-6 text-yellow-500" />
@@ -208,11 +254,11 @@ export default function SensorsPage() {
               <div>
                 <p className="text-sm text-gray-400">Warning</p>
                 <p className="text-2xl font-bold text-white">
-                  {warningSensors}
+                  {stats?.warning ?? 0}
                 </p>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
           <Card className="border-[#333] bg-[#222]">
             <CardContent className="flex items-center gap-4 p-4">
               <div className="rounded-full bg-red-500/20 p-3">
@@ -221,7 +267,7 @@ export default function SensorsPage() {
               <div>
                 <p className="text-sm text-gray-400">Inactive</p>
                 <p className="text-2xl font-bold text-white">
-                  {offlineSensors}
+                  {stats?.inactive ?? 0}
                 </p>
               </div>
             </CardContent>
@@ -261,7 +307,7 @@ export default function SensorsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSensors.map((sensor) => (
+                {sensors.map((sensor) => (
                   <TableRow
                     key={sensor.id}
                     className="border-[#333] hover:bg-[#2a2a2a]"
@@ -395,7 +441,7 @@ export default function SensorsPage() {
         {/* Mobile Cards */}
         {!loading && (
           <div className="grid gap-4 lg:hidden">
-            {filteredSensors.map((sensor) => (
+            {sensors.map((sensor) => (
               <Card key={sensor.id} className="border-[#333] bg-[#222]">
                 <CardContent className="p-4">
                   <div className="mb-3 flex items-start justify-between">
@@ -531,7 +577,7 @@ export default function SensorsPage() {
           </div>
         )}
 
-        {!loading && filteredSensors.length === 0 && (
+        {!loading && sensors.length === 0 && (
           <div className="py-12 text-center">
             <Radio className="mx-auto h-12 w-12 text-gray-500" />
             <p className="mt-4 text-gray-400">No sensors found</p>
@@ -543,6 +589,31 @@ export default function SensorsPage() {
           </div>
         )}
       </div>
+      {!loading && pagination && pagination.totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between">
+          <Button
+            variant="outline"
+            disabled={!pagination.hasPrevPage}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="border-[#333] bg-transparent text-white hover:bg-[#333]"
+          >
+            Previous
+          </Button>
+
+          <p className="text-sm text-gray-400">
+            Page {page} of {pagination.totalPages}
+          </p>
+
+          <Button
+            variant="outline"
+            disabled={!pagination.hasNextPage}
+            onClick={() => setPage((p) => p + 1)}
+            className="border-[#333] bg-transparent text-white hover:bg-[#333]"
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
