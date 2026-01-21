@@ -71,6 +71,9 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [neutraliseAllConfirmOpen, setNeutraliseAllConfirmOpen] =
+    useState(false);
+
   // Drones for selected alert
   const [drones, setDrones] = useState<DroneOS[]>([]);
   const [dronesLoading2, setDronesLoading2] = useState(false);
@@ -514,37 +517,20 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   const handleNeutraliseAll = async () => {
     if (alerts.length === 0) return;
 
-    try {
-      setActionLoading(true);
+    const res = await neutraliseAllActiveAlerts("manual_clear");
 
-      const res = await neutraliseAllActiveAlerts("manual_clear");
-
-      if (!res.success) {
-        throw new Error(res.error || "Failed to neutralise all alerts");
-      }
-
-      toast({
-        title: "All alerts neutralised",
-        description: `${res.count ?? alerts.length} alerts cleared`,
-      });
-
-      // Clear alerts locally (socket will also sync)
-      setAlerts([]);
-      setSelectedAlert(null);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error("Error neutralising all alerts:", err);
-      toast({
-        title: "Error",
-        description:
-          err instanceof Error
-            ? err.message
-            : "Failed to neutralise all alerts",
-        variant: "destructive",
-      });
-    } finally {
-      setActionLoading(false);
+    if (!res.success) {
+      throw new Error(res.error || "Failed to neutralise all alerts");
     }
+
+    toast({
+      title: "All alerts neutralised",
+      description: `${res.count ?? alerts.length} alerts cleared`,
+    });
+
+    setAlerts([]);
+    setSelectedAlert(null);
+    setIsModalOpen(false);
   };
 
   return (
@@ -694,7 +680,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                   size="sm"
                   variant="outline"
                   disabled={actionLoading}
-                  onClick={handleNeutraliseAll}
+                  onClick={() => setNeutraliseAllConfirmOpen(true)}
                   className="h-6 px-2 text-[10px] border-red-500 text-red-400 hover:bg-red-500/10"
                 >
                   Neutralise All
@@ -1058,6 +1044,55 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                 className="bg-blue-600 text-white hover:bg-blue-700"
               >
                 {patrolLoading ? "Sending..." : "Confirm"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {neutraliseAllConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="w-full max-w-sm rounded-lg border border-[#333] bg-[#111] p-5">
+            <h3 className="mb-2 text-sm font-semibold text-white">
+              Confirm Neutralise All
+            </h3>
+
+            <p className="mb-4 text-xs text-gray-400">
+              Are you sure you want to neutralise{" "}
+              <span className="font-semibold text-red-400">
+                all active alerts ({alerts.length})
+              </span>
+              ?
+              <br />
+              <span className="text-red-500">
+                This action cannot be undone.
+              </span>
+            </p>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setNeutraliseAllConfirmOpen(false)}
+                className="border-[#444] bg-transparent text-gray-300"
+              >
+                Cancel
+              </Button>
+
+              <Button
+                size="sm"
+                disabled={actionLoading}
+                onClick={async () => {
+                  try {
+                    setActionLoading(true);
+                    await handleNeutraliseAll();
+                    setNeutraliseAllConfirmOpen(false);
+                  } finally {
+                    setActionLoading(false);
+                  }
+                }}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                {actionLoading ? "Processing..." : "Confirm"}
               </Button>
             </div>
           </div>
