@@ -848,11 +848,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
               <Button
                 type="button"
                 variant="outline"
-                disabled={
-                  videoLoading ||
-                  !selectedAlert?.sensor?.id ||
-                  !selectedAlert?.sensor?.rtspUrl
-                }
+                disabled={videoLoading}
                 onClick={handleOpenVideoFeed}
                 className="border-[#444] bg-transparent text-xs text-gray-200 hover:bg-[#333]"
               >
