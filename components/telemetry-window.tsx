@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, ChevronDown, ChevronUp } from "lucide-react";
 import { dropPayload, recallDrone } from "@/lib/api/droneCommand";
 import { Button } from "@/components/ui/button";
+
+const DROP_PAYLOAD_PIN = "2580";
 
 export interface DroneTelemetry {
   droneDbId: string;
@@ -79,10 +81,21 @@ export function TelemetryWindow({
   onDropPayload,
   onRecall,
 }: TelemetryWindowProps) {
+  const [recallConfirmOpen, setRecallConfirmOpen] = useState(false);
+  const [recallLoading, setRecallLoading] = useState(false);
+  const [recallSuccess, setRecallSuccess] = useState(false);
+  const [recallError, setRecallError] = useState<string | null>(null);
+  const [dropSuccess, setDropSuccess] = useState(false);
+  const [dropConfirmOpen, setDropConfirmOpen] = useState(false);
+  const [dropPin, setDropPin] = useState("");
+  const [dropPinError, setDropPinError] = useState<string | null>(null);
+  const [dropLoading, setDropLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [lastDropAt, setLastDropAt] = useState<number | null>(null);
   const [lastRecallAt, setLastRecallAt] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
+
+  const recallAutoCloseRef = useRef<NodeJS.Timeout | null>(null);
 
   const dropCooldownRemaining =
     lastDropAt === null
@@ -96,6 +109,7 @@ export function TelemetryWindow({
 
   const dropDisabled = dropCooldownRemaining > 0;
   const recallDisabled = recallCooldownRemaining > 0;
+  const canDrop = telemetry?.status === "on_air" && !dropDisabled;
 
   useEffect(() => {
     const i = setInterval(() => setNow(Date.now()), 1000);
@@ -108,9 +122,20 @@ export function TelemetryWindow({
     return new Date(ts).toLocaleTimeString();
   };
 
+  const closeRecallModal = () => {
+    if (recallAutoCloseRef.current) {
+      clearTimeout(recallAutoCloseRef.current);
+      recallAutoCloseRef.current = null;
+    }
+
+    setRecallConfirmOpen(false);
+    setRecallSuccess(false);
+    setRecallError(null);
+  };
+
   const getTelemetryColor = (
     value: number | null,
-    thresholds?: { good: number; warning: number }
+    thresholds?: { good: number; warning: number },
   ) => {
     if (value === null) return "text-gray-400";
     if (!thresholds) return "text-gray-300";
@@ -150,10 +175,10 @@ export function TelemetryWindow({
                 telemetry.status === "on_air"
                   ? "bg-blue-500"
                   : telemetry.status === "ground"
-                  ? "bg-gray-500"
-                  : telemetry.status === "reached"
-                  ? "bg-green-500"
-                  : "bg-yellow-500"
+                    ? "bg-gray-500"
+                    : telemetry.status === "reached"
+                      ? "bg-green-500"
+                      : "bg-yellow-500"
               }`}
             />
           ) : (
@@ -284,7 +309,7 @@ export function TelemetryWindow({
                       {
                         good: 12,
                         warning: 10,
-                      }
+                      },
                     )}`}
                   >
                     {toNumber(telemetry?.battery)?.toFixed(2) ?? "N/A"} V
@@ -381,7 +406,7 @@ export function TelemetryWindow({
             variant="outline"
             disabled={!telemetry?.droneDbId || dropDisabled}
             className="flex-1 border-amber-700 bg-transparent text-amber-400 hover:bg-amber-900/30 hover:text-amber-300 text-[11px] sm:text-xs py-1.5 sm:py-2 h-auto"
-            onClick={handleDropPayload}
+            onClick={() => setDropConfirmOpen(true)}
           >
             {dropDisabled
               ? `Cooldown ${Math.ceil(dropCooldownRemaining / 1000)}s`
@@ -393,12 +418,214 @@ export function TelemetryWindow({
             variant="outline"
             disabled={!telemetry?.droneDbId || recallDisabled}
             className="flex-1 border-blue-700 bg-transparent text-blue-400 hover:bg-blue-900/30 hover:text-blue-300 text-[11px] sm:text-xs py-1.5 sm:py-2 h-auto"
-            onClick={handleRecallDrone}
+            onClick={() => {
+              setRecallConfirmOpen(true);
+              setRecallError(null);
+            }}
           >
             {recallDisabled
               ? `Cooldown ${Math.ceil(recallCooldownRemaining / 1000)}s`
               : "Recall"}
           </Button>
+        </div>
+      )}
+      {recallConfirmOpen && (
+        <div className="fixed inset-0 z-[950] flex items-center justify-center bg-black/70">
+          <div className="w-full max-w-sm rounded-lg border border-[#333] bg-[#111] p-5">
+            <h3 className="mb-2 text-sm font-semibold text-white">
+              {recallSuccess ? "Recall Initiated" : "Confirm Recall"}
+            </h3>
+
+            {!recallSuccess ? (
+              <>
+                <p className="mb-4 text-xs text-gray-400">
+                  The drone will immediately return to its home location.
+                  <br />
+                  Ensure airspace is clear.
+                </p>
+
+                {recallError && (
+                  <p className="mb-2 text-xs text-red-400">{recallError}</p>
+                )}
+
+                <div className="mt-4 flex justify-end gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={recallLoading}
+                    onClick={closeRecallModal}
+                    className="border-[#444] bg-transparent text-gray-300"
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    disabled={!telemetry?.droneDbId || recallDisabled}
+                    className="bg-blue-600 text-white hover:bg-blue-700"
+                    onClick={async () => {
+                      try {
+                        setRecallLoading(true);
+
+                        if (!telemetry?.droneDbId) {
+                          throw new Error("Drone ID missing");
+                        }
+
+                        await recallDrone({ droneDbId: telemetry.droneDbId });
+                        setLastRecallAt(Date.now());
+                        setRecallSuccess(true);
+
+                        // auto close
+                        recallAutoCloseRef.current = setTimeout(() => {
+                          closeRecallModal();
+                        }, 2000);
+                      } catch (err) {
+                        setRecallError(
+                          err instanceof Error
+                            ? err.message
+                            : "Recall command failed",
+                        );
+                      } finally {
+                        setRecallLoading(false);
+                      }
+                    }}
+                  >
+                    {recallLoading ? "Recalling..." : "Confirm Recall"}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="py-6 text-center">
+                <div className="text-3xl mb-2">🔄</div>
+
+                <p className="text-sm font-semibold text-blue-400">
+                  Recall command sent
+                </p>
+
+                <p className="mt-1 text-xs text-gray-400">
+                  Drone: {telemetry?.droneId}
+                </p>
+
+                {/* ✅ CLOSE BUTTON */}
+                <div className="mt-5 flex justify-center">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={closeRecallModal}
+                    className="border-[#444] bg-transparent text-gray-300"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {dropConfirmOpen && (
+        <div className="fixed inset-0 z-[950] flex items-center justify-center bg-black/70">
+          <div className="w-full max-w-sm rounded-lg border border-[#333] bg-[#111] p-5">
+            <h3 className="mb-2 text-sm font-semibold text-white">
+              {dropSuccess ? "Payload Dropped" : "Confirm Payload Drop"}
+            </h3>
+
+            {!dropSuccess ? (
+              <>
+                <p className="mb-4 text-xs text-gray-400">
+                  This is a{" "}
+                  <span className="text-red-400 font-semibold">
+                    critical action
+                  </span>
+                  .
+                  <br />
+                  Enter PIN to proceed.
+                </p>
+
+                <input
+                  type="password"
+                  value={dropPin}
+                  onChange={(e) => {
+                    setDropPin(e.target.value);
+                    setDropPinError(null);
+                  }}
+                  placeholder="Enter PIN"
+                  className="mb-2 w-full rounded-md border border-[#333] bg-[#181818] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                />
+
+                {dropPinError && (
+                  <p className="mb-2 text-xs text-red-400">{dropPinError}</p>
+                )}
+              </>
+            ) : (
+              <div className="py-6 text-center">
+                <div className="text-3xl mb-2">✅</div>
+                <p className="text-sm font-semibold text-green-400">
+                  Payload successfully dropped
+                </p>
+                <p className="mt-1 text-xs text-gray-400">
+                  Drone: {telemetry?.droneId}
+                </p>
+              </div>
+            )}
+
+            <div className="mt-4 flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={dropLoading}
+                onClick={() => {
+                  setDropConfirmOpen(false);
+                  setDropPin("");
+                  setDropPinError(null);
+                }}
+                className="border-[#444] bg-transparent text-gray-300"
+              >
+                Cancel
+              </Button>
+
+              <Button
+                size="sm"
+                disabled={!telemetry?.droneDbId || !canDrop}
+                className="bg-red-600 text-white hover:bg-red-700"
+                onClick={async () => {
+                  if (dropPin !== DROP_PAYLOAD_PIN) {
+                    setDropPinError("Invalid PIN");
+                    return;
+                  }
+
+                  try {
+                    setDropLoading(true);
+
+                    if (!telemetry?.droneDbId) {
+                      throw new Error("Drone ID missing");
+                    }
+
+                    await dropPayload({ droneDbId: telemetry.droneDbId });
+                    setLastDropAt(Date.now());
+
+                    setDropSuccess(true);
+
+                    // Auto-close after 2 seconds
+                    setTimeout(() => {
+                      setDropConfirmOpen(false);
+                      setDropPin("");
+                      setDropPinError(null);
+                      setDropSuccess(false);
+                    }, 2000);
+                  } catch (err) {
+                    setDropPinError(
+                      err instanceof Error ? err.message : "Drop failed",
+                    );
+                  } finally {
+                    setDropLoading(false);
+                  }
+                }}
+              >
+                {dropLoading ? "Dropping..." : "Confirm Drop"}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
