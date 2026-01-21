@@ -198,13 +198,13 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     socket.on("alert_resolved", (payload: AlertResolvedPayload) => {
       setAlerts((prev) => prev.filter((a) => a.id !== payload.id));
 
-      setSelectedAlert((current) => {
-        if (current?.id === payload.id) {
-          setIsModalOpen(false);
-          return null;
-        }
-        return current;
-      });
+      // close modal safely if the active alert was resolved
+      setSelectedAlert((current) =>
+        current?.id === payload.id ? null : current,
+      );
+      setIsModalOpen((open) =>
+        selectedAlert?.id === payload.id ? false : open,
+      );
     });
 
     return () => {
@@ -288,10 +288,10 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     }
 
     try {
+      
       const res = await openRtspBySensor(selectedAlert.sensor.id);
-
       setVideoLoading(true);
-
+      
       if (res?.success) {
         toast({
           title: "Video Feed launched",
