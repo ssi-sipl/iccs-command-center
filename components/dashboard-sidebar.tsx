@@ -49,10 +49,6 @@ interface AlertResolvedPayload {
 export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   const { toast } = useToast();
 
-  const alertSoundRef = useRef<HTMLAudioElement | null>(null);
-  const [soundEnabled, setSoundEnabled] = useState(false);
-  const [soundInitialized, setSoundInitialized] = useState(false);
-
   // const [alarmsList, setAlarmsList] = useState<Alarm[]>([]);
   // const [alarmsLoading, setAlarmsLoading] = useState(false);
   // const [alarmsError, setAlarmsError] = useState<string | null>(null);
@@ -91,77 +87,6 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   useEffect(() => {
-    // Create audio element for alert sound
-    // You can use a different sound URL or host your own sound file
-    alertSoundRef.current = new Audio(
-      "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
-    );
-    alertSoundRef.current.volume = 0.7; // Adjust volume (0.0 to 1.0)
-
-    return () => {
-      if (alertSoundRef.current) {
-        alertSoundRef.current.pause();
-        alertSoundRef.current = null;
-      }
-    };
-  }, []);
-
-  // useEffect(() => {
-  //   const fetchAlarms = async () => {
-  //     setAlarmsLoading(true);
-  //     setAlarmsError(null);
-
-  //     try {
-  //       const res = await getAllAlarms();
-  //       if (res.success && res.data) {
-  //         setAlarmsList(res.data);
-  //       } else {
-  //         setAlarmsList([]);
-  //         setAlarmsError(res.error || "Failed to fetch alarms");
-  //       }
-  //     } catch (err: any) {
-  //       console.error("Error fetching alarms:", err);
-  //       setAlarmsError(
-  //         err instanceof Error ? err.message : "Failed to fetch alarms",
-  //       );
-  //       setAlarmsList([]);
-  //     } finally {
-  //       setAlarmsLoading(false);
-  //     }
-  //   };
-
-  //   fetchAlarms();
-  // }, []);
-
-  useEffect(() => {
-    const socket = io(API_BASE_URL, {
-      transports: ["websocket", "polling"],
-    });
-
-    socket.on("drone_created", (drone: DroneOS) => {
-      setDronesList((prev) => {
-        if (prev.some((d) => d.id === drone.id)) return prev;
-        return [drone, ...prev];
-      });
-    });
-
-    socket.on("drone_updated", (drone: DroneOS) => {
-      setDronesList((prev) => prev.map((d) => (d.id === drone.id ? drone : d)));
-    });
-
-    socket.on("drone_deleted", ({ id }: { id: string }) => {
-      setDronesList((prev) => prev.filter((d) => d.id !== id));
-    });
-
-    return () => {
-      socket.off("drone_created");
-      socket.off("drone_updated");
-      socket.off("drone_deleted");
-      socket.disconnect();
-    };
-  }, [API_BASE_URL]);
-
-  useEffect(() => {
     const fetchDrones = async () => {
       setDronesLoading(true);
       setDronesError(null);
@@ -187,40 +112,6 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
 
     fetchDrones();
   }, []);
-
-  const enableSound = async () => {
-    // if (!alertSoundRef.current) {
-    //   alertSoundRef.current = new Audio(
-    //     "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
-    //   );
-    //   alertSoundRef.current.volume = 0.7;
-    // }
-    if (!alertSoundRef.current) {
-      alertSoundRef.current = new Audio("/sounds/alert.mp3");
-      alertSoundRef.current.volume = 0.7;
-    }
-
-    try {
-      // Play and immediately pause to "unlock" audio
-      await alertSoundRef.current.play();
-      alertSoundRef.current.pause();
-      alertSoundRef.current.currentTime = 0;
-      setSoundEnabled(true);
-      setSoundInitialized(true);
-
-      toast({
-        title: "Alert sounds enabled",
-        description: "You will now hear sounds for new alerts",
-      });
-    } catch (err) {
-      console.error("Failed to enable sound:", err);
-      toast({
-        title: "Sound permission denied",
-        description: "Please check your browser settings",
-        variant: "destructive",
-      });
-    }
-  };
 
   // Initial fetch of active alerts
   useEffect(() => {
@@ -264,59 +155,62 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     fetchActiveAlerts();
   }, [API_BASE_URL]);
 
-  // Socket.IO realtime updates
   useEffect(() => {
     const socket: Socket = io(API_BASE_URL, {
       transports: ["websocket", "polling"],
     });
 
+    // ---------- connection state ----------
     socket.on("connect", () => {
-      console.log("✅ Connected to alerts socket:", socket.id);
+      console.log("✅ Socket connected:", socket.id);
       setSocketConnected(true);
     });
 
     socket.on("disconnect", () => {
-      console.log("❌ Disconnected from alerts socket");
+      console.log("❌ Socket disconnected");
       setSocketConnected(false);
     });
 
+    // ---------- DRONES ----------
+    socket.on("drone_created", (drone: DroneOS) => {
+      setDronesList((prev) => {
+        if (prev.some((d) => d.id === drone.id)) return prev;
+        return [drone, ...prev];
+      });
+    });
+
+    socket.on("drone_updated", (drone: DroneOS) => {
+      setDronesList((prev) => prev.map((d) => (d.id === drone.id ? drone : d)));
+    });
+
+    socket.on("drone_deleted", ({ id }: { id: string }) => {
+      setDronesList((prev) => prev.filter((d) => d.id !== id));
+    });
+
+    // ---------- ALERTS ----------
     socket.on("alert_active", (alert: Alert) => {
       setAlerts((prev) => {
-        const exists = prev.some((a) => a.id === alert.id);
-        if (exists) return prev;
-
-        // ✅ Play sound for new alert (only if enabled)
-        if (soundEnabled && alertSoundRef.current) {
-          alertSoundRef.current.currentTime = 0;
-          alertSoundRef.current.play().catch((err) => {
-            console.error("Failed to play alert sound:", err);
-          });
-        }
-
-        // ✅ add new alert at the TOP
+        if (prev.some((a) => a.id === alert.id)) return prev;
         return [alert, ...prev];
       });
     });
 
     socket.on("alert_resolved", (payload: AlertResolvedPayload) => {
-      console.log("✅ alert_resolved:", payload);
       setAlerts((prev) => prev.filter((a) => a.id !== payload.id));
 
+      // close modal safely if the active alert was resolved
       setSelectedAlert((current) =>
-        current && current.id === payload.id ? null : current,
+        current?.id === payload.id ? null : current,
       );
       setIsModalOpen((open) =>
-        selectedAlert && selectedAlert.id === payload.id ? false : open,
+        selectedAlert?.id === payload.id ? false : open,
       );
     });
 
     return () => {
+      socket.removeAllListeners();
       socket.disconnect();
-      if (alertSoundRef.current) {
-        alertSoundRef.current.pause();
-      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API_BASE_URL]);
 
   // When modal opens / selectedAlert changes, fetch drones for alert modal
