@@ -25,27 +25,88 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface PaginatedApiResponse<T> {
+  success: boolean;
+  data?: T;
+  pagination?: PaginationMeta;
+  error?: string;
+  message?: string;
+}
+
 // Get all areas
 // NOW INCLUDES: drones array when include=true
+// export async function getAllAreas(params?: {
+//   status?: string;
+//   include?: boolean;
+// }): Promise<ApiResponse<Area[]>> {
+//   try {
+//     const queryParams = new URLSearchParams();
+//     if (params?.status) queryParams.append("status", params.status);
+//     if (params?.include) queryParams.append("include", "true");
+
+//     const url = `${API_BASE_URL}/api/areas${
+//       queryParams.toString() ? `?${queryParams.toString()}` : ""
+//     }`;
+//     const response = await fetch(url, {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       credentials: "include",
+//       cache: "no-store", // Disable caching for real-time data
+//     });
+
+//     if (!response.ok) {
+//       const errorData = await response.json();
+//       throw new Error(errorData.error || "Failed to fetch areas");
+//     }
+
+//     return await response.json();
+//   } catch (error) {
+//     console.error("Error fetching areas:", error);
+//     return {
+//       success: false,
+//       error: error instanceof Error ? error.message : "Failed to fetch areas",
+//     };
+//   }
+// }
+
 export async function getAllAreas(params?: {
   status?: string;
   include?: boolean;
-}): Promise<ApiResponse<Area[]>> {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<PaginatedApiResponse<Area[]>> {
   try {
     const queryParams = new URLSearchParams();
+
     if (params?.status) queryParams.append("status", params.status);
     if (params?.include) queryParams.append("include", "true");
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.search) queryParams.append("search", params.search);
 
     const url = `${API_BASE_URL}/api/areas${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
+
     const response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      cache: "no-store", // Disable caching for real-time data
+      cache: "no-store",
     });
 
     if (!response.ok) {
@@ -67,7 +128,7 @@ export async function getAllAreas(params?: {
 // NOW INCLUDES: drones array when includeRelations=true
 export async function getAreaById(
   id: string,
-  includeRelations = false
+  includeRelations = false,
 ): Promise<ApiResponse<Area>> {
   try {
     const url = `${API_BASE_URL}/api/areas/${id}${
@@ -140,7 +201,7 @@ export async function updateArea(
     latitude: number;
     longitude: number;
     status: string;
-  }>
+  }>,
 ): Promise<ApiResponse<Area>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/areas/${id}`, {

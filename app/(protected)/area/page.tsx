@@ -39,6 +39,14 @@ import { getAllAreas, deleteArea, type Area } from "@/lib/api/areas";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AreaListPage() {
+  const [page, setPage] = useState(1);
+  const [limit] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalPages: number;
+    totalCount: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [areas, setAreas] = useState<Area[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,17 +54,27 @@ export default function AreaListPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Fetch areas on component mount
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
   useEffect(() => {
     fetchAreas();
-  }, []);
+  }, [page]);
 
   const fetchAreas = async () => {
     setLoading(true);
     try {
-      const response = await getAllAreas({ include: true });
-      if (response.success && response.data) {
+      const response = await getAllAreas({
+        include: true,
+        page,
+        limit,
+        search: searchTerm || undefined,
+      });
+
+      if (response.success && response.data && response.pagination) {
         setAreas(response.data);
+        setPagination(response.pagination);
       } else {
         toast({
           title: "Error",
@@ -64,7 +82,7 @@ export default function AreaListPage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to fetch areas",
@@ -74,12 +92,6 @@ export default function AreaListPage() {
       setLoading(false);
     }
   };
-
-  const filteredAreas = areas.filter(
-    (area) =>
-      area.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      area.areaId.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleDelete = async (id: string, areaName: string) => {
     setDeleting(id);
@@ -138,11 +150,18 @@ export default function AreaListPage() {
               placeholder="Search areas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  setPage(1); // force reset
+                  fetchAreas(); // explicit fetch
+                }
+              }}
               className="border-[#333] bg-[#222] pl-10 text-white placeholder:text-gray-500 focus:border-[#8B0000] focus:ring-[#8B0000]"
             />
           </div>
           <p className="text-sm text-gray-400">
-            Showing {filteredAreas.length} of {areas.length} areas
+            Showing {areas.length} of {pagination?.totalCount ?? 0} areas
           </p>
         </div>
 
@@ -175,7 +194,7 @@ export default function AreaListPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAreas.map((area) => (
+                {areas.map((area) => (
                   <TableRow
                     key={area.id}
                     className="border-[#333] hover:bg-[#2a2a2a]"
@@ -283,7 +302,7 @@ export default function AreaListPage() {
         {/* Cards - Mobile */}
         {!loading && (
           <div className="flex flex-col gap-4 md:hidden">
-            {filteredAreas.map((area) => (
+            {areas.map((area) => (
               <div
                 key={area.id}
                 className="rounded-lg border border-[#333] bg-[#222] p-4"
@@ -374,7 +393,7 @@ export default function AreaListPage() {
           </div>
         )}
 
-        {!loading && filteredAreas.length === 0 && (
+        {!loading && areas.length === 0 && (
           <div className="flex flex-col items-center justify-center rounded-lg border border-[#333] bg-[#222] py-12">
             <MapPin className="mb-4 h-12 w-12 text-gray-600" />
             <p className="text-lg font-medium text-gray-400">No areas found</p>
@@ -384,6 +403,31 @@ export default function AreaListPage() {
           </div>
         )}
       </div>
+      {!loading && pagination && pagination.totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between">
+          <Button
+            variant="outline"
+            disabled={!pagination.hasPrevPage}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="border-[#333] bg-transparent text-white hover:bg-[#333]"
+          >
+            Previous
+          </Button>
+
+          <p className="text-sm text-gray-400">
+            Page {page} of {pagination.totalPages}
+          </p>
+
+          <Button
+            variant="outline"
+            disabled={!pagination.hasNextPage}
+            onClick={() => setPage((p) => p + 1)}
+            className="border-[#333] bg-transparent text-white hover:bg-[#333]"
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
