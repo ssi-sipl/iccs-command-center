@@ -53,9 +53,9 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [soundInitialized, setSoundInitialized] = useState(false);
 
-  const [alarmsList, setAlarmsList] = useState<Alarm[]>([]);
-  const [alarmsLoading, setAlarmsLoading] = useState(false);
-  const [alarmsError, setAlarmsError] = useState<string | null>(null);
+  // const [alarmsList, setAlarmsList] = useState<Alarm[]>([]);
+  // const [alarmsLoading, setAlarmsLoading] = useState(false);
+  // const [alarmsError, setAlarmsError] = useState<string | null>(null);
 
   const [dronesList, setDronesList] = useState<DroneOS[]>([]);
   const [dronesLoading, setDronesLoading] = useState(false);
@@ -103,32 +103,60 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     };
   }, []);
 
+  // useEffect(() => {
+  //   const fetchAlarms = async () => {
+  //     setAlarmsLoading(true);
+  //     setAlarmsError(null);
+
+  //     try {
+  //       const res = await getAllAlarms();
+  //       if (res.success && res.data) {
+  //         setAlarmsList(res.data);
+  //       } else {
+  //         setAlarmsList([]);
+  //         setAlarmsError(res.error || "Failed to fetch alarms");
+  //       }
+  //     } catch (err: any) {
+  //       console.error("Error fetching alarms:", err);
+  //       setAlarmsError(
+  //         err instanceof Error ? err.message : "Failed to fetch alarms",
+  //       );
+  //       setAlarmsList([]);
+  //     } finally {
+  //       setAlarmsLoading(false);
+  //     }
+  //   };
+
+  //   fetchAlarms();
+  // }, []);
+
   useEffect(() => {
-    const fetchAlarms = async () => {
-      setAlarmsLoading(true);
-      setAlarmsError(null);
+    const socket = io(API_BASE_URL, {
+      transports: ["websocket", "polling"],
+    });
 
-      try {
-        const res = await getAllAlarms();
-        if (res.success && res.data) {
-          setAlarmsList(res.data);
-        } else {
-          setAlarmsList([]);
-          setAlarmsError(res.error || "Failed to fetch alarms");
-        }
-      } catch (err: any) {
-        console.error("Error fetching alarms:", err);
-        setAlarmsError(
-          err instanceof Error ? err.message : "Failed to fetch alarms",
-        );
-        setAlarmsList([]);
-      } finally {
-        setAlarmsLoading(false);
-      }
+    socket.on("drone_created", (drone: DroneOS) => {
+      setDronesList((prev) => {
+        if (prev.some((d) => d.id === drone.id)) return prev;
+        return [drone, ...prev];
+      });
+    });
+
+    socket.on("drone_updated", (drone: DroneOS) => {
+      setDronesList((prev) => prev.map((d) => (d.id === drone.id ? drone : d)));
+    });
+
+    socket.on("drone_deleted", ({ id }: { id: string }) => {
+      setDronesList((prev) => prev.filter((d) => d.id !== id));
+    });
+
+    return () => {
+      socket.off("drone_created");
+      socket.off("drone_updated");
+      socket.off("drone_deleted");
+      socket.disconnect();
     };
-
-    fetchAlarms();
-  }, []);
+  }, [API_BASE_URL]);
 
   useEffect(() => {
     const fetchDrones = async () => {
@@ -353,7 +381,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
       return;
     }
 
-    if (!selectedAlert.sensor.rtspUrl) {
+    if (!selectedAlert?.sensor?.rtspUrl) {
       toast({
         title: "No RTSP configured",
         description: "This sensor has no RTSP URL configured.",

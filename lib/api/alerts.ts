@@ -23,6 +23,7 @@ export interface Alert {
     name: string;
     latitude: number;
     longitude: number;
+    rtspUrl?: string;
     area?: {
       id: string;
       areaId: string;
@@ -62,7 +63,7 @@ export interface GetAllAlertsParams {
  * @param params - Query parameters for filtering, sorting, and pagination
  */
 export async function getAllAlerts(
-  params?: GetAllAlertsParams
+  params?: GetAllAlertsParams,
 ): Promise<ApiResponse<Alert[]>> {
   try {
     // Build query string
@@ -132,7 +133,7 @@ export async function getAllAlerts(
       console.error("Non-JSON response received:", textResponse);
       throw new Error(
         "Server returned invalid response format. Expected JSON but got: " +
-          (contentType || "unknown")
+          (contentType || "unknown"),
       );
     }
 
@@ -204,7 +205,7 @@ export async function getActiveAlerts(): Promise<ApiResponse<Alert[]>> {
  * @param sensorDbId - MongoDB ObjectId of the sensor
  */
 export async function getAlertsBySensor(
-  sensorDbId: string
+  sensorDbId: string,
 ): Promise<ApiResponse<Alert[]>> {
   try {
     const response = await fetch(
@@ -216,7 +217,7 @@ export async function getAlertsBySensor(
         },
         credentials: "include",
         cache: "no-store",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -258,7 +259,7 @@ export async function getAlertsBySensor(
  */
 export async function sendDroneForAlert(
   alertId: string,
-  droneId: string
+  droneId: string,
 ): Promise<
   ApiResponse<{
     alert: Alert;
@@ -279,7 +280,7 @@ export async function sendDroneForAlert(
         },
         credentials: "include",
         body: JSON.stringify({ droneId }),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -318,7 +319,7 @@ export async function sendDroneForAlert(
  */
 export async function neutraliseAlert(
   alertId: string,
-  reason?: string
+  reason?: string,
 ): Promise<ApiResponse<Alert>> {
   try {
     const response = await fetch(
@@ -330,7 +331,7 @@ export async function neutraliseAlert(
         },
         credentials: "include",
         body: JSON.stringify({ reason }),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -367,7 +368,7 @@ export async function neutraliseAlert(
  * @param alertId - MongoDB ObjectId of the alert
  */
 export async function getAlertById(
-  alertId: string
+  alertId: string,
 ): Promise<ApiResponse<Alert>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/alerts/${alertId}`, {
@@ -412,7 +413,7 @@ export async function getAlertById(
  * @param alertId - MongoDB ObjectId of the alert
  */
 export async function deleteAlert(
-  alertId: string
+  alertId: string,
 ): Promise<ApiResponse<{ id: string }>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/alerts/${alertId}`, {
@@ -457,7 +458,7 @@ export async function deleteAlert(
  * @param reason - Optional reason (manual_clear | system_clear | maintenance)
  */
 export async function neutraliseAllActiveAlerts(
-  reason?: string
+  reason?: string,
 ): Promise<ApiResponse<null>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/alerts/neutralise-all`, {
@@ -474,7 +475,7 @@ export async function neutraliseAllActiveAlerts(
       if (contentType && contentType.includes("application/json")) {
         const errorData = await response.json();
         throw new Error(
-          errorData.error || errorData.message || "Failed to neutralise alerts"
+          errorData.error || errorData.message || "Failed to neutralise alerts",
         );
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
