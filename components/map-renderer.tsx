@@ -517,6 +517,7 @@ function MapRenderer({
 
       <MapContainer
         center={center}
+        attributionControl={false}
         zoom={mapConfig.minZoom} // only initial value
         minZoom={mapConfig.minZoom}
         maxZoom={Math.min(mapConfig.maxZoom, 19)}
