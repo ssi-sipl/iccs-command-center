@@ -244,16 +244,26 @@ export function TelemetryWindow({
                 </div>
               </div>
             </div>
-            {telemetry?.alt !== null && (
-              <div>
-                <span className="text-gray-400 text-[10px] sm:text-xs">
-                  Altitude:
-                </span>
-                <div className="text-blue-400 font-semibold text-[10px] sm:text-xs">
-                  {toNumber(telemetry?.alt) ?? "N/A"} m
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs mt-2">
+              {telemetry?.alt !== null && (
+                <div>
+                  <span className="text-gray-400 text-[10px] sm:text-xs">
+                    Altitude:
+                  </span>
+                  <div className="text-blue-400 font-semibold text-[10px] sm:text-xs">
+                    {toNumber(telemetry?.alt) ?? "N/A"} m
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+              {telemetry?.targetDistance !== null && (
+                <div>
+                  <span className="text-gray-400">To Target:</span>
+                  <div className="text-gray-200 font-semibold text-[9px] sm:text-[10px]">
+                    {toNumber(telemetry?.targetDistance)?.toFixed(1) ?? "N/A"} m
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Drone Status */}
@@ -375,15 +385,6 @@ export function TelemetryWindow({
                     <span className="text-gray-400">Wind:</span>
                     <div className="text-gray-200 font-semibold text-[9px] sm:text-[10px]">
                       {toNumber(telemetry?.windSpeed)?.toFixed(1) ?? "N/A"} m/s
-                    </div>
-                  </div>
-                )}
-                {telemetry?.targetDistance !== null && (
-                  <div>
-                    <span className="text-gray-400">To Target:</span>
-                    <div className="text-gray-200 font-semibold text-[9px] sm:text-[10px]">
-                      {toNumber(telemetry?.targetDistance)?.toFixed(1) ?? "N/A"}{" "}
-                      m
                     </div>
                   </div>
                 )}
