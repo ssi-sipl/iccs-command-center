@@ -162,12 +162,10 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
 
     // ---------- connection state ----------
     socket.on("connect", () => {
-      console.log("✅ Socket connected:", socket.id);
       setSocketConnected(true);
     });
 
     socket.on("disconnect", () => {
-      console.log("❌ Socket disconnected");
       setSocketConnected(false);
     });
 
@@ -257,6 +255,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   const openAlertModal = (alert: Alert) => {
     setSelectedAlert(alert);
     setIsModalOpen(true);
+    setVideoLoading(false);
   };
 
   const closeAlertModal = () => {
@@ -266,47 +265,33 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
     setDrones([]);
     setDronesError2(null);
     setSelectedDroneId("");
+    setVideoLoading(false);
   };
 
   const handleOpenVideoFeed = async () => {
     if (!selectedAlert?.sensor?.id) {
-      toast({
-        title: "Sensor data missing",
-        description: "Cannot launch video feed for this alert.",
-        variant: "destructive",
-      });
       return;
     }
 
     if (!selectedAlert?.sensor?.rtspUrl) {
-      toast({
-        title: "No RTSP configured",
-        description: "This sensor has no RTSP URL configured.",
-        variant: "destructive",
-      });
       return;
     }
 
+    setVideoLoading(true);
+
     try {
-      
       const res = await openRtspBySensor(selectedAlert.sensor.id);
-      setVideoLoading(true);
-      
+
       if (res?.success) {
-        toast({
-          title: "Video Feed launched",
-          description: res.message || "RTSP stream launched successfully",
-        });
+        console.log("✅ Video feed launched successfully");
       } else {
-        throw new Error(res?.error || "Failed to launch video feed");
+        console.log(
+          "❌ Failed to launch video feed:",
+          res?.error || "Unknown error",
+        );
       }
     } catch (err) {
-      toast({
-        title: "Video launch failed",
-        description:
-          err instanceof Error ? err.message : "Unable to reach backend",
-        variant: "destructive",
-      });
+      console.error("❌ Error launching video feed:", err);
     } finally {
       setVideoLoading(false);
     }
@@ -850,18 +835,17 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                 variant="outline"
                 disabled={videoLoading}
                 onClick={handleOpenVideoFeed}
-                className="border-[#444] bg-transparent text-xs text-gray-200 hover:bg-[#333]"
+                className="border-[#444] bg-transparent text-xs text-gray-200 hover:bg-[#333] active:scale-95 transition-transform duration-150 disabled:opacity-50"
               >
                 {videoLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-1 h-3 w-3 animate-spin text-blue-400" />
                     Launching...
                   </>
                 ) : (
                   "Video Feed"
                 )}
               </Button>
-
               <Button
                 type="button"
                 variant="outline"

@@ -279,8 +279,6 @@ export function MapView() {
     }
 
     timeoutRefsRef.current[droneId] = setTimeout(() => {
-      console.log(`[MapView] Drone ${droneId} location update timeout`);
-
       setDroneStatus((prev) => {
         const updated = { ...prev };
         const drone = updated[droneId];
@@ -301,37 +299,20 @@ export function MapView() {
   const handleAlertDispatch = (alert: Alert) => {
     const sensor = sensorsRef.current.find((s) => s.id === alert.sensorDbId);
     if (!sensor || sensor.sendDrone !== "Yes") {
-      console.log(
-        "[v0] Auto-dispatch skipped: sensor not found or sendDrone != Yes",
-      );
       return;
     }
 
     const dronesInArea = dronesRef.current.filter(
       (d) => d.areaId === sensor.areaId,
     );
-    console.log(
-      "[v0] Drones in area:",
-      dronesInArea.length,
-      "Alert:",
-      alert.id,
-    );
 
     const flyingDrone = dronesInArea.find((d) => {
       const telemetry = droneTelemetryRef.current[d.id];
 
-      console.log(
-        `[v0] Drone ${d.droneOSName}: telemetry status =`,
-        telemetry?.status,
-      );
       return telemetry?.status === "on_air";
     });
 
     if (flyingDrone) {
-      console.log(
-        "[v0] AUTO-DISPATCH BLOCKED: Flying drone detected:",
-        flyingDrone.droneOSName,
-      );
       showAutoDispatchBlockedModal(
         sensor,
         alert,
@@ -365,11 +346,6 @@ export function MapView() {
       return;
     }
 
-    console.log("[AutoDispatch] Alert received", alert.id);
-    console.log(
-      "[AutoDispatch] Auto-dispatching drone:",
-      availableDrone.droneOSName,
-    );
     startAutoDispatchCountdown(sensor, alert, availableDrone.id);
   };
 
@@ -439,8 +415,6 @@ export function MapView() {
     });
 
     s.on("drone_position", (pos: DronePosition) => {
-      console.log("[MapView] Received drone position:", pos);
-
       setDronePositions((prev) => ({
         ...prev,
         [pos.id]: pos,
@@ -460,8 +434,6 @@ export function MapView() {
     });
 
     s.on("drone_telemetry", (telemetry: DroneTelemetry) => {
-      console.log("[MapView] Received drone telemetry:", telemetry);
-
       setDronePositions((prev) => ({
         ...prev,
         [telemetry.droneDbId]: {
@@ -493,12 +465,10 @@ export function MapView() {
     });
 
     s.on("connect", () => {
-      console.log("[MapView] Socket connected", s.id);
       setSocketConnected(true);
     });
 
     s.on("disconnect", () => {
-      console.log("[MapView] Socket disconnected");
       setSocketConnected(false);
 
       setDroneStatus((prev) => {
@@ -613,12 +583,6 @@ export function MapView() {
       return hasChanges ? updated : prev;
     });
   };
-
-  useEffect(() => {
-    console.log("🛰 Drone Positions:", dronePositions);
-    console.log("📊 Drone Status:", droneStatus);
-    console.log("🎯 Active Missions:", activeMissions);
-  }, [dronePositions, droneStatus, activeMissions]);
 
   const dronesInSameArea = useMemo(() => {
     if (!selectedSensor) return [];
@@ -846,13 +810,6 @@ export function MapView() {
         // Safety check: verify drone is not flying before dispatch
         const droneStatus = droneTelemetryData[droneId];
         if (droneStatus?.status === "on_air") {
-          console.log("[v0] Auto-dispatch blocked: Drone is still flying");
-          toast({
-            title: "Auto-dispatch cancelled",
-            description:
-              "Drone is currently in the air. Cancelled to prevent safety conflicts.",
-            variant: "destructive",
-          });
           closeModal();
           return;
         }
