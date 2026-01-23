@@ -30,9 +30,9 @@ import { Badge } from "./ui/badge";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const REACH_RADIUS_METERS = 6;
-const DRONE_LOCATION_TIMEOUT_MS = 30000;
-const STALE_DATA_THRESHOLD_MS = 60000;
-const CRITICAL_LOSS_THRESHOLD_MS = 120000;
+const DRONE_LOCATION_TIMEOUT_MS = 5000;
+const STALE_DATA_THRESHOLD_MS = 10000;
+const CRITICAL_LOSS_THRESHOLD_MS = 12000;
 const DRONE_STATUS_REFRESH_MS = 5000;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -68,14 +68,8 @@ type DroneStatus = {
   connectionLossTime?: number;
   isStale: boolean;
   hasAlert: boolean;
-};
 
-type ActiveMission = {
-  droneId: string;
-  sensorId: string;
-  targetLat: number;
-  targetLng: number;
-  auto?: boolean;
+  recovered?: boolean;
 };
 
 export function MapView() {
@@ -92,9 +86,6 @@ export function MapView() {
   const [droneStatus, setDroneStatus] = useState<Record<string, DroneStatus>>(
     {},
   );
-  const [activeMissions, setActiveMissions] = useState<
-    Record<string, ActiveMission>
-  >({});
 
   const [loadingMapConfig, setLoadingMapConfig] = useState(true);
   const [loadingSensors, setLoadingSensors] = useState(true);
@@ -323,8 +314,8 @@ export function MapView() {
     }
 
     const availableDrone = dronesInArea.find((d) => {
-      if (activeMissions[d.id]) return false;
-      return true;
+      const telemetry = droneTelemetryRef.current[d.id];
+      return telemetry?.status !== "on_air";
     });
 
     if (!availableDrone) {
@@ -384,36 +375,6 @@ export function MapView() {
       reconnectionAttempts: 5,
     });
 
-    s.on("mission_started", (payload) => {
-      setActiveMissions((prev) => {
-        // 🔒 HARD LOCK: Do NOT overwrite existing mission
-        if (prev[payload.droneId]) {
-          showAutoDispatchBlockedModal(
-            sensorsRef.current.find((s) => s.sensorId === payload.sensorId)!,
-            {
-              id: "system",
-              message: "Drone already executing another mission",
-            } as Alert,
-            "Drone is already on an active mission. New mission request was ignored.",
-          );
-          return prev;
-        }
-
-        return {
-          ...prev,
-          [payload.droneId]: {
-            droneId: payload.droneId,
-            sensorId: payload.sensorId ?? "",
-            targetLat: payload.targetLat,
-            targetLng: payload.targetLng,
-            auto: true, // or false depending on source
-          },
-        };
-      });
-
-      setMarkerUpdateKey((k) => k + 1);
-    });
-
     s.on("drone_position", (pos: DronePosition) => {
       setDronePositions((prev) => ({
         ...prev,
@@ -446,17 +407,27 @@ export function MapView() {
         },
       }));
 
-      setDroneStatus((prev) => ({
-        ...prev,
-        [telemetry.droneDbId]: {
-          ...prev[telemetry.droneDbId],
-          isLive: true,
-          lastUpdateTime: telemetry.ts,
-          connectionLossTime: undefined,
-          isStale: false,
-          hasAlert: false,
-        },
-      }));
+      setDroneStatus((prev) => {
+        const prevStatus = prev[telemetry.droneDbId];
+        const wasLost =
+          prevStatus?.connectionLossTime &&
+          Date.now() - prevStatus.connectionLossTime > STALE_DATA_THRESHOLD_MS;
+
+        return {
+          ...prev,
+          [telemetry.droneDbId]: {
+            ...prevStatus,
+            isLive: true,
+            lastUpdateTime: telemetry.ts,
+            connectionLossTime: undefined,
+            isStale: false,
+            hasAlert: false,
+
+            // 🔑 mark recovery
+            recovered: Boolean(wasLost),
+          },
+        };
+      });
 
       setDroneTelemetryData((prev) => ({
         ...prev,
@@ -549,6 +520,16 @@ export function MapView() {
     };
   }, []);
 
+  function acknowledgeRecovery(droneId: string) {
+    setDroneStatus((prev) => ({
+      ...prev,
+      [droneId]: {
+        ...prev[droneId],
+        recovered: false,
+      },
+    }));
+  }
+
   const updateAllDroneStatuses = () => {
     setDroneStatus((prev) => {
       const now = Date.now();
@@ -564,6 +545,22 @@ export function MapView() {
 
           const newIsStale = timeLosses > STALE_DATA_THRESHOLD_MS;
           const newHasAlert = timeLosses > CRITICAL_LOSS_THRESHOLD_MS;
+
+          if (newHasAlert) {
+            // Hard telemetry loss → invalidate mission visually
+            setDroneTelemetryData((prev) => {
+              const copy = { ...prev };
+              if (copy[droneId]) {
+                copy[droneId] = {
+                  ...copy[droneId],
+                  targetLat: null,
+                  targetLng: null,
+                  status: "ground", // or "unknown"
+                };
+              }
+              return copy;
+            });
+          }
 
           if (wasStale !== newIsStale || hadAlert !== newHasAlert) {
             updated[droneId] = {
@@ -689,14 +686,10 @@ export function MapView() {
     }
 
     if (isDroneBusy(selectedDroneId)) {
-      const telemetry = droneTelemetryData[selectedDroneId];
-      const isFlying = telemetry?.status === "on_air";
-
       toast({
         title: "Drone unavailable",
-        description: isFlying
-          ? "This drone is currently in the air. Please wait for it to land before dispatching."
-          : "This drone is currently executing another mission. Please wait for it to complete.",
+        description:
+          "Drone is currently in the air. Wait until it reaches the target.",
         variant: "destructive",
       });
       return;
@@ -752,14 +745,19 @@ export function MapView() {
   };
 
   function isDroneBusy(droneId: string): boolean {
-    // Case 1: Active mission exists
-    if (activeMissions[droneId]) return true;
+    // const telemetry = droneTelemetryData[droneId];
+    // return telemetry?.status === "on_air";
 
-    // Case 2: Telemetry says drone is flying
     const telemetry = droneTelemetryData[droneId];
-    if (telemetry?.status === "on_air") return true;
+    const status = droneStatus[droneId];
 
-    return false;
+    // 🚫 Never trust recovered drone automatically
+    if (status?.recovered) return true;
+
+    // 🚫 Block if telemetry missing or stale
+    if (!telemetry || status?.isStale) return true;
+
+    return telemetry.status === "on_air";
   }
 
   function showAutoDispatchBlockedModal(
@@ -816,17 +814,6 @@ export function MapView() {
 
         try {
           setActionLoading(true);
-
-          setActiveMissions((prev) => ({
-            ...prev,
-            [droneId]: {
-              droneId,
-              sensorId: sensor.sensorId,
-              targetLat: sensor.latitude,
-              targetLng: sensor.longitude,
-              auto: true, // 🔑 NEW FLAG
-            },
-          }));
 
           await sendDrone({
             droneDbId: droneId,
@@ -1041,7 +1028,6 @@ export function MapView() {
         dronePositions={dronePositions}
         droneStatus={droneStatus}
         droneTelemetryData={droneTelemetryData}
-        activeMissions={activeMissions}
         currentZoom={currentZoom}
         socketConnected={socketConnected}
         markerUpdateKey={markerUpdateKey}
@@ -1188,11 +1174,7 @@ export function MapView() {
                         const isBusy = isDroneBusy(drone.id);
                         const telemetry = droneTelemetryData[drone.id];
                         const isFlying = telemetry?.status === "on_air";
-                        const statusText = isFlying
-                          ? " (Flying)"
-                          : activeMissions[drone.id]
-                            ? " (On Mission)"
-                            : "";
+                        const statusText = isFlying ? " (Flying)" : "";
 
                         return (
                           <option

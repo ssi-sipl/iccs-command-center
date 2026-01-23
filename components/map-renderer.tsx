@@ -28,14 +28,6 @@ type DroneStatus = {
   hasAlert: boolean;
 };
 
-type ActiveMission = {
-  droneId: string;
-  sensorId: string;
-  targetLat: number;
-  targetLng: number;
-  auto?: boolean;
-};
-
 export interface DroneTelemetry {
   droneDbId: string;
   droneId: string;
@@ -48,6 +40,10 @@ export interface DroneTelemetry {
   gpsFix: string | null;
   satellites: number | null;
   windSpeed: number | null;
+
+  targetLat: number | null; // ✅ NEW
+  targetLng: number | null; // ✅ NEW
+
   targetDistance: number | null;
   status: "on_air" | "ground" | "reached" | null; // ✅ UPDATED
   command: string | null;
@@ -61,7 +57,6 @@ interface MapRendererProps {
   alertBySensorDbId: Record<string, Alert>;
   dronePositions: Record<string, DronePosition>;
   droneStatus: Record<string, DroneStatus>;
-  activeMissions: Record<string, ActiveMission>;
   currentZoom: number;
   socketConnected: boolean;
   markerUpdateKey: number;
@@ -320,9 +315,28 @@ function haversineMeters(
 function getDroneOnSensor(
   sensor: Sensor,
   dronePositions: Record<string, any>,
+  droneTelemetryData: Record<string, DroneTelemetry>,
 ): string | null {
   for (const [droneId, pos] of Object.entries(dronePositions)) {
     if (!pos) continue;
+
+    const telemetry = droneTelemetryData[droneId];
+    if (!telemetry) continue;
+
+    // ✅ Only count drones that have actually REACHED
+    if (telemetry.status !== "reached") continue;
+
+    // ✅ Optional but STRONGLY recommended:
+    // Make sure this sensor is the intended target
+    if (
+      telemetry.targetLat == null ||
+      telemetry.targetLng == null ||
+      Math.abs(telemetry.targetLat - sensor.latitude) > 0.00001 ||
+      Math.abs(telemetry.targetLng - sensor.longitude) > 0.00001
+    ) {
+      continue;
+    }
+
     const distance = haversineMeters(
       sensor.latitude,
       sensor.longitude,
@@ -415,7 +429,6 @@ function MapRenderer({
   alertBySensorDbId,
   dronePositions,
   droneStatus,
-  activeMissions,
   currentZoom,
   socketConnected,
   markerUpdateKey,
@@ -550,7 +563,8 @@ function MapRenderer({
           const alert = alertBySensorDbId[sensor.id];
           const hasActiveAlert = !!alert && alert.status === "ACTIVE";
           const droneOnSensor =
-            getDroneOnSensor(sensor, dronePositions) !== null;
+            getDroneOnSensor(sensor, dronePositions, droneTelemetryData) !==
+            null;
 
           return (
             <Marker
@@ -670,9 +684,9 @@ function MapRenderer({
                     {statusBadge}
                   </div>
 
-                  {activeMissions[drone.id]?.auto && (
-                    <div className="text-[10px] font-bold text-amber-500">
-                      🤖 AUTO MISSION
+                  {telemetry?.status === "on_air" && (
+                    <div className="text-[10px] font-bold text-blue-400">
+                      ✈ En Route
                     </div>
                   )}
 
@@ -689,24 +703,32 @@ function MapRenderer({
             </Marker>
           );
         })}
-        {/* Active missions path lines */}
-        {Object.values(activeMissions).map((mission) => {
-          const isAuto = mission.auto;
-          const drone = drones.find((d) => d.droneId === mission.droneId);
-          if (!drone) return null;
+        {/* Drone path from telemetry */}
+        {visibleDrones.map((drone) => {
+          const telemetry = droneTelemetryData[drone.id];
+          if (!telemetry) return null;
 
-          const pos = dronePositions[drone.id];
-          if (!pos) return null;
+          // Only draw when drone is flying
+          if (
+            telemetry.status === "ground" ||
+            telemetry.targetLat == null ||
+            telemetry.targetLng == null
+            // telemetry.status !== "on_air" ||
+            // telemetry.targetLat == null ||
+            // telemetry.targetLng == null
+          ) {
+            return null;
+          }
 
           return (
             <Polyline
-              key={`mission-${mission.droneId}`}
+              key={`telemetry-path-${drone.id}`}
               positions={[
-                [pos.lat, pos.lng],
-                [mission.targetLat, mission.targetLng],
+                [telemetry.lat, telemetry.lng],
+                [telemetry.targetLat, telemetry.targetLng],
               ]}
               pathOptions={{
-                color: isAuto ? "#f59e0b" : "red",
+                color: "#f59e0b",
                 weight: 3,
                 dashArray: "6 8",
               }}

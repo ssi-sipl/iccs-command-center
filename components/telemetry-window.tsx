@@ -19,6 +19,8 @@ export interface DroneTelemetry {
   gpsFix: string | null;
   satellites: number | null;
   windSpeed: number | null;
+  targetLat: number | null; // ✅ NEW
+  targetLng: number | null; // ✅ NEW
   targetDistance: number | null;
   status: "on_air" | "ground" | "reached" | null; // ✅ UPDATED
   command: string | null;
