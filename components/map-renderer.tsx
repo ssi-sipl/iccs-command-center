@@ -26,6 +26,8 @@ type DroneStatus = {
   connectionLossTime?: number;
   isStale: boolean;
   hasAlert: boolean;
+  recovered?: boolean;
+  hasEverReceivedTelemetry: boolean;
 };
 
 export interface DroneTelemetry {
@@ -40,10 +42,8 @@ export interface DroneTelemetry {
   gpsFix: string | null;
   satellites: number | null;
   windSpeed: number | null;
-
   targetLat: number | null; // ✅ NEW
   targetLng: number | null; // ✅ NEW
-
   targetDistance: number | null;
   status: "on_air" | "ground" | "reached" | null; // ✅ UPDATED
   command: string | null;
@@ -171,6 +171,8 @@ function getSensorBaseColor(sensorType: string): string {
 // map-renderer.tsx - Updated getDroneIcon function
 function getDroneIcon(
   isOnline: boolean,
+  isStale: boolean,
+  hasAlert: boolean,
   status: "on_air" | "ground" | "reached" | null,
 ): DivIcon {
   const leaflet = require("leaflet");
@@ -183,44 +185,92 @@ function getDroneIcon(
   let icon: string;
   let animation = "";
 
-  if (!isOnline) {
-    // Offline state
+  if (hasAlert) {
+    bgColor = "#DC2626"; // red
+    borderColor = "#FCA5A5";
+    glowColor = "rgba(220,38,38,0.9)";
+    icon = "⚠️";
+    animation = `animation: drone-pulse 1s infinite;`;
+  } else if (isStale) {
+    bgColor = "#F59E0B"; // amber
+    borderColor = "#FCD34D";
+    glowColor = "rgba(245,158,11,0.7)";
+    icon = "❓";
+  } else if (!isOnline) {
+    // bgColor = "#374151"; // dark gray
+    // borderColor = "#9CA3AF";
+    // glowColor = "rgba(107,114,128,0.4)";
+    // icon = "⛔";
     bgColor = "#C4B5FD";
     borderColor = "#6D28D9";
     glowColor = "rgba(196,181,253,0.4)";
     icon = "✈";
   } else {
-    // Online states based on status
+    // NORMAL ONLINE STATE → fall back to telemetry.status
     switch (status) {
       case "on_air":
-        bgColor = "#3B82F6"; // blue
+        bgColor = "#3B82F6";
         borderColor = "#60A5FA";
         glowColor = "rgba(59,130,246,0.9)";
         icon = "✈";
         animation = `animation: drone-pulse 1.5s infinite;`;
         break;
-      case "ground":
-        bgColor = "#6B7280"; // gray
-        borderColor = "#9CA3AF";
-        glowColor = "rgba(107,116,128,0.6)";
-        icon = "🛬";
-        break;
+
       case "reached":
-        bgColor = "#10B981"; // green
+        bgColor = "#10B981";
         borderColor = "#34D399";
         glowColor = "rgba(16,185,129,0.9)";
         icon = "🎯";
         animation = `animation: drone-reached 2s infinite;`;
         break;
+
+      case "ground":
       default:
-        // Default online state (purple)
-        bgColor = "#6D28D9";
-        borderColor = "#A78BFA";
-        glowColor = "rgba(109,40,217,0.9)";
-        icon = "✈";
-        animation = `animation: drone-pulse 1.5s infinite;`;
+        bgColor = "#6B7280";
+        borderColor = "#9CA3AF";
+        glowColor = "rgba(107,116,128,0.6)";
+        icon = "🛬";
     }
   }
+
+  // if (!isOnline) {
+  //   // Offline state
+  //   bgColor = "#C4B5FD";
+  //   borderColor = "#6D28D9";
+  //   glowColor = "rgba(196,181,253,0.4)";
+  //   icon = "✈";
+  // } else {
+  //   // Online states based on status
+  //   switch (status) {
+  //     case "on_air":
+  //       bgColor = "#3B82F6"; // blue
+  //       borderColor = "#60A5FA";
+  //       glowColor = "rgba(59,130,246,0.9)";
+  //       icon = "✈";
+  //       animation = `animation: drone-pulse 1.5s infinite;`;
+  //       break;
+  //     case "ground":
+  //       bgColor = "#6B7280"; // gray
+  //       borderColor = "#9CA3AF";
+  //       glowColor = "rgba(107,116,128,0.6)";
+  //       icon = "🛬";
+  //       break;
+  //     case "reached":
+  //       bgColor = "#10B981"; // green
+  //       borderColor = "#34D399";
+  //       glowColor = "rgba(16,185,129,0.9)";
+  //       icon = "🎯";
+  //       animation = `animation: drone-reached 2s infinite;`;
+  //       break;
+  //     default:
+  //       // Default online state (purple)
+  //       bgColor = "#6D28D9";
+  //       borderColor = "#A78BFA";
+  //       glowColor = "rgba(109,40,217,0.9)";
+  //       icon = "✈";
+  //       animation = `animation: drone-pulse 1.5s infinite;`;
+  //   }
+  // }
 
   const html = `
     <style>
@@ -448,13 +498,23 @@ function MapRenderer({
   const droneIconCache = useRef<Map<string, DivIcon>>(new Map());
   const sensorIconCache = useRef<Map<string, DivIcon>>(new Map());
 
+  useEffect(() => {
+    droneIconCache.current.clear();
+  }, [droneStatus, droneTelemetryData]);
+
   const getMemoizedDroneIcon = (
     isOnline: boolean,
+    isStale: boolean,
+    hasAlert: boolean,
     status: "on_air" | "ground" | "reached" | null,
   ) => {
-    const key = `${isOnline}-${status}`;
+    const key = `${isOnline}-${isStale}-${hasAlert}-${status}`;
+
     if (!droneIconCache.current.has(key)) {
-      droneIconCache.current.set(key, getDroneIcon(isOnline, status));
+      droneIconCache.current.set(
+        key,
+        getDroneIcon(isOnline, isStale, hasAlert, status),
+      );
     }
     return droneIconCache.current.get(key)!;
   };
@@ -613,13 +673,13 @@ function MapRenderer({
 
           const markerPos: [number, number] = [pos.lat, pos.lng];
 
-          const telemetryAge = status
-            ? Math.round((Date.now() - status.lastUpdateTime) / 1000)
-            : null;
-          const isOnline = telemetryAge !== null && telemetryAge < 10;
+          const isOnline = status?.isLive === true;
+          const isStale = status?.isStale === true;
+          const hasAlert = status?.hasAlert === true;
 
           // Get status from telemetry (renamed to avoid conflict)
-          const currentDroneStatus = telemetry?.status || null;
+          const currentDroneStatus =
+            status?.isLive === false ? null : (telemetry?.status ?? null);
 
           // Status display based on telemetry.status
           let statusDisplay = "Offline";
@@ -655,11 +715,48 @@ function MapRenderer({
             }
           }
 
+          let tooltipStatusText = "● Ready";
+          let tooltipStatusColor = "text-gray-400";
+
+          if (status?.recovered) {
+            tooltipStatusText = "⚠ Telemetry Recovering";
+            tooltipStatusColor = "text-amber-500";
+          } else if (status?.hasEverReceivedTelemetry && !isOnline) {
+            tooltipStatusText = "○ Link Unavailable";
+            tooltipStatusColor = "text-gray-500";
+          } else if (hasAlert) {
+            tooltipStatusText = "🚨 Telemetry Lost";
+            tooltipStatusColor = "text-red-600";
+          } else if (isOnline) {
+            switch (currentDroneStatus) {
+              case "on_air":
+                tooltipStatusText = "✈ In Flight";
+                tooltipStatusColor = "text-blue-500";
+                break;
+              case "reached":
+                tooltipStatusText = "🎯 At Target";
+                tooltipStatusColor = "text-green-500";
+                break;
+              case "ground":
+                tooltipStatusText = "🛬 Idle";
+                tooltipStatusColor = "text-gray-400";
+                break;
+              default:
+                tooltipStatusText = "● Ready";
+                tooltipStatusColor = "text-gray-400";
+            }
+          }
+
           return (
             <Marker
               key={`drone-${drone.id}-${markerUpdateKey}`}
               position={markerPos}
-              icon={getMemoizedDroneIcon(isOnline, currentDroneStatus)}
+              icon={getMemoizedDroneIcon(
+                isOnline,
+                isStale,
+                hasAlert,
+                currentDroneStatus,
+              )}
               eventHandlers={{
                 click: (e) => {
                   e.originalEvent?.stopPropagation();
@@ -679,14 +776,19 @@ function MapRenderer({
                     {drone.droneOSName}
                   </div>
 
-                  {/* Status Badge */}
-                  <div className={`text-[10px] font-bold ${statusColor}`}>
-                    {statusBadge}
+                  <div
+                    className={`text-[10px] font-bold ${tooltipStatusColor}`}
+                  >
+                    {tooltipStatusText}
                   </div>
 
-                  {telemetry?.status === "on_air" && (
-                    <div className="text-[10px] font-bold text-blue-400">
-                      ✈ En Route
+                  {!isOnline && status?.connectionLossTime && (
+                    <div className="text-[9px] text-gray-500">
+                      Lost{" "}
+                      {Math.floor(
+                        (Date.now() - status.connectionLossTime) / 1000,
+                      )}
+                      s ago
                     </div>
                   )}
 
@@ -709,13 +811,14 @@ function MapRenderer({
           if (!telemetry) return null;
 
           // Only draw when drone is flying
+          const status = droneStatus[drone.id];
+
           if (
+            !status?.isLive ||
+            status.isStale ||
             telemetry.status === "ground" ||
             telemetry.targetLat == null ||
             telemetry.targetLng == null
-            // telemetry.status !== "on_air" ||
-            // telemetry.targetLat == null ||
-            // telemetry.targetLng == null
           ) {
             return null;
           }

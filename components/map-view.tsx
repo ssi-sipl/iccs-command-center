@@ -70,6 +70,8 @@ type DroneStatus = {
   hasAlert: boolean;
 
   recovered?: boolean;
+
+  hasEverReceivedTelemetry: boolean;
 };
 
 export function MapView() {
@@ -222,6 +224,7 @@ export function MapView() {
               lastUpdateTime: 0,
               isStale: false,
               hasAlert: false,
+              hasEverReceivedTelemetry: false, // 👈
             };
 
             if (drone.latitude != null && drone.longitude != null) {
@@ -263,29 +266,6 @@ export function MapView() {
   useEffect(() => {
     dronesRef.current = drones;
   }, [drones]);
-
-  const setDroneLocationTimeout = (droneId: string) => {
-    if (timeoutRefsRef.current[droneId]) {
-      clearTimeout(timeoutRefsRef.current[droneId]);
-    }
-
-    timeoutRefsRef.current[droneId] = setTimeout(() => {
-      setDroneStatus((prev) => {
-        const updated = { ...prev };
-        const drone = updated[droneId];
-        const connectionLossTime = drone.connectionLossTime || Date.now();
-
-        return {
-          ...prev,
-          [droneId]: {
-            ...prev[droneId],
-            isLive: false,
-            connectionLossTime,
-          },
-        };
-      });
-    }, DRONE_LOCATION_TIMEOUT_MS);
-  };
 
   const handleAlertDispatch = (alert: Alert) => {
     const sensor = sensorsRef.current.find((s) => s.id === alert.sensorDbId);
@@ -395,6 +375,51 @@ export function MapView() {
     });
 
     s.on("drone_telemetry", (telemetry: DroneTelemetry) => {
+      setDroneStatus((prev) => {
+        const prevStatus = prev[telemetry.droneDbId];
+
+        // 🔑 First-ever telemetry?
+        const firstTelemetry = !prevStatus?.hasEverReceivedTelemetry;
+
+        // 🔑 Arm timeout ONLY when telemetry exists
+        if (firstTelemetry) {
+          if (timeoutRefsRef.current[telemetry.droneDbId]) {
+            clearTimeout(timeoutRefsRef.current[telemetry.droneDbId]);
+          }
+
+          timeoutRefsRef.current[telemetry.droneDbId] = setTimeout(() => {
+            setDroneStatus((inner) => ({
+              ...inner,
+              [telemetry.droneDbId]: {
+                ...inner[telemetry.droneDbId],
+                isLive: false,
+                connectionLossTime:
+                  inner[telemetry.droneDbId].connectionLossTime ?? Date.now(),
+              },
+            }));
+          }, DRONE_LOCATION_TIMEOUT_MS);
+        }
+
+        const wasLost =
+          prevStatus?.connectionLossTime &&
+          Date.now() - prevStatus.connectionLossTime > STALE_DATA_THRESHOLD_MS;
+
+        return {
+          ...prev,
+          [telemetry.droneDbId]: {
+            ...prevStatus,
+            hasEverReceivedTelemetry: true,
+            isLive: true,
+            lastUpdateTime: telemetry.ts,
+            connectionLossTime: undefined,
+            isStale: false,
+            hasAlert: false,
+            recovered: Boolean(wasLost),
+          },
+        };
+      });
+
+      // Positions
       setDronePositions((prev) => ({
         ...prev,
         [telemetry.droneDbId]: {
@@ -407,28 +432,7 @@ export function MapView() {
         },
       }));
 
-      setDroneStatus((prev) => {
-        const prevStatus = prev[telemetry.droneDbId];
-        const wasLost =
-          prevStatus?.connectionLossTime &&
-          Date.now() - prevStatus.connectionLossTime > STALE_DATA_THRESHOLD_MS;
-
-        return {
-          ...prev,
-          [telemetry.droneDbId]: {
-            ...prevStatus,
-            isLive: true,
-            lastUpdateTime: telemetry.ts,
-            connectionLossTime: undefined,
-            isStale: false,
-            hasAlert: false,
-
-            // 🔑 mark recovery
-            recovered: Boolean(wasLost),
-          },
-        };
-      });
-
+      // Telemetry payload
       setDroneTelemetryData((prev) => ({
         ...prev,
         [telemetry.droneDbId]: telemetry,
@@ -538,7 +542,29 @@ export function MapView() {
 
       Object.keys(updated).forEach((droneId) => {
         const drone = updated[droneId];
-        if (!drone.isLive && drone.connectionLossTime) {
+
+        // ⏱️ Telemetry timeout detection
+        if (
+          drone.hasEverReceivedTelemetry &&
+          drone.isLive &&
+          now - drone.lastUpdateTime > DRONE_LOCATION_TIMEOUT_MS
+        ) {
+          updated[droneId] = {
+            ...drone,
+            isLive: false,
+            connectionLossTime: drone.connectionLossTime ?? now,
+          };
+          hasChanges = true;
+        }
+      });
+
+      Object.keys(updated).forEach((droneId) => {
+        const drone = updated[droneId];
+        if (
+          drone.hasEverReceivedTelemetry &&
+          !drone.isLive &&
+          drone.connectionLossTime
+        ) {
           const timeLosses = now - drone.connectionLossTime;
           const wasStale = drone.isStale;
           const hadAlert = drone.hasAlert;
@@ -751,13 +777,15 @@ export function MapView() {
     const telemetry = droneTelemetryData[droneId];
     const status = droneStatus[droneId];
 
-    // 🚫 Never trust recovered drone automatically
     if (status?.recovered) return true;
 
-    // 🚫 Block if telemetry missing or stale
-    if (!telemetry || status?.isStale) return true;
+    // 🚫 If telemetry explicitly says flying → block
+    if (telemetry?.status === "on_air") return true;
 
-    return telemetry.status === "on_air";
+    if (status?.hasEverReceivedTelemetry && !status?.isLive) return true;
+
+    // ✅ Otherwise ALWAYS allow command
+    return false;
   }
 
   function showAutoDispatchBlockedModal(
@@ -1171,20 +1199,32 @@ export function MapView() {
                         Select a drone
                       </option>
                       {dronesInSameArea.map((drone) => {
-                        const isBusy = isDroneBusy(drone.id);
                         const telemetry = droneTelemetryData[drone.id];
-                        const isFlying = telemetry?.status === "on_air";
-                        const statusText = isFlying ? " (Flying)" : "";
+                        const status = droneStatus[drone.id];
+
+                        let availabilityLabel = "● Ready";
+
+                        if (telemetry?.status === "on_air") {
+                          availabilityLabel = "✈ In Flight";
+                        } else if (status?.recovered) {
+                          availabilityLabel = "⚠ Telemetry Recovering";
+                        } else if (!status?.hasEverReceivedTelemetry) {
+                          availabilityLabel = "● Ready";
+                        } else if (!status?.isLive) {
+                          availabilityLabel = "○ Link Unavailable";
+                        } else if (telemetry?.status === "reached") {
+                          availabilityLabel = "🎯 At Target";
+                        }
 
                         return (
                           <option
                             key={drone.id}
                             value={drone.id}
-                            disabled={isBusy}
+                            disabled={isDroneBusy(drone.id)}
                             className="bg-[#111] text-gray-100"
                           >
-                            {drone.droneOSName} · {drone.droneType}
-                            {statusText}
+                            {drone.droneOSName} · {drone.droneType} —{" "}
+                            {availabilityLabel}
                           </option>
                         );
                       })}
