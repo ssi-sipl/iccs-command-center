@@ -543,6 +543,11 @@ export function MapView() {
       Object.keys(updated).forEach((droneId) => {
         const drone = updated[droneId];
 
+        if (droneTelemetryData[droneId]?.status === "ground" && !drone.isLive) {
+          // landed drones should not escalate to alert
+          return;
+        }
+
         // ⏱️ Telemetry timeout detection
         if (
           drone.hasEverReceivedTelemetry &&

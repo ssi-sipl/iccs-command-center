@@ -168,12 +168,42 @@ function getSensorBaseColor(sensorType: string): string {
 //   });
 // }
 
+function getBaseIcon(): DivIcon {
+  const leaflet = require("leaflet");
+
+  const html = `
+    <div style="
+      width:18px;
+      height:18px;
+      border-radius:9999px;
+      background:#111827;
+      border:2px solid #22c55e;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#22c55e;
+      font-size:10px;
+      font-weight:700;
+    ">
+      🏠
+    </div>
+  `;
+
+  return leaflet.divIcon({
+    html,
+    className: "",
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+  });
+}
+
 // map-renderer.tsx - Updated getDroneIcon function
 function getDroneIcon(
   isOnline: boolean,
   isStale: boolean,
   hasAlert: boolean,
   status: "on_air" | "ground" | "reached" | null,
+  staticIcon = false, // 👈 NEW
 ): DivIcon {
   const leaflet = require("leaflet");
   const size = 26;
@@ -229,8 +259,12 @@ function getDroneIcon(
         bgColor = "#6B7280";
         borderColor = "#9CA3AF";
         glowColor = "rgba(107,116,128,0.6)";
-        icon = "🛬";
+        icon = "✈";
     }
+  }
+
+  if (staticIcon) {
+    animation = ""; // ❌ no pulse, no scale
   }
 
   // if (!isOnline) {
@@ -507,13 +541,14 @@ function MapRenderer({
     isStale: boolean,
     hasAlert: boolean,
     status: "on_air" | "ground" | "reached" | null,
+    staticIcon: boolean = false,
   ) => {
     const key = `${isOnline}-${isStale}-${hasAlert}-${status}`;
 
     if (!droneIconCache.current.has(key)) {
       droneIconCache.current.set(
         key,
-        getDroneIcon(isOnline, isStale, hasAlert, status),
+        getDroneIcon(isOnline, isStale, hasAlert, status, staticIcon),
       );
     }
     return droneIconCache.current.get(key)!;
@@ -663,6 +698,7 @@ function MapRenderer({
             </Marker>
           );
         })}
+
         {/* Drone markers */}
         {visibleDrones.map((drone) => {
           const pos = dronePositions[drone.id];
@@ -805,6 +841,66 @@ function MapRenderer({
             </Marker>
           );
         })}
+
+        {visibleDrones.map((drone) => {
+          const telemetry = droneTelemetryData[drone.id];
+          const pos = dronePositions[drone.id];
+
+          // Must have everything
+          if (
+            !telemetry ||
+            !pos ||
+            drone.latitude == null ||
+            drone.longitude == null
+          ) {
+            return null;
+          }
+
+          // 🧠 Distance from base
+          const distanceFromBase = haversineMeters(
+            pos.lat,
+            pos.lng,
+            drone.latitude,
+            drone.longitude,
+          );
+
+          // ✅ Hide base marker once drone is back home
+          if (distanceFromBase <= REACH_RADIUS_METERS) {
+            return null;
+          }
+
+          return (
+            <Marker
+              key={`base-${drone.id}`}
+              position={[drone.latitude, drone.longitude]}
+              icon={getMemoizedDroneIcon(
+                true, // base is always "online"
+                false,
+                false,
+                "ground",
+                true, // static icon
+              )}
+              zIndexOffset={-1000}
+              interactive={true}
+            >
+              <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
+                <div className="space-y-1 text-xs">
+                  <div className="font-semibold text-black">🏠 Base</div>
+                  <div className="text-[10px] text-black-300">
+                    Drone: {drone.droneId}
+                  </div>
+                  <div className="text-[10px] text-black-300">
+                    Lat: {drone.latitude.toFixed(5)}
+                  </div>
+                  <div className="text-[10px] text-black-300">
+                    Lon: {drone.longitude.toFixed(5)}
+                  </div>
+                </div>
+              </Tooltip>
+            </Marker>
+          );
+        })}
+
         {/* Drone path from telemetry */}
         {visibleDrones.map((drone) => {
           const telemetry = droneTelemetryData[drone.id];
