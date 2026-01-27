@@ -793,6 +793,7 @@ function MapRenderer({
                 hasAlert,
                 currentDroneStatus,
               )}
+              zIndexOffset={1000}
               eventHandlers={{
                 click: (e) => {
                   e.originalEvent?.stopPropagation();
