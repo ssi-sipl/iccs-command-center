@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import type { Map as LeafletMap, DivIcon } from "leaflet";
 import dynamic from "next/dynamic";
 import type { Alert, Sensor, DroneOS } from "@/lib/api";
@@ -534,7 +534,14 @@ function MapRenderer({
 
   useEffect(() => {
     droneIconCache.current.clear();
-  }, [droneStatus, droneTelemetryData]);
+  }, [
+    Object.values(droneStatus)
+      .map((d) => `${d.isLive}-${d.isStale}-${d.hasAlert}`)
+      .join("|"),
+    Object.values(droneTelemetryData)
+      .map((t) => t?.status)
+      .join("|"),
+  ]);
 
   const getMemoizedDroneIcon = (
     isOnline: boolean,
@@ -624,6 +631,7 @@ function MapRenderer({
       </div> */}
 
       <MapContainer
+        preferCanvas={true}
         center={center}
         attributionControl={false}
         zoom={mapConfig.minZoom} // only initial value
@@ -663,7 +671,7 @@ function MapRenderer({
 
           return (
             <Marker
-              key={`${sensor.id}-${markerUpdateKey}`}
+              key={sensor.id}
               position={[sensor.latitude, sensor.longitude]}
               icon={getMemoizedSensorIcon(
                 sensor,
@@ -785,7 +793,7 @@ function MapRenderer({
 
           return (
             <Marker
-              key={`drone-${drone.id}-${markerUpdateKey}`}
+              key={`drone-${drone.id}`}
               position={markerPos}
               icon={getMemoizedDroneIcon(
                 isOnline,
@@ -940,5 +948,4 @@ function MapRenderer({
   );
 }
 
-export { MapRenderer };
-export default MapRenderer;
+export default React.memo(MapRenderer);

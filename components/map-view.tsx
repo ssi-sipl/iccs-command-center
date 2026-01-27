@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import "leaflet/dist/leaflet.css";
 import io, { type Socket } from "socket.io-client";
 import { Loader2 } from "lucide-react";
@@ -662,28 +662,31 @@ export function MapView() {
     setActionLoading(false);
   }
 
-  function handleDroneMarkerClick(droneDbId: string, e?: MouseEvent) {
-    // Ctrl / Cmd + click → open in new tab
-    if (e?.ctrlKey || e?.metaKey) {
-      window.open(`/drones/${droneDbId}`, "_blank");
-      return;
-    }
+  const handleDroneMarkerClick = useCallback(
+    (droneDbId: string, e?: MouseEvent) => {
+      // Ctrl / Cmd + click → open in new tab
+      if (e?.ctrlKey || e?.metaKey) {
+        window.open(`/drones/${droneDbId}`, "_blank");
+        return;
+      }
 
-    // Double click → navigate
-    if (clickTimeoutRef.current) {
-      clearTimeout(clickTimeoutRef.current);
-      clickTimeoutRef.current = null;
-      router.push(`/drones/${droneDbId}`);
-      return;
-    }
+      // Double click → navigate
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
+        router.push(`/drones/${droneDbId}`);
+        return;
+      }
 
-    // Single click → open telemetry (delay to detect double click)
-    clickTimeoutRef.current = setTimeout(() => {
-      setSelectedDroneIdForTelemetry(droneDbId);
-      setTelemetryWindowOpen(true);
-      clickTimeoutRef.current = null;
-    }, CLICK_DELAY_MS);
-  }
+      // Single click → open telemetry (delay to detect double click)
+      clickTimeoutRef.current = setTimeout(() => {
+        setSelectedDroneIdForTelemetry(droneDbId);
+        setTelemetryWindowOpen(true);
+        clickTimeoutRef.current = null;
+      }, CLICK_DELAY_MS);
+    },
+    [router],
+  );
 
   function closeTelemetryWindow() {
     setTelemetryWindowOpen(false);
@@ -1305,13 +1308,15 @@ export function MapView() {
         </DialogContent>
       </Dialog>
 
-      <TelemetryWindow
-        telemetry={liveTelemetry}
-        isOpen={telemetryWindowOpen}
-        onClose={closeTelemetryWindow}
-        onDropPayload={handleDropPayload}
-        onRecall={handleRecall}
-      />
+      {telemetryWindowOpen && (
+        <TelemetryWindow
+          telemetry={liveTelemetry}
+          isOpen={telemetryWindowOpen}
+          onClose={closeTelemetryWindow}
+          onDropPayload={handleDropPayload}
+          onRecall={handleRecall}
+        />
+      )}
     </>
   );
 }
