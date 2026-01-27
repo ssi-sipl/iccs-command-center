@@ -32,6 +32,7 @@ import { getAllAlarms, type Alarm } from "@/lib/api/alarms";
 import { openRtspBySensor } from "@/lib/api/rtsp";
 import { sendDrone, dronePatrol } from "@/lib/api/droneCommand";
 import { useRef } from "react";
+import { useAlertSound } from "@/hooks/use-alert-sound";
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -48,6 +49,10 @@ interface AlertResolvedPayload {
 
 export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
   const { toast } = useToast();
+  const { playAlertSound } = useAlertSound({
+    soundPath: "/sounds/siren-alert.mp3",
+    throttleMs: 8000,
+  });
 
   // const [alarmsList, setAlarmsList] = useState<Alarm[]>([]);
   // const [alarmsLoading, setAlarmsLoading] = useState(false);
@@ -191,6 +196,8 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
         if (prev.some((a) => a.id === alert.id)) return prev;
         return [alert, ...prev];
       });
+      // Play alert sound with throttling to prevent overlapping
+      playAlertSound();
     });
 
     socket.on("alert_resolved", (payload: AlertResolvedPayload) => {
