@@ -10,7 +10,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 // <CHANGE> Updated metadata for Rudrarakshak dashboard
 export const metadata: Metadata = {
-  title: "RUDRARAKSHAK - Drone Monitoring System",
+  title: "RUDRARAKSHAK",
   description: "Advanced drone surveillance and monitoring dashboard",
   icons: {
     icon: [
