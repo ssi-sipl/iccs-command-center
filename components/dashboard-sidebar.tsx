@@ -542,12 +542,12 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
           )}
 
           <Button
-            className="mt-4 w-full border border-[#444] bg-transparent text-white hover:bg-[#333]"
+            className="mt-4 w-full border border-[#444] bg-transparent text-white hover:bg-[#333] hover:cursor-pointer"
             variant="outline"
             disabled={!selectedPatrolDroneId}
             onClick={() => setPatrolConfirmOpen(true)}
           >
-            Send Drone
+            Send on Patrol (पेट्रोलिंग पर भेजो)
           </Button>
 
           <div className="mt-4 border-b border-[#333]" />
@@ -834,7 +834,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
                     Sending...
                   </>
                 ) : (
-                  "Send Drone"
+                  "Send Drone (ड्रोन भेजिए)"
                 )}
               </Button>
               <Button

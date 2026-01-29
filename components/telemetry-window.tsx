@@ -413,7 +413,7 @@ export function TelemetryWindow({
           >
             {dropDisabled
               ? `Cooldown ${Math.ceil(dropCooldownRemaining / 1000)}s`
-              : "Drop Payload"}
+              : "Drop Payload (पेलोड गिराओ)"}
           </Button>
 
           <Button
@@ -428,7 +428,7 @@ export function TelemetryWindow({
           >
             {recallDisabled
               ? `Cooldown ${Math.ceil(recallCooldownRemaining / 1000)}s`
-              : "Recall"}
+              : "Recall (वापस बुलाओ)"}
           </Button>
         </div>
       )}

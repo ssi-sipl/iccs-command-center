@@ -1302,7 +1302,9 @@ export function MapView() {
               }
               onClick={handleSendDrone}
             >
-              {selectedAlert ? "Send Drone for Alert" : "Send Drone"}
+              {selectedAlert
+                ? "Send Drone (ड्रोन भेजिए)"
+                : "Send Drone (ड्रोन भेजिए)"}
             </Button>
           </DialogFooter>
         </DialogContent>
