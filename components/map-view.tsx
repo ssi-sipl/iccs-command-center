@@ -146,9 +146,33 @@ export function MapView() {
     ? (droneTelemetryData[selectedDroneIdForTelemetry] ?? null)
     : null;
 
+  const clearFocusedSensor = useCallback(() => {
+    setFocusedSensorId(null);
+    setSensorSearchResults([]);
+    setSensorSearchInput("");
+  }, []);
+
   useEffect(() => {
     droneTelemetryRef.current = droneTelemetryData;
   }, [droneTelemetryData]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        // Clear focused sensor
+        setFocusedSensorId(null);
+
+        // Clear search UI (optional but UX-correct)
+        setSensorSearchResults([]);
+        setSensorSearchInput("");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchActiveMap = async () => {
@@ -1119,6 +1143,7 @@ export function MapView() {
         onSensorClick={openSensorModal}
         onDroneMarkerClick={handleDroneMarkerClick}
         focusedSensorId={focusedSensorId}
+        onClearFocusedSensor={clearFocusedSensor}
       />
 
       <Dialog
