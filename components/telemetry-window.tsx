@@ -111,7 +111,7 @@ export function TelemetryWindow({
 
   const dropDisabled = dropCooldownRemaining > 0;
   const recallDisabled = recallCooldownRemaining > 0;
-  const canDrop = telemetry?.status === "on_air" && !dropDisabled;
+  const canDrop = telemetry?.status !== "ground" && !dropDisabled;
 
   useEffect(() => {
     const i = setInterval(() => setNow(Date.now()), 1000);
