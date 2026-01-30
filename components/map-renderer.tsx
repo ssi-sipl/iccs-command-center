@@ -692,11 +692,12 @@ function MapRenderer({
         ]}
         maxBoundsViscosity={1.0}
         className="h-full w-full bg-black"
-        zoomControl={false}
+        zoomControl={true}
         doubleClickZoom={false}
         whenCreated={(mapInstance) => {
           leafletMapRef.current = mapInstance;
           onZoomChange(mapInstance.getZoom()); // 🔑 initialize state once
+          mapInstance.zoomControl.setPosition("bottomright");
         }}
       >
         <TileLayer

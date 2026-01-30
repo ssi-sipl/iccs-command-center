@@ -1084,7 +1084,7 @@ export function MapView() {
         </div>
       )}
 
-      <div className="absolute top-4 left-4 z-[1200] w-80">
+      <div className="absolute top-4 right-4 z-[1200] w-80">
         <input
           value={sensorSearchInput}
           onChange={(e) => setSensorSearchInput(e.target.value)}
@@ -1143,7 +1143,6 @@ export function MapView() {
         onSensorClick={openSensorModal}
         onDroneMarkerClick={handleDroneMarkerClick}
         focusedSensorId={focusedSensorId}
-        onClearFocusedSensor={clearFocusedSensor}
       />
 
       <Dialog
