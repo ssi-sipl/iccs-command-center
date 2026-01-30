@@ -64,6 +64,7 @@ interface MapRendererProps {
   onSensorClick: (sensor: Sensor) => void;
   onDroneMarkerClick?: (droneId: string, e?: MouseEvent) => void;
   droneTelemetryData: Record<string, DroneTelemetry>;
+  focusedSensorId: string | null;
 }
 
 const REACH_RADIUS_METERS = 6;
@@ -441,6 +442,7 @@ function getSensorIcon(
   hasActiveAlert: boolean,
   zoom: number,
   droneOnSensor: boolean,
+  isFocused: boolean,
 ): DivIcon {
   const leaflet = require("leaflet");
 
@@ -475,8 +477,21 @@ function getSensorIcon(
   `
     : "";
 
+  const focusGlow = isFocused
+    ? `
+  @keyframes focus-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.9); }
+    70% { box-shadow: 0 0 0 16px rgba(59,130,246,0); }
+    100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+  }
+`
+    : "";
+
   const html = `
-    <style>${pulseAnimation}</style>
+    <style>
+    ${pulseAnimation}
+    ${focusGlow}
+    </style>
     <div style="
       width: ${markerSize}px;
       height: ${markerSize}px;
@@ -489,6 +504,15 @@ function getSensorIcon(
       color: ${hasActiveAlert ? "white" : border};
       font-size: ${fontSize}px;
       font-weight: 600;
+      ${
+        isFocused
+          ? `
+  border: 3px solid #3b82f6;
+  animation: focus-pulse 1.5s infinite;
+`
+          : ""
+      }
+
       ${
         droneOnSensor
           ? `box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);
@@ -523,6 +547,7 @@ function MapRenderer({
   onSensorClick,
   onDroneMarkerClick,
   droneTelemetryData,
+  focusedSensorId,
 }: MapRendererProps) {
   const leafletMapRef = useRef<LeafletMap | null>(null);
 
@@ -530,6 +555,8 @@ function MapRenderer({
     (mapConfig.north + mapConfig.south) / 2,
     (mapConfig.east + mapConfig.west) / 2,
   ];
+
+  const sensorMarkerRefs = useRef<Record<string, L.Marker>>({});
 
   // Memoize icon generation to prevent unnecessary HTML string regeneration
   const droneIconCache = useRef<Map<string, DivIcon>>(new Map());
@@ -545,6 +572,18 @@ function MapRenderer({
       .map((t) => t?.status)
       .join("|"),
   ]);
+
+  useEffect(() => {
+    // Close all tooltips first
+    Object.values(sensorMarkerRefs.current).forEach((m) => m.closeTooltip());
+
+    if (!focusedSensorId) return;
+
+    const marker = sensorMarkerRefs.current[focusedSensorId];
+    if (!marker) return;
+
+    marker.openTooltip();
+  }, [focusedSensorId]);
 
   const getMemoizedDroneIcon = (
     isOnline: boolean,
@@ -568,12 +607,19 @@ function MapRenderer({
     sensor: Sensor,
     hasActiveAlert: boolean,
     droneOnSensor: boolean,
+    isFocused: boolean,
   ) => {
-    const key = `${sensor.id}-${hasActiveAlert}-${currentZoom}-${droneOnSensor}`;
+    const key = `${sensor.id}-${hasActiveAlert}-${currentZoom}-${droneOnSensor}-${isFocused}`;
     if (!sensorIconCache.current.has(key)) {
       sensorIconCache.current.set(
         key,
-        getSensorIcon(sensor, hasActiveAlert, currentZoom, droneOnSensor),
+        getSensorIcon(
+          sensor,
+          hasActiveAlert,
+          currentZoom,
+          droneOnSensor,
+          isFocused,
+        ),
       );
     }
     return sensorIconCache.current.get(key)!;
@@ -680,7 +726,13 @@ function MapRenderer({
                 sensor,
                 hasActiveAlert,
                 droneOnSensor,
+                sensor.id === focusedSensorId, // 👈 highlight flag
               )}
+              ref={(ref) => {
+                if (ref) {
+                  sensorMarkerRefs.current[sensor.id] = ref;
+                }
+              }}
               eventHandlers={{
                 click: () => onSensorClick(sensor),
               }}

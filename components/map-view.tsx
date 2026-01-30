@@ -94,6 +94,10 @@ export function MapView() {
   const [loadingAlerts, setLoadingAlerts] = useState(true);
   const [loadingDrones, setLoadingDrones] = useState(true);
 
+  const [sensorSearchInput, setSensorSearchInput] = useState("");
+  const [sensorSearchResults, setSensorSearchResults] = useState<Sensor[]>([]);
+  const [focusedSensorId, setFocusedSensorId] = useState<string | null>(null);
+
   const [error, setError] = useState<string | null>(null);
 
   const [sensors, setSensors] = useState<Sensor[]>([]);
@@ -1056,6 +1060,50 @@ export function MapView() {
         </div>
       )}
 
+      <div className="absolute top-4 left-4 z-[1200] w-80">
+        <input
+          value={sensorSearchInput}
+          onChange={(e) => setSensorSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const q = sensorSearchInput.trim().toLowerCase();
+              if (!q) return;
+
+              const matches = sensors.filter(
+                (s) =>
+                  s.name.toLowerCase().includes(q) ||
+                  s.sensorId.toLowerCase().includes(q),
+              );
+
+              setSensorSearchResults(matches.slice(0, 15)); // cap results
+            }
+          }}
+          placeholder="Search sensor → Press Enter"
+          className="w-full rounded-md border border-[#333] bg-black/80 px-3 py-2 text-xs text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 backdrop-blur"
+        />
+
+        {sensorSearchResults.length > 0 && (
+          <div className="mt-1 max-h-72 overflow-auto rounded-md border border-[#333] bg-black/90 text-xs shadow-xl backdrop-blur">
+            {sensorSearchResults.map((sensor) => (
+              <button
+                key={sensor.id}
+                className="flex w-full flex-col px-3 py-2 text-left hover:bg-[#1f2933]"
+                onClick={() => {
+                  setFocusedSensorId(sensor.id);
+                  setSensorSearchResults([]);
+                  setSensorSearchInput("");
+                }}
+              >
+                <span className="font-medium text-white">{sensor.name}</span>
+                <span className="text-[10px] text-gray-400">
+                  {sensor.sensorId} · {sensor.sensorType}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       <MapRenderer
         mapConfig={mapConfig}
         sensors={sensors}
@@ -1070,6 +1118,7 @@ export function MapView() {
         onZoomChange={setCurrentZoom}
         onSensorClick={openSensorModal}
         onDroneMarkerClick={handleDroneMarkerClick}
+        focusedSensorId={focusedSensorId}
       />
 
       <Dialog
