@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 
 // Sensor types
 const sensorTypes = [
+  "Command Center",
   "Camera",
   "Post",
   "Motion Detector",

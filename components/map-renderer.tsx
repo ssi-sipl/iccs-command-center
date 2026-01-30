@@ -110,11 +110,13 @@ const Polyline = dynamic(
 
 function getSensorBaseColor(sensorType: string): string {
   const t = sensorType.toLowerCase();
+  if (t.includes("command")) return "#ffffff";
   if (t.includes("camera")) return "#26f51b";
   if (t.includes("thermal")) return "#f97316";
   if (t.includes("infrared") || t.includes("pir")) return "#a855f7";
   if (t.includes("motion")) return "#22c55e";
   if (t.includes("post")) return "#3b82f6";
+
   return "#9ca3af";
 }
 
@@ -457,6 +459,7 @@ function getSensorIcon(
   else if (t.includes("infrared") || t.includes("pir")) label = "P";
   else if (t.includes("motion")) label = "M";
   else if (t.includes("post")) label = "PT";
+  else if (t.includes("command")) label = "CC";
 
   const pulseAnimation = droneOnSensor
     ? `

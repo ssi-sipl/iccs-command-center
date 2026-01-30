@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 
 // Options
 const sensorTypes = [
+  "Command Center",
   "Camera",
   "Post",
   "Motion Detector",
@@ -91,7 +92,7 @@ export default function EditSensorPage() {
           getSensorById(params.id as string, true),
           getAllAreas(),
           getAllAlarms(),
-        ]
+        ],
       );
 
       if (sensorResponse.success && sensorResponse.data) {
