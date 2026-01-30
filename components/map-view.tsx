@@ -135,6 +135,10 @@ export function MapView() {
     reason: string;
   } | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const mapInstanceRef = useRef<any>(null);
+
   const sensorsRef = useRef<Sensor[]>([]);
   const dronesRef = useRef<DroneOS[]>([]);
 
@@ -612,6 +616,24 @@ export function MapView() {
     });
   };
 
+  const filteredSensors = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+
+    const query = searchQuery.toLowerCase();
+    return sensors
+      .filter((sensor) => {
+        if (sensor.status !== "Active") return false;
+        if (sensor.area?.status !== "Active") return false;
+
+        const matchesName = sensor.name.toLowerCase().includes(query);
+        const matchesId = sensor.sensorId.toLowerCase().includes(query);
+        const matchesType = sensor.sensorType.toLowerCase().includes(query);
+
+        return matchesName || matchesId || matchesType;
+      })
+      .slice(0, 8); // Limit to 8 results
+  }, [sensors, searchQuery]);
+
   const dronesInSameArea = useMemo(() => {
     if (!selectedSensor) return [];
 
@@ -1012,6 +1034,23 @@ export function MapView() {
     );
   }
 
+  const handleSearchSensorSelect = (sensor: Sensor) => {
+    setSearchQuery("");
+    setShowSearchResults(false);
+
+    // Zoom to sensor on map
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setView(
+        [sensor.latitude, sensor.longitude],
+        20, // zoom level
+        { animate: true, duration: 0.6 },
+      );
+    }
+
+    // Open sensor modal
+    openSensorModal(sensor);
+  };
+
   const goToSensor = (sensorId: string) => {
     router.push(`/sensors/${sensorId}`);
   };
@@ -1047,7 +1086,7 @@ export function MapView() {
             <Button
               size="sm"
               variant="outline"
-              className="border-red-500 text-red-300 hover:bg-red-900/40"
+              className="border-red-500 text-red-300 hover:bg-red-900/40 bg-transparent"
               onClick={() => setAutoDispatchBlocked(null)}
             >
               Acknowledge
@@ -1056,21 +1095,83 @@ export function MapView() {
         </div>
       )}
 
-      <MapRenderer
-        mapConfig={mapConfig}
-        sensors={sensors}
-        drones={drones}
-        alertBySensorDbId={alertBySensorDbId}
-        dronePositions={dronePositions}
-        droneStatus={droneStatus}
-        droneTelemetryData={droneTelemetryData}
-        currentZoom={currentZoom}
-        socketConnected={socketConnected}
-        markerUpdateKey={markerUpdateKey}
-        onZoomChange={setCurrentZoom}
-        onSensorClick={openSensorModal}
-        onDroneMarkerClick={handleDroneMarkerClick}
-      />
+      <div className="relative h-full w-full">
+        <MapRenderer
+          mapConfig={mapConfig}
+          sensors={sensors}
+          drones={drones}
+          alertBySensorDbId={alertBySensorDbId}
+          dronePositions={dronePositions}
+          droneStatus={droneStatus}
+          droneTelemetryData={droneTelemetryData}
+          currentZoom={currentZoom}
+          socketConnected={socketConnected}
+          markerUpdateKey={markerUpdateKey}
+          onZoomChange={setCurrentZoom}
+          onSensorClick={openSensorModal}
+          onDroneMarkerClick={handleDroneMarkerClick}
+          mapInstanceRef={mapInstanceRef}
+        />
+      </div>
+
+      {/* Sensor Search Bar */}
+      <div className="absolute top-4 left-4 z-[400] w-80 pointer-events-auto">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="🔍 Search sensors by name, ID, or type..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowSearchResults(e.target.value.trim().length > 0);
+            }}
+            onFocus={() => setShowSearchResults(searchQuery.trim().length > 0)}
+            onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
+            className="w-full rounded-lg border border-[#333] bg-[#111]/90 px-3 py-2 text-xs text-white placeholder-gray-500 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          {/* Search Results Dropdown */}
+          {showSearchResults && filteredSensors.length > 0 && (
+            <div className="absolute top-10 left-0 right-0 rounded-lg border border-[#333] bg-[#111]/95 shadow-xl backdrop-blur-sm">
+              <div className="max-h-64 overflow-y-auto">
+                {filteredSensors.map((sensor) => {
+                  const hasAlert =
+                    alertBySensorDbId[sensor.id] &&
+                    alertBySensorDbId[sensor.id].status === "ACTIVE";
+
+                  return (
+                    <button
+                      key={sensor.id}
+                      onClick={() => handleSearchSensorSelect(sensor)}
+                      className="w-full border-b border-[#222] px-3 py-2 text-left text-xs text-gray-300 hover:bg-[#1a1a1a] transition-colors flex items-start justify-between gap-2"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-white truncate">
+                          {sensor.name}
+                        </div>
+                        <div className="text-[10px] text-gray-500 truncate">
+                          {sensor.sensorId} · {sensor.sensorType}
+                        </div>
+                      </div>
+                      {hasAlert && (
+                        <div className="shrink-0 text-red-500 font-bold">⚠</div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {showSearchResults &&
+            searchQuery.trim().length > 0 &&
+            filteredSensors.length === 0 && (
+              <div className="absolute top-10 left-0 right-0 rounded-lg border border-[#333] bg-[#111]/95 px-3 py-2 text-xs text-gray-400 backdrop-blur-sm">
+                No sensors found matching "{searchQuery}"
+              </div>
+            )}
+        </div>
+      </div>
 
       <Dialog
         open={modalOpen && autoDispatchBlocked === null}

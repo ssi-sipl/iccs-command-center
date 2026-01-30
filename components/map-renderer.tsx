@@ -64,6 +64,7 @@ interface MapRendererProps {
   onSensorClick: (sensor: Sensor) => void;
   onDroneMarkerClick?: (droneId: string, e?: MouseEvent) => void;
   droneTelemetryData: Record<string, DroneTelemetry>;
+  mapInstanceRef?: React.MutableRefObject<LeafletMap | null>;
 }
 
 const REACH_RADIUS_METERS = 6;
@@ -523,6 +524,7 @@ function MapRenderer({
   onSensorClick,
   onDroneMarkerClick,
   droneTelemetryData,
+  mapInstanceRef,
 }: MapRendererProps) {
   const leafletMapRef = useRef<LeafletMap | null>(null);
 
@@ -650,6 +652,9 @@ function MapRenderer({
         doubleClickZoom={false}
         whenCreated={(mapInstance) => {
           leafletMapRef.current = mapInstance;
+          if (mapInstanceRef) {
+            mapInstanceRef.current = mapInstance;
+          }
           onZoomChange(mapInstance.getZoom()); // 🔑 initialize state once
         }}
       >
