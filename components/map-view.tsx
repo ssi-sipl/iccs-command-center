@@ -406,11 +406,20 @@ export function MapView() {
       setDroneStatus((prev) => {
         const prevStatus = prev[telemetry.droneDbId];
 
+        // 🔑 Check if drone just landed
+        const isNowGrounded = telemetry.status === "ground";
+
         // 🔑 First-ever telemetry?
         const firstTelemetry = !prevStatus?.hasEverReceivedTelemetry;
 
+        // 🔑 Clear timeout if drone is grounded
+        if (isNowGrounded && timeoutRefsRef.current[telemetry.droneDbId]) {
+          clearTimeout(timeoutRefsRef.current[telemetry.droneDbId]);
+          delete timeoutRefsRef.current[telemetry.droneDbId];
+        }
+
         // 🔑 Arm timeout ONLY when telemetry exists
-        if (firstTelemetry) {
+        if (firstTelemetry && !isNowGrounded) {
           if (timeoutRefsRef.current[telemetry.droneDbId]) {
             clearTimeout(timeoutRefsRef.current[telemetry.droneDbId]);
           }
@@ -436,8 +445,8 @@ export function MapView() {
           ...prev,
           [telemetry.droneDbId]: {
             ...prevStatus,
-            hasEverReceivedTelemetry: true,
-            isLive: true,
+            hasEverReceivedTelemetry: !isNowGrounded, // ✅ Reset when grounded
+            isLive: !isNowGrounded, // ✅ Set false when grounded
             lastUpdateTime: telemetry.ts,
             connectionLossTime: undefined,
             isStale: false,
@@ -570,6 +579,11 @@ export function MapView() {
 
       Object.keys(updated).forEach((droneId) => {
         const drone = updated[droneId];
+
+        // ✅ Skip timeout check for drones that never received telemetry (includes grounded)
+        if (!drone.hasEverReceivedTelemetry) {
+          return;
+        }
 
         if (droneTelemetryData[droneId]?.status === "ground" && !drone.isLive) {
           // landed drones should not escalate to alert
@@ -817,6 +831,8 @@ export function MapView() {
 
     // 🚫 If telemetry explicitly says flying → block
     if (telemetry?.status === "on_air") return true;
+
+    if (telemetry?.status === "ground") return false;
 
     if (status?.hasEverReceivedTelemetry && !status?.isLive) return true;
 
