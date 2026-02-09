@@ -113,9 +113,15 @@ function getSensorBaseColor(sensorType: string): string {
   const t = sensorType.toLowerCase();
   if (t.includes("command")) return "#ffffff";
   if (t.includes("camera")) return "#26f51b";
-  if (t.includes("thermal")) return "#f97316";
-  if (t.includes("infrared") || t.includes("pir")) return "#a855f7";
-  if (t.includes("motion")) return "#22c55e";
+  // if (t.includes("thermal")) return "#f97316";
+  if (t.includes("thermal")) return "#26f51b";
+
+  // if (t.includes("infrared") || t.includes("pir")) return "#a855f7";
+  if (t.includes("thermal")) return "#26f51b";
+
+  // if (t.includes("motion")) return "#22c55e";
+  if (t.includes("motion")) return "#26f51b";
+
   // if (t.includes("post")) return "#3b82f6";
   if (t.includes("post")) return "#26f51b";
 
@@ -461,101 +467,20 @@ function getSensorIconPath(sensorType: string): string {
   return "/Icons/Dark/Other.png";
 }
 
-// function getSensorIcon(
-//   sensor: Sensor,
-//   hasActiveAlert: boolean,
-//   zoom: number,
-//   droneOnSensor: boolean,
-//   isFocused: boolean,
-// ): DivIcon {
-//   const leaflet = require("leaflet");
+function getSensorIconPathWhite(sensorType: string): string {
+  const t = sensorType.toLowerCase();
 
-//   const markerSize = calculateMarkerSize(zoom);
-//   const fontSize = Math.max(9, Math.round(markerSize * 0.45));
-//   const borderWidth = markerSize > 30 ? 2 : 1;
+  if (t.includes("camera")) return "/Icons/White/Camera - W.png";
+  if (t.includes("thermal")) return "/Icons/White/thermol - W.png";
+  if (t.includes("infrared") || t.includes("ir"))
+    return "/Icons/White/IR - W.png";
+  if (t.includes("pir")) return "/Icons/White/PIR - W.png";
+  if (t.includes("motion")) return "/Icons/White/Motion - W.png";
+  if (t.includes("post")) return "/Icons/White/Post - W.png";
+  if (t.includes("command")) return "/Icons/White/Commond Center - W.png";
 
-//   const baseColor = getSensorBaseColor(sensor.sensorType);
-//   const bg = hasActiveAlert ? "#b91c1c" : baseColor;
-//   const border = hasActiveAlert ? "#fecaca" : "#0f172a";
-
-//   const t = sensor.sensorType.toLowerCase();
-//   let label = "S";
-//   if (t.includes("camera")) label = "C";
-//   else if (t.includes("thermal")) label = "T";
-//   else if (t.includes("infrared") || t.includes("pir")) label = "P";
-//   else if (t.includes("motion")) label = "M";
-//   else if (t.includes("post")) label = "PT";
-//   else if (t.includes("command")) label = "CC";
-
-//   const pulseAnimation = droneOnSensor
-//     ? `
-//     @keyframes pulse-ring {
-//       0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
-//       50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
-//       100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
-//     }
-//     @keyframes scale-pulse {
-//       0%, 100% { transform: scale(1); }
-//       50% { transform: scale(1.1); }
-//     }
-//   `
-//     : "";
-
-//   const focusGlow = isFocused
-//     ? `
-//   @keyframes focus-pulse {
-//     0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.9); }
-//     70% { box-shadow: 0 0 0 16px rgba(59,130,246,0); }
-//     100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
-//   }
-// `
-//     : "";
-
-//   const html = `
-//     <style>
-//     ${pulseAnimation}
-//     ${focusGlow}
-//     </style>
-//     <div style="
-//       width: ${markerSize}px;
-//       height: ${markerSize}px;
-//       border-radius: 9999px;
-//       background: ${bg};
-//       border: ${borderWidth}px solid ${border};
-//       display: flex;
-//       align-items: center;
-//       justify-content: center;
-//       color: ${hasActiveAlert ? "white" : border};
-//       font-size: ${fontSize}px;
-//       font-weight: 600;
-//       ${
-//         isFocused
-//           ? `
-//   border: 3px solid #3b82f6;
-//   animation: focus-pulse 1.5s infinite;
-// `
-//           : ""
-//       }
-
-//       ${
-//         droneOnSensor
-//           ? `box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);
-//       animation: pulse-ring 2s infinite, scale-pulse 2s infinite;`
-//           : `box-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);`
-//       }
-//       transition: all 0.15s ease-out;
-//     ">
-//       ${label}
-//     </div>
-//   `;
-
-//   return leaflet.divIcon({
-//     html,
-//     className: "",
-//     iconSize: [markerSize, markerSize],
-//     iconAnchor: [markerSize / 2, markerSize / 2],
-//   });
-// }
+  return "/Icons/White/Other - W.png";
+}
 
 function getSensorIcon(
   sensor: Sensor,
@@ -566,62 +491,172 @@ function getSensorIcon(
 ): DivIcon {
   const leaflet = require("leaflet");
 
-  const size = calculateMarkerSize(zoom);
-  const iconPath = getSensorIconPath(sensor.sensorType);
-  const color = getSensorBaseColor(sensor.sensorType);
+  const markerSize = calculateMarkerSize(zoom);
+  const fontSize = Math.max(9, Math.round(markerSize * 0.45));
+  const borderWidth = markerSize > 30 ? 2 : 1;
 
-  const alertRing = hasActiveAlert
-    ? `box-shadow: 0 0 0 4px rgba(220,38,38,0.8);`
+  const baseColor = getSensorBaseColor(sensor.sensorType);
+  const bg = hasActiveAlert ? "#b91c1c" : baseColor;
+  const border = hasActiveAlert ? "#fecaca" : "#0f172a";
+
+  const t = sensor.sensorType.toLowerCase();
+  let label = "S";
+  if (t.includes("camera")) label = "C";
+  else if (t.includes("thermal")) label = "T";
+  else if (t.includes("infrared") || t.includes("pir")) label = "P";
+  else if (t.includes("motion")) label = "M";
+  else if (t.includes("post")) label = "PT";
+  else if (t.includes("command")) label = "CC";
+
+  const iconPath = hasActiveAlert
+    ? getSensorIconPathWhite(sensor.sensorType)
+    : getSensorIconPath(sensor.sensorType);
+
+  const pulseAnimation = droneOnSensor
+    ? `
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
+    }
+    @keyframes scale-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+  `
     : "";
 
-  const focusRing = isFocused
-    ? `box-shadow: 0 0 0 6px rgba(59,130,246,0.9);`
+  const focusGlow = isFocused
+    ? `
+  @keyframes focus-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.9); }
+    70% { box-shadow: 0 0 0 16px rgba(59,130,246,0); }
+    100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+  }
+`
     : "";
-
-  const dronePulse = droneOnSensor ? `animation: pulse 2s infinite;` : "";
 
   const html = `
     <style>
-      @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.15); }
-        100% { transform: scale(1); }
-      }
+    ${pulseAnimation}
+    ${focusGlow}
     </style>
-
     <div style="
-      width:${size}px;
-      height:${size}px;
-      border-radius:9999px;
-      background:${color};
-      border:1px solid #000000;      /* ✅ BLACK BORDER */
-      box-sizing:border-box;         /* ✅ prevents shrinking */
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      ${alertRing}
-      ${focusRing}
-      ${dronePulse}
+      width: ${markerSize}px;
+      height: ${markerSize}px;
+      border-radius: 9999px;
+      background: ${bg};
+      border: ${borderWidth}px solid ${border};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: ${hasActiveAlert ? "white" : border};
+      font-size: ${fontSize}px;
+      font-weight: 600;
+      ${
+        isFocused
+          ? `
+  border: 3px solid #3b82f6;
+  animation: focus-pulse 1.5s infinite;
+`
+          : ""
+      }
+
+      ${
+        droneOnSensor
+          ? `box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);
+      animation: pulse-ring 2s infinite, scale-pulse 2s infinite;`
+          : `box-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);`
+      }
+      transition: all 0.15s ease-out;
     ">
+      
       <img
-        src="${iconPath}"
-        style="
-          width:100%;
-          height:100%;
-          object-fit:contain;
-          
-        "
-      />
+          src="${iconPath}"
+          style="
+            width:100%;
+            height:100%;
+            object-fit:contain;
+
+          "
+        />
     </div>
   `;
 
   return leaflet.divIcon({
     html,
     className: "",
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
+    iconSize: [markerSize, markerSize],
+    iconAnchor: [markerSize / 2, markerSize / 2],
   });
 }
+
+// function getSensorIcon(
+//   sensor: Sensor,
+//   hasActiveAlert: boolean,
+//   zoom: number,
+//   droneOnSensor: boolean,
+//   isFocused: boolean,
+// ): DivIcon {
+//   const leaflet = require("leaflet");
+
+//   const size = calculateMarkerSize(zoom);
+//   const iconPath = getSensorIconPath(sensor.sensorType);
+//   const baseColor = getSensorBaseColor(sensor.sensorType);
+//   const color = hasActiveAlert ? "#b91c1c" : baseColor;
+
+//   const alertRing = hasActiveAlert
+//     ? `box-shadow: 0 0 0 4px rgba(220,38,38,0.8);`
+//     : "";
+
+//   const focusRing = isFocused
+//     ? `box-shadow: 0 0 0 6px rgba(59,130,246,0.9);`
+//     : "";
+
+//   const dronePulse = droneOnSensor ? `animation: pulse 2s infinite;` : "";
+
+//   const html = `
+//     <style>
+//       @keyframes pulse {
+//         0% { transform: scale(1); }
+//         50% { transform: scale(1.15); }
+//         100% { transform: scale(1); }
+//       }
+//     </style>
+
+//     <div style="
+//       width:${size}px;
+//       height:${size}px;
+//       border-radius:9999px;
+//       background:${color};
+//       border:1px solid #000000;      /* ✅ BLACK BORDER */
+//       box-sizing:border-box;         /* ✅ prevents shrinking */
+//       display:flex;
+//       align-items:center;
+//       justify-content:center;
+//       ${alertRing}
+//       ${focusRing}
+//       ${dronePulse}
+//     ">
+//       <img
+//         src="${iconPath}"
+//         style="
+//           width:100%;
+//           height:100%;
+//           object-fit:contain;
+
+//         "
+//       />
+//     </div>
+//   `;
+
+//   return leaflet.divIcon({
+//     html,
+//     className: "",
+//     iconSize: [size, size],
+//     iconAnchor: [size / 2, size / 2],
+//   });
+// }
 
 function MapRenderer({
   mapConfig,
