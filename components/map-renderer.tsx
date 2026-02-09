@@ -116,7 +116,8 @@ function getSensorBaseColor(sensorType: string): string {
   if (t.includes("thermal")) return "#f97316";
   if (t.includes("infrared") || t.includes("pir")) return "#a855f7";
   if (t.includes("motion")) return "#22c55e";
-  if (t.includes("post")) return "#3b82f6";
+  // if (t.includes("post")) return "#3b82f6";
+  if (t.includes("post")) return "#26f51b";
 
   return "#9ca3af";
 }
@@ -200,8 +201,16 @@ function getBaseIcon(): DivIcon {
   });
 }
 
+function calculateDroneSize(zoom: number): number {
+  const { minSize, maxSize, minZoom, maxZoom } = ZOOM_SCALE_CONFIG;
+  const z = Math.max(minZoom, Math.min(maxZoom, zoom));
+  const progress = (z - minZoom) / (maxZoom - minZoom);
+  return Math.round(minSize + (maxSize - minSize) * progress);
+}
+
 // map-renderer.tsx - Updated getDroneIcon function
 function getDroneIcon(
+  zoom: number,
   isOnline: boolean,
   isStale: boolean,
   hasAlert: boolean,
@@ -209,7 +218,8 @@ function getDroneIcon(
   staticIcon = false, // 👈 NEW
 ): DivIcon {
   const leaflet = require("leaflet");
-  const size = 26;
+  // const size = 26;
+  const size = calculateDroneSize(zoom);
 
   // Determine colors and animation based on status
   let bgColor: string;
@@ -337,7 +347,7 @@ function getDroneIcon(
       align-items:center;
       justify-content:center;
       color:white;
-      font-size:14px;
+      font-size:${Math.round(size * 0.55)}px;
       font-weight:700;
       ${animation}
     ">
@@ -357,8 +367,8 @@ function getDroneIcon(
 const ZOOM_SCALE_CONFIG = {
   minZoom: 10,
   maxZoom: 40,
-  minSize: 18,
-  maxSize: 48,
+  minSize: 28, // ✅ was 18
+  maxSize: 64, // ✅ was 48
 };
 
 function calculateMarkerSize(zoom: number): number {
@@ -437,6 +447,116 @@ function getDroneOnSensor(
   return null;
 }
 
+function getSensorIconPath(sensorType: string): string {
+  const t = sensorType.toLowerCase();
+
+  if (t.includes("camera")) return "/Icons/Dark/Camera.png";
+  if (t.includes("thermal")) return "/Icons/Dark/thermol.png";
+  if (t.includes("infrared") || t.includes("ir")) return "/Icons/Dark/IR.png";
+  if (t.includes("pir")) return "/Icons/Dark/PIR.png";
+  if (t.includes("motion")) return "/Icons/Dark/Motion.png";
+  if (t.includes("post")) return "/Icons/Dark/Post.png";
+  if (t.includes("command")) return "/Icons/Dark/Commond Center.png";
+
+  return "/Icons/Dark/Other.png";
+}
+
+// function getSensorIcon(
+//   sensor: Sensor,
+//   hasActiveAlert: boolean,
+//   zoom: number,
+//   droneOnSensor: boolean,
+//   isFocused: boolean,
+// ): DivIcon {
+//   const leaflet = require("leaflet");
+
+//   const markerSize = calculateMarkerSize(zoom);
+//   const fontSize = Math.max(9, Math.round(markerSize * 0.45));
+//   const borderWidth = markerSize > 30 ? 2 : 1;
+
+//   const baseColor = getSensorBaseColor(sensor.sensorType);
+//   const bg = hasActiveAlert ? "#b91c1c" : baseColor;
+//   const border = hasActiveAlert ? "#fecaca" : "#0f172a";
+
+//   const t = sensor.sensorType.toLowerCase();
+//   let label = "S";
+//   if (t.includes("camera")) label = "C";
+//   else if (t.includes("thermal")) label = "T";
+//   else if (t.includes("infrared") || t.includes("pir")) label = "P";
+//   else if (t.includes("motion")) label = "M";
+//   else if (t.includes("post")) label = "PT";
+//   else if (t.includes("command")) label = "CC";
+
+//   const pulseAnimation = droneOnSensor
+//     ? `
+//     @keyframes pulse-ring {
+//       0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
+//       50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
+//       100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
+//     }
+//     @keyframes scale-pulse {
+//       0%, 100% { transform: scale(1); }
+//       50% { transform: scale(1.1); }
+//     }
+//   `
+//     : "";
+
+//   const focusGlow = isFocused
+//     ? `
+//   @keyframes focus-pulse {
+//     0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.9); }
+//     70% { box-shadow: 0 0 0 16px rgba(59,130,246,0); }
+//     100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+//   }
+// `
+//     : "";
+
+//   const html = `
+//     <style>
+//     ${pulseAnimation}
+//     ${focusGlow}
+//     </style>
+//     <div style="
+//       width: ${markerSize}px;
+//       height: ${markerSize}px;
+//       border-radius: 9999px;
+//       background: ${bg};
+//       border: ${borderWidth}px solid ${border};
+//       display: flex;
+//       align-items: center;
+//       justify-content: center;
+//       color: ${hasActiveAlert ? "white" : border};
+//       font-size: ${fontSize}px;
+//       font-weight: 600;
+//       ${
+//         isFocused
+//           ? `
+//   border: 3px solid #3b82f6;
+//   animation: focus-pulse 1.5s infinite;
+// `
+//           : ""
+//       }
+
+//       ${
+//         droneOnSensor
+//           ? `box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);
+//       animation: pulse-ring 2s infinite, scale-pulse 2s infinite;`
+//           : `box-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);`
+//       }
+//       transition: all 0.15s ease-out;
+//     ">
+//       ${label}
+//     </div>
+//   `;
+
+//   return leaflet.divIcon({
+//     html,
+//     className: "",
+//     iconSize: [markerSize, markerSize],
+//     iconAnchor: [markerSize / 2, markerSize / 2],
+//   });
+// }
+
 function getSensorIcon(
   sensor: Sensor,
   hasActiveAlert: boolean,
@@ -446,90 +566,60 @@ function getSensorIcon(
 ): DivIcon {
   const leaflet = require("leaflet");
 
-  const markerSize = calculateMarkerSize(zoom);
-  const fontSize = Math.max(9, Math.round(markerSize * 0.45));
-  const borderWidth = markerSize > 30 ? 2 : 1;
+  const size = calculateMarkerSize(zoom);
+  const iconPath = getSensorIconPath(sensor.sensorType);
+  const color = getSensorBaseColor(sensor.sensorType);
 
-  const baseColor = getSensorBaseColor(sensor.sensorType);
-  const bg = hasActiveAlert ? "#b91c1c" : baseColor;
-  const border = hasActiveAlert ? "#fecaca" : "#0f172a";
-
-  const t = sensor.sensorType.toLowerCase();
-  let label = "S";
-  if (t.includes("camera")) label = "C";
-  else if (t.includes("thermal")) label = "T";
-  else if (t.includes("infrared") || t.includes("pir")) label = "P";
-  else if (t.includes("motion")) label = "M";
-  else if (t.includes("post")) label = "PT";
-  else if (t.includes("command")) label = "CC";
-
-  const pulseAnimation = droneOnSensor
-    ? `
-    @keyframes pulse-ring {
-      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
-      50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
-      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4); }
-    }
-    @keyframes scale-pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-  `
+  const alertRing = hasActiveAlert
+    ? `box-shadow: 0 0 0 4px rgba(220,38,38,0.8);`
     : "";
 
-  const focusGlow = isFocused
-    ? `
-  @keyframes focus-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.9); }
-    70% { box-shadow: 0 0 0 16px rgba(59,130,246,0); }
-    100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
-  }
-`
+  const focusRing = isFocused
+    ? `box-shadow: 0 0 0 6px rgba(59,130,246,0.9);`
     : "";
+
+  const dronePulse = droneOnSensor ? `animation: pulse 2s infinite;` : "";
 
   const html = `
     <style>
-    ${pulseAnimation}
-    ${focusGlow}
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+      }
     </style>
-    <div style="
-      width: ${markerSize}px;
-      height: ${markerSize}px;
-      border-radius: 9999px;
-      background: ${bg};
-      border: ${borderWidth}px solid ${border};
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: ${hasActiveAlert ? "white" : border};
-      font-size: ${fontSize}px;
-      font-weight: 600;
-      ${
-        isFocused
-          ? `
-  border: 3px solid #3b82f6;
-  animation: focus-pulse 1.5s infinite;
-`
-          : ""
-      }
 
-      ${
-        droneOnSensor
-          ? `box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7), 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);
-      animation: pulse-ring 2s infinite, scale-pulse 2s infinite;`
-          : `box-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.4);`
-      }
-      transition: all 0.15s ease-out;
+    <div style="
+      width:${size}px;
+      height:${size}px;
+      border-radius:9999px;
+      background:${color};
+      border:1px solid #000000;      /* ✅ BLACK BORDER */
+      box-sizing:border-box;         /* ✅ prevents shrinking */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      ${alertRing}
+      ${focusRing}
+      ${dronePulse}
     ">
-      ${label}
+      <img
+        src="${iconPath}"
+        style="
+          width:100%;
+          height:100%;
+          object-fit:contain;
+          
+        "
+      />
     </div>
   `;
 
   return leaflet.divIcon({
     html,
     className: "",
-    iconSize: [markerSize, markerSize],
-    iconAnchor: [markerSize / 2, markerSize / 2],
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   });
 }
 
@@ -592,12 +682,19 @@ function MapRenderer({
     status: "on_air" | "ground" | "reached" | null,
     staticIcon: boolean = false,
   ) => {
-    const key = `${isOnline}-${isStale}-${hasAlert}-${status}`;
+    const key = `${currentZoom}-${isOnline}-${isStale}-${hasAlert}-${status}`;
 
     if (!droneIconCache.current.has(key)) {
       droneIconCache.current.set(
         key,
-        getDroneIcon(isOnline, isStale, hasAlert, status, staticIcon),
+        getDroneIcon(
+          currentZoom,
+          isOnline,
+          isStale,
+          hasAlert,
+          status,
+          staticIcon,
+        ),
       );
     }
     return droneIconCache.current.get(key)!;
