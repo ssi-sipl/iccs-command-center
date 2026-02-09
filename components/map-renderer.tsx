@@ -115,9 +115,9 @@ function getSensorBaseColor(sensorType: string): string {
   if (t.includes("camera")) return "#26f51b";
   // if (t.includes("thermal")) return "#f97316";
   if (t.includes("thermal")) return "#26f51b";
-
-  // if (t.includes("infrared") || t.includes("pir")) return "#a855f7";
   if (t.includes("thermal")) return "#26f51b";
+  if (t.includes("pir")) return "#26f51b";
+  if (t.includes("infrared")) return "#26f51b";
 
   // if (t.includes("motion")) return "#22c55e";
   if (t.includes("motion")) return "#26f51b";
